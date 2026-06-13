@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxt/ui'],
   css: ['~/assets/css/main.css'],
+  vite: {
+    optimizeDeps: {
+      include: ['vue-konva', 'jspdf', 'konva']
+    }
+  },
   ui: {
     colorMode: false,
     fonts: false

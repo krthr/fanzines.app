@@ -7,6 +7,11 @@ const { state, elementCount } = useZineStore()
 
 const isExporting = ref(false)
 const errorMessage = ref('')
+const elementCountLabel = computed(() => (
+  elementCount.value === 1
+    ? '1 elemento en el fanzine.'
+    : `${elementCount.value} elementos en el fanzine.`
+))
 
 const exportGuides = computed({
   get: () => state.value.exportGuides,
@@ -36,7 +41,7 @@ async function handleExport() {
         Exportar
       </h2>
       <p class="mt-1 text-xs leading-5 text-muted">
-        PDF A4 horizontal, generado localmente.
+        PDF A4 horizontal, listo para imprimir, cortar y doblar.
       </p>
     </div>
 
@@ -50,13 +55,13 @@ async function handleExport() {
     <UButton
       block
       icon="i-lucide-download"
-      label="Exportar PDF"
+      label="Descargar PDF"
       :loading="isExporting"
       @click="handleExport"
     />
 
     <p class="text-xs text-muted">
-      {{ elementCount }} elementos en el fanzine.
+      {{ elementCountLabel }}
     </p>
 
     <UAlert

@@ -140,7 +140,7 @@ export function useZineStore() {
       id: createId(),
       type: 'text',
       pageId: state.value.selectedPageId,
-      text: 'Texto',
+      text: 'Escribe aquí',
       x: PAGE_W * 0.15,
       y: PAGE_H * 0.16,
       width: PAGE_W * 0.7,

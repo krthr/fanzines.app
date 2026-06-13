@@ -1,17 +1,17 @@
 <script setup>
 useHead({
-  title: 'Fanzines | Publica una idea doblada en papel',
+  title: 'Fanzines | Crea y exporta un fanzine A4',
   meta: [
     {
       name: 'description',
       content:
-        'Fanzines explica qué es un fanzine y cómo convertir una idea en una publicación breve, hecha a mano y lista para compartir.'
+        'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
     },
-    { property: 'og:title', content: 'Fanzines | Publica una idea doblada en papel' },
+    { property: 'og:title', content: 'Fanzines | Crea y exporta un fanzine A4' },
     {
       property: 'og:description',
       content:
-        'Una landing sencilla y handmade para entender qué es un fanzine y empezar uno en beta.fanzines.app.'
+        'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
     },
     { property: 'og:url', content: 'https://beta.fanzines.app' }
   ],
@@ -27,73 +27,75 @@ useHead({
 
 const steps = [
   {
-    title: 'Dobla una hoja',
-    text: 'Un fanzine puede empezar con una sola página A4, ocho caras y un corte en medio.'
+    title: 'Monta el pliego',
+    text: 'El editor ordena las ocho caras en una hoja A4 horizontal, lista para imprimir.'
   },
   {
-    title: 'Pega tus imágenes',
-    text: 'Fotos, notas, dibujos, recortes y huecos. La mezcla es parte del lenguaje.'
+    title: 'Añade texto e imágenes',
+    text: 'Sube fotos o escribe directamente en cada panel. Puedes mover, girar y ajustar cada pieza.'
   },
   {
-    title: 'Compártelo',
-    text: 'Imprime, exporta o pásalo por enlace. Lo importante es que circule.'
+    title: 'Exporta y dobla',
+    text: 'Descarga el PDF, imprime, corta por la guía central y convierte la hoja en un fanzine.'
   }
 ]
 </script>
 
 <template>
   <main class="home-page">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
     <header class="site-header" aria-label="Navegación principal">
       <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">Fanzines</NuxtLink>
       <nav aria-label="Secciones">
-        <a href="#que-es">Qué es</a>
-        <a href="#como-se-hace">Cómo se hace</a>
-        <NuxtLink to="/editor">Editor</NuxtLink>
+        <a href="#editor">Qué incluye</a>
+        <a href="#como-se-hace">Imprimir</a>
+        <NuxtLink to="/editor">Abrir editor</NuxtLink>
       </nav>
     </header>
 
-    <section class="hero" aria-labelledby="hero-title">
+    <section id="contenido" class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <h1 id="hero-title">Haz un fanzine con papel, tijeras y una idea.</h1>
+        <h1 id="hero-title">Haz un fanzine en el navegador.</h1>
         <p>
-          Fanzines es una forma sencilla de convertir una obsesión, una serie de fotos o una
-          pequeña historia en una publicación que se dobla, se abre y se comparte.
+          Fanzines te da un editor para colocar textos e imágenes en una hoja A4 plegable.
+          Diseña cada panel, revisa el pliego completo y exporta un PDF listo para imprimir.
         </p>
         <div class="actions" aria-label="Acciones principales">
-          <NuxtLink class="button button-dark" to="/editor">Empezar un fanzine</NuxtLink>
-          <a class="button button-light" href="#como-se-hace">Ver el pliegue</a>
+          <NuxtLink class="button button-dark" to="/editor">Abrir el editor</NuxtLink>
+          <a class="button button-light" href="#como-se-hace">Ver cómo se imprime</a>
         </div>
       </div>
 
       <div class="hero-board" aria-label="Fanzine físico hecho a mano">
         <img class="photo photo-main" src="/images/folded-zine.webp" alt="Fanzine desplegado sobre una mesa" />
         <img class="photo photo-small" src="/images/hand-zine.webp" alt="Fanzine pequeño abierto en una mano" />
-        <p class="tape-note">1 hoja / 8 páginas / corte central</p>
+        <p class="tape-note">Editor A4 / 8 páginas / PDF</p>
       </div>
     </section>
 
-    <section id="que-es" class="definition" aria-labelledby="definition-title">
+    <section id="editor" class="definition" aria-labelledby="definition-title">
       <div>
-        <h2 id="definition-title">¿Qué es un fanzine?</h2>
+        <h2 id="definition-title">Editor A4</h2>
         <p>
-          Una publicación independiente, corta y directa. Puede ser fotográfica, escrita, dibujada o
-          una mezcla de todo. No necesita permiso editorial: necesita una voz y una forma de viajar.
+          Empieza con una portada vacía y trabaja panel por panel. El editor coloca cada página en
+          el orden correcto del pliego, con guías de corte y doblez para que no tengas que calcularlo.
         </p>
       </div>
       <figure class="table-photo">
         <img src="/images/making-table.webp" alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras" />
-        <figcaption>Cortar, doblar, ordenar. La parte física también piensa.</figcaption>
+        <figcaption>Diseña en pantalla. Termina con papel, tijeras y una mesa.</figcaption>
       </figure>
     </section>
 
     <section id="como-se-hace" class="making" aria-labelledby="making-title">
       <div class="making-intro">
-        <h2 id="making-title">Cómo se hace</h2>
-        <p>Una estructura mínima para que la idea salga de la pantalla y se convierta en objeto.</p>
+        <h2 id="making-title">Del editor al papel</h2>
+        <p>El PDF sale impuesto para una hoja A4. Imprime, corta la línea central y dobla.</p>
       </div>
 
       <div class="fold-layout">
-        <img src="/images/fold-guide.webp" alt="Diagrama dibujado a mano para doblar y cortar un fanzine" />
+        <img src="/images/fold-guide.webp" alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine" />
         <ol>
           <li v-for="step in steps" :key="step.title">
             <strong>{{ step.title }}</strong>
@@ -104,8 +106,8 @@ const steps = [
     </section>
 
     <section class="final-cta" aria-labelledby="cta-title">
-      <h2 id="cta-title">Empieza con una versión imperfecta.</h2>
-      <NuxtLink class="button button-dark" to="/editor">Abrir el editor</NuxtLink>
+      <h2 id="cta-title">Empieza con una portada y una imagen.</h2>
+      <NuxtLink class="button button-dark" to="/editor">Crear fanzine</NuxtLink>
     </section>
 
     <footer>
@@ -123,7 +125,7 @@ const steps = [
 .home-page {
   position: relative;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   background:
     linear-gradient(rgba(12, 11, 9, 0.035) 1px, transparent 1px),
@@ -137,6 +139,23 @@ const steps = [
 .home-page a {
   color: inherit;
   text-decoration: none;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  padding: 10px 14px;
+  border: 2px solid #14120f;
+  background: #fffaf0;
+  color: #14120f;
+  transform: translateY(-140%);
+  transition: transform 180ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .home-page::before {
@@ -192,6 +211,12 @@ footer {
 
 .site-header a:hover {
   text-decoration-line: underline;
+}
+
+.site-header a:focus-visible,
+.button:focus-visible {
+  outline: 3px solid #ff4c2e;
+  outline-offset: 4px;
 }
 
 .hero {
@@ -250,7 +275,12 @@ footer {
   box-shadow: 5px 5px 0 #14120f;
 }
 
-.button-dark {
+.button:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0 #14120f;
+}
+
+.home-page .button-dark {
   background: #14120f;
   color: #fffaf0;
 }

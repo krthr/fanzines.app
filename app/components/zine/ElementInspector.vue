@@ -82,7 +82,7 @@ function sendBackward() {
     </div>
 
     <div v-if="!selectedElement" class="rounded-lg border border-dashed border-muted bg-default/55 p-4 text-sm leading-6 text-muted">
-      Selecciona un elemento del panel para editarlo.
+      Selecciona un texto o una imagen para editar sus medidas, posición y estilo.
     </div>
 
     <template v-else>

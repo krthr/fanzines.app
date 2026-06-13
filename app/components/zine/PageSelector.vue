@@ -45,7 +45,7 @@ function choosePage(pageId: PageId) {
         {{ props.compact ? page.short : page.label }}
       </span>
       <span class="mt-0.5 block text-[11px] leading-4 opacity-70">
-        {{ page.count }} elem.
+        {{ page.count === 1 ? '1 elemento' : `${page.count} elementos` }}
       </span>
     </button>
   </div>

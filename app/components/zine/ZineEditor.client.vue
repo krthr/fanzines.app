@@ -65,7 +65,7 @@ async function handleFileChange(event: Event) {
 }
 
 function confirmReset() {
-  if (window.confirm('Reiniciar el fanzine y eliminar todos los elementos?')) {
+  if (window.confirm('¿Reiniciar el fanzine y eliminar todos los elementos?')) {
     resetZine()
   }
 }
@@ -108,14 +108,14 @@ onBeforeUnmount(() => {
     <header class="flex h-auto min-h-14 flex-wrap items-center gap-3 border-b border-muted bg-default/88 px-3 py-2 backdrop-blur lg:h-14 lg:px-4">
       <div class="flex min-w-0 items-center gap-3">
         <div class="grid size-9 place-items-center rounded-md border border-muted bg-[var(--zine-paper)] text-sm font-black text-default">
-          MZ
+          FZ
         </div>
         <div class="min-w-0">
           <h1 class="truncate text-base font-semibold leading-5 text-default">
-            Mini Zine A4
+            Editor de fanzines
           </h1>
           <p class="truncate text-xs text-muted">
-            {{ activePageLabel }}
+            Pliego A4 · {{ activePageLabel }}
           </p>
         </div>
       </div>
@@ -130,7 +130,7 @@ onBeforeUnmount(() => {
         />
         <UButton
           icon="i-lucide-type"
-          label="Agregar texto"
+          label="Añadir texto"
           variant="soft"
           size="sm"
           @click="addTextElement"
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
         <UDrawer
           v-model:open="mobileToolsOpen"
           title="Propiedades"
-          description="Controles del panel activo"
+          description="Ajustes del panel activo"
           :ui="{ content: 'max-h-[88dvh]', body: 'space-y-6 overflow-y-auto' }"
         >
           <UButton
@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
                 variant="ghost"
                 color="neutral"
                 size="xs"
-                aria-label="Reiniciar"
+                aria-label="Reiniciar fanzine"
                 @click="confirmReset"
               />
             </div>
