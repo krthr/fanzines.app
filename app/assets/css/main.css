@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+:root {
+  --zine-page: #ffffff;
+  --zine-paper: #f4efe7;
+  --zine-paper-deep: #ebe2d6;
+  --zine-ink: #1d1c18;
+  --zine-muted: #6c675f;
+  --zine-border: #d8d0c4;
+  --zine-accent: #0f8f8c;
+  --zine-accent-strong: #087572;
+  --zine-cut: #a3362b;
+  --zine-shadow: 0 18px 48px rgb(29 28 24 / 13%);
+}
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--zine-paper);
+  color: var(--zine-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.zine-shell {
+  min-height: 100dvh;
+  background:
+    linear-gradient(90deg, rgb(29 28 24 / 4%) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(29 28 24 / 4%) 1px, transparent 1px),
+    var(--zine-paper);
+  background-size: 28px 28px;
+}
+
+.zine-panel {
+  border: 1px solid var(--zine-border);
+  background: rgb(255 255 255 / 78%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 70%) inset;
+}
+
+.zine-canvas-wrap {
+  touch-action: none;
+}
+
+.zine-sheet-preview {
+  position: relative;
+  aspect-ratio: 297 / 210;
+  overflow: hidden;
+  border: 1px solid var(--zine-border);
+  background: var(--zine-page);
+  box-shadow: 0 8px 22px rgb(29 28 24 / 9%);
+}
+
+.zine-sheet-guide {
+  position: absolute;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.zine-sheet-guide.fold-v {
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed rgb(29 28 24 / 34%);
+}
+
+.zine-sheet-guide.fold-h {
+  border-top: 1px dashed rgb(29 28 24 / 34%);
+}
+
+.zine-sheet-guide.cut-h {
+  left: 25%;
+  right: 25%;
+  top: 50%;
+  border-top: 2px solid var(--zine-cut);
+}
+
+.zine-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(29 28 24 / 28%) transparent;
+}
+
+.zine-scrollbar::-webkit-scrollbar {
+  height: 9px;
+  width: 9px;
+}
+
+.zine-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(29 28 24 / 24%);
+  border-radius: 999px;
+}
+
+.zine-input-color {
+  height: 2rem;
+  width: 100%;
+  border: 1px solid var(--zine-border);
+  border-radius: 0.375rem;
+  background: var(--zine-page);
+  padding: 0.125rem;
+}
+
+@media (min-width: 1024px) {
+  .zine-editor-grid {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 320px;
+    height: calc(100dvh - 57px);
+  }
+}
