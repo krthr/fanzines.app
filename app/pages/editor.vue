@@ -35,23 +35,21 @@ useHead({
 
 <template>
   <main class="editor-page">
-    <section class="editor-intro" aria-labelledby="editor-title">
-      <NuxtLink class="editor-brand" to="/" aria-label="Fanzines inicio">
-        Fanzines
-      </NuxtLink>
-      <div>
-        <p class="editor-kicker">
-          Editor A4 en línea
-        </p>
+    <details class="editor-info">
+      <summary>
+        <span class="editor-info-icon" aria-hidden="true">i</span>
+        <span>Información</span>
+      </summary>
+      <section class="editor-info-panel" aria-labelledby="editor-title">
         <h1 id="editor-title">
           Editor de fanzines para imprimir y doblar.
         </h1>
-        <p class="editor-summary">
+        <p>
           Crea ocho paneles, coloca textos e imágenes, revisa el pliego completo y descarga un PDF
           preparado para una hoja A4.
         </p>
-      </div>
-    </section>
+      </section>
+    </details>
 
     <ClientOnly>
       <ZineEditor />
@@ -66,60 +64,80 @@ useHead({
 
 <style scoped>
 .editor-page {
+  position: relative;
   min-width: 320px;
   min-height: 100dvh;
   background: var(--zine-paper);
   color: var(--zine-ink);
 }
 
-.editor-intro {
-  display: grid;
-  grid-template-columns: minmax(120px, 0.18fr) minmax(0, 1fr);
-  gap: clamp(20px, 4vw, 48px);
-  width: min(1180px, calc(100% - 36px));
-  margin-inline: auto;
-  padding: clamp(22px, 4vw, 42px) 0 clamp(18px, 3vw, 30px);
+.editor-info {
+  position: absolute;
+  top: 10px;
+  right: clamp(220px, 18vw, 380px);
+  z-index: 30;
+  width: min(420px, calc(100% - 24px));
+  color: var(--zine-ink);
 }
 
-.editor-brand {
-  color: inherit;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 0.92rem;
+.editor-info summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--zine-border);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 8px 22px rgb(29 28 24 / 10%);
+  cursor: pointer;
+  font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0;
-  text-decoration: none;
-  text-transform: uppercase;
+  list-style: none;
 }
 
-.editor-brand:focus-visible {
+.editor-info summary::-webkit-details-marker {
+  display: none;
+}
+
+.editor-info summary:focus-visible {
   outline: 3px solid var(--zine-accent);
-  outline-offset: 4px;
+  outline-offset: 3px;
 }
 
-.editor-kicker {
-  margin: 0 0 10px;
+.editor-info-icon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
   color: var(--zine-accent-strong);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
-.editor-intro h1 {
-  max-width: 860px;
+.editor-info-panel {
+  margin-top: 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--zine-border);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 18px 44px rgb(29 28 24 / 14%);
+}
+
+.editor-info-panel h1 {
   margin: 0;
-  font-size: clamp(2.3rem, 6vw, 5rem);
-  font-weight: 850;
-  letter-spacing: 0;
-  line-height: 0.94;
+  font-size: 1.15rem;
+  line-height: 1.25;
 }
 
-.editor-summary {
-  max-width: 720px;
-  margin: 18px 0 0;
+.editor-info-panel p {
+  margin: 8px 0 0;
   color: var(--zine-muted);
-  font-size: clamp(1rem, 1.8vw, 1.22rem);
-  line-height: 1.55;
+  font-size: 0.92rem;
+  line-height: 1.5;
 }
 
 .editor-loading {
@@ -130,8 +148,11 @@ useHead({
 }
 
 @media (max-width: 720px) {
-  .editor-intro {
-    grid-template-columns: 1fr;
+  .editor-info {
+    right: 12px;
+    left: 12px;
+    width: auto;
   }
 }
+
 </style>

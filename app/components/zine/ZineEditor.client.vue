@@ -111,9 +111,9 @@ onBeforeUnmount(() => {
           FZ
         </div>
         <div class="min-w-0">
-          <h1 class="truncate text-base font-semibold leading-5 text-default">
+          <p class="m-0 truncate text-base font-semibold leading-5 text-default">
             Editor de fanzines
-          </h1>
+          </p>
           <p class="truncate text-xs text-muted">
             Pliego A4 · {{ activePageLabel }}
           </p>
