@@ -28,6 +28,16 @@ const alignItems = [
 
 const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
 
+function fontPreviewStyle(value: unknown) {
+  return {
+    fontFamily: typeof value === 'string' ? value : undefined
+  }
+}
+
+function fontLabel(value: unknown) {
+  return typeof value === 'string' ? value : ''
+}
+
 function patch(patch: Partial<ZineElement> | Record<string, unknown>) {
   if (!selectedElement.value) return
   updateElement(selectedElement.value.id, patch as Partial<ZineElement>)
@@ -166,9 +176,27 @@ function sendBackward() {
             <USelect
               :model-value="selectedElement.fontFamily"
               :items="fontItems"
+              value-key="value"
               class="w-full"
               @update:model-value="(value) => patch({ fontFamily: value as FontOption } as Partial<ZineElement>)"
-            />
+            >
+              <template #default="{ modelValue }">
+                <span class="block truncate" :style="fontPreviewStyle(modelValue)">
+                  {{ fontLabel(modelValue) }}
+                </span>
+              </template>
+
+              <template #item-label="{ item }">
+                <span class="flex min-w-0 flex-1 items-baseline justify-between gap-3">
+                  <span class="truncate" :style="fontPreviewStyle(item.value)">
+                    {{ item.label }}
+                  </span>
+                  <span class="shrink-0 text-xs text-muted" :style="fontPreviewStyle(item.value)">
+                    Aa
+                  </span>
+                </span>
+              </template>
+            </USelect>
           </UFormField>
 
           <UFormField label="Estilo">
