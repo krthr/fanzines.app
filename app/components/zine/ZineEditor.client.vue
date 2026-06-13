@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="zine-shell min-h-dvh">
+  <div class="zine-shell min-h-dvh">
     <input
       ref="fileInput"
       class="hidden"
@@ -237,5 +237,5 @@ onBeforeUnmount(() => {
         </div>
       </aside>
     </section>
-  </main>
+  </div>
 </template>
