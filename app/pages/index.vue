@@ -120,14 +120,11 @@ const steps = [
   box-sizing: border-box;
 }
 
-:global(html) {
-  background: #f6f0df;
-  scroll-behavior: smooth;
-}
-
-:global(body) {
-  margin: 0;
+.home-page {
+  position: relative;
   min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
   background:
     linear-gradient(rgba(12, 11, 9, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(12, 11, 9, 0.025) 1px, transparent 1px),
@@ -137,15 +134,9 @@ const steps = [
   font-family: 'Special Elite', 'Courier New', monospace;
 }
 
-:global(a) {
+.home-page a {
   color: inherit;
   text-decoration: none;
-}
-
-.home-page {
-  position: relative;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
 .home-page::before {
