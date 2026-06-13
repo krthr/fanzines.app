@@ -1,21 +1,32 @@
-<script setup>
+<script setup lang="ts">
+const siteUrl = 'https://fanzines.app'
+const pageTitle = 'Crea y exporta un fanzine A4'
+const socialTitle = 'Fanzines | Crea y exporta un fanzine A4'
+const pageDescription =
+  'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
+const socialDescription = 'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
+const socialImage = `${siteUrl}/images/og-fanzines.webp`
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+  robots: 'index, follow',
+  ogTitle: socialTitle,
+  ogDescription: socialDescription,
+  ogType: 'website',
+  ogUrl: siteUrl,
+  ogSiteName: 'Fanzines',
+  ogImage: socialImage,
+  ogImageAlt: 'Fanzine plegable y herramientas de edición en Fanzines',
+  twitterCard: 'summary_large_image',
+  twitterTitle: socialTitle,
+  twitterDescription: socialDescription,
+  twitterImage: socialImage
+})
+
 useHead({
-  title: 'Fanzines | Crea y exporta un fanzine A4',
-  meta: [
-    {
-      name: 'description',
-      content:
-        'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
-    },
-    { property: 'og:title', content: 'Fanzines | Crea y exporta un fanzine A4' },
-    {
-      property: 'og:description',
-      content:
-        'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
-    },
-    { property: 'og:url', content: 'https://beta.fanzines.app' }
-  ],
   link: [
+    { rel: 'canonical', href: siteUrl },
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
     {
@@ -112,7 +123,7 @@ const steps = [
 
     <footer>
       <span>Fanzines</span>
-      <span>beta.fanzines.app</span>
+      <span>fanzines.app</span>
     </footer>
   </main>
 </template>
