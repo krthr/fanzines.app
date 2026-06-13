@@ -94,7 +94,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
     <img
       v-if="previewImageUrl && !renderFailed"
       :src="previewImageUrl"
-      alt=""
+      alt="Previsualización del pliego A4 del fanzine"
       class="absolute inset-0 size-full select-none object-fill"
       draggable="false"
     >

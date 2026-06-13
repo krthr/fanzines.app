@@ -52,5 +52,5 @@ export async function exportZinePdf(state: ZineState) {
     drawPdfGuides(pdf)
   }
 
-  pdf.save('mini-zine-a4.pdf')
+  pdf.save('fanzine-a4.pdf')
 }

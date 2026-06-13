@@ -2,11 +2,11 @@
 import ZineEditor from '~/components/zine/ZineEditor.client.vue'
 
 useHead({
-  title: 'Editor | Fanzines',
+  title: 'Editor de fanzines | Fanzines',
   meta: [
     {
       name: 'description',
-      content: 'Editor de Fanzines para montar, previsualizar y exportar una publicación plegable.'
+      content: 'Editor de Fanzines para diseñar ocho paneles, revisar el pliego A4 y exportar un PDF listo para imprimir.'
     }
   ]
 })
@@ -17,7 +17,7 @@ useHead({
     <ZineEditor />
     <template #fallback>
       <main class="min-h-dvh bg-default p-6 text-sm text-muted">
-        Cargando editor...
+        Cargando editor.
       </main>
     </template>
   </ClientOnly>
