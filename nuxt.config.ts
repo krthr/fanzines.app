@@ -35,7 +35,7 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: ['vue-konva', 'jspdf', 'konva']
+      include: ['vue-konva', 'jspdf', 'konva', 'gsap', 'gsap/ScrollTrigger', '@unhead/schema-org/vue']
     }
   },
   ui: {
