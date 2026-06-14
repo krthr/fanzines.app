@@ -105,9 +105,9 @@ onBeforeUnmount(() => {
       @change="handleFileChange"
     >
 
-    <header class="flex h-auto min-h-14 flex-wrap items-center gap-3 border-b border-muted bg-default/88 px-3 py-2 backdrop-blur lg:h-14 lg:px-4">
+    <header class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4">
       <div class="flex min-w-0 items-center gap-3">
-        <div class="grid size-9 place-items-center rounded-md border border-muted bg-[var(--zine-paper)] text-sm font-black text-default">
+        <div class="zine-editor-mark grid size-10 place-items-center text-sm font-black">
           FZ
         </div>
         <div class="min-w-0">
@@ -126,6 +126,7 @@ onBeforeUnmount(() => {
           label="Subir imagen"
           variant="outline"
           size="sm"
+          class="zine-toolbar-button"
           @click="openFilePicker"
         />
         <UButton
@@ -133,6 +134,7 @@ onBeforeUnmount(() => {
           label="Añadir texto"
           variant="soft"
           size="sm"
+          class="zine-toolbar-button"
           @click="addTextElement"
         />
         <USwitch
@@ -152,7 +154,7 @@ onBeforeUnmount(() => {
             label="Propiedades"
             variant="outline"
             size="sm"
-            class="lg:hidden"
+            class="zine-toolbar-button lg:hidden"
           />
           <template #body>
             <ElementInspector />
@@ -196,8 +198,8 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <section class="flex min-h-[calc(100dvh-57px)] min-w-0 flex-col">
-        <div class="flex items-center justify-between gap-3 border-b border-muted bg-default/58 px-4 py-2">
+      <section class="zine-workspace flex min-h-[calc(100dvh-67px)] min-w-0 flex-col">
+        <div class="zine-workbar flex items-center justify-between gap-3 px-4 py-2">
           <div class="min-w-0">
             <h2 class="truncate text-sm font-semibold text-default">
               {{ activePageLabel }}
@@ -212,6 +214,7 @@ onBeforeUnmount(() => {
             variant="ghost"
             color="neutral"
             size="xs"
+            class="zine-toolbar-button"
             @click="selectElement(null)"
           />
         </div>
@@ -220,7 +223,7 @@ onBeforeUnmount(() => {
           <PageCanvas />
         </div>
 
-        <div class="space-y-3 border-t border-muted bg-default/78 p-3 lg:hidden">
+        <div class="zine-mobile-panel space-y-3 p-3 lg:hidden">
           <PageSelector compact />
           <div class="mx-auto max-w-sm">
             <SheetPreview />

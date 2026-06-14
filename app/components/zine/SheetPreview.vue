@@ -104,7 +104,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
       v-for="item in slots"
       :key="item.pageId"
       type="button"
-      class="group absolute z-10 overflow-hidden border bg-transparent text-left transition"
+      class="zine-sheet-slot group absolute z-10 overflow-hidden border bg-transparent text-left transition"
       :class="[
         state.previewGuides ? 'border-[rgb(29_28_24_/_18%)]' : 'border-transparent',
         state.selectedPageId === item.pageId
@@ -115,7 +115,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
       @click="selectPage(item.pageId)"
     >
       <span
-        class="absolute left-1 top-1 z-[22] max-w-[calc(100%-0.5rem)] truncate rounded-[2px] bg-white/80 px-1 text-[9px] font-medium text-muted shadow-sm backdrop-blur-sm transition-opacity"
+        class="zine-sheet-label absolute left-1 top-1 z-[22] max-w-[calc(100%-0.5rem)] truncate px-1 text-[9px] font-medium shadow-sm transition-opacity"
         :class="state.previewGuides || state.selectedPageId === item.pageId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'"
       >
         {{ item.slot.label === 'Portada' || item.slot.label === 'Contraportada' ? item.slot.label : `p. ${item.slot.label}` }}

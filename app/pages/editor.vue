@@ -36,9 +36,9 @@ useHead({
 <template>
   <main class="editor-page">
     <details class="editor-info">
-      <summary>
+      <summary aria-label="Información">
         <span class="editor-info-icon" aria-hidden="true">i</span>
-        <span>Información</span>
+        <span class="editor-info-label">Información</span>
       </summary>
       <section class="editor-info-panel" aria-labelledby="editor-title">
         <h1 id="editor-title">
@@ -67,17 +67,28 @@ useHead({
   position: relative;
   min-width: 320px;
   min-height: 100dvh;
-  background: var(--zine-paper);
-  color: var(--zine-ink);
+  overflow: hidden;
+  background:
+    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
+    var(--zine-bg);
+  background-size: 24px 24px;
+  color: var(--zine-paper);
+  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .editor-info {
   position: absolute;
-  top: 10px;
-  right: clamp(220px, 18vw, 380px);
+  top: 78px;
+  right: clamp(350px, 25vw, 460px);
   z-index: 30;
+  width: max-content;
+  max-width: min(420px, calc(100% - 24px));
+  color: var(--zine-paper);
+}
+
+.editor-info[open] {
   width: min(420px, calc(100% - 24px));
-  color: var(--zine-ink);
 }
 
 .editor-info summary {
@@ -86,14 +97,16 @@ useHead({
   gap: 8px;
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid var(--zine-border);
-  border-radius: 6px;
-  background: rgb(255 255 255 / 92%);
-  box-shadow: 0 8px 22px rgb(29 28 24 / 10%);
+  border: 2px solid var(--zine-paper);
+  border-radius: 0;
+  background: var(--zine-accent);
+  box-shadow: 5px 5px 0 rgb(0 0 0 / 92%);
+  color: var(--zine-ink);
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 900;
   list-style: none;
+  text-transform: uppercase;
 }
 
 .editor-info summary::-webkit-details-marker {
@@ -111,8 +124,8 @@ useHead({
   height: 18px;
   place-items: center;
   border: 1px solid currentcolor;
-  border-radius: 50%;
-  color: var(--zine-accent-strong);
+  border-radius: 0;
+  color: var(--zine-ink);
   font-size: 0.78rem;
   font-weight: 900;
   line-height: 1;
@@ -121,16 +134,19 @@ useHead({
 .editor-info-panel {
   margin-top: 8px;
   padding: 16px 18px;
-  border: 1px solid var(--zine-border);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 96%);
-  box-shadow: 0 18px 44px rgb(29 28 24 / 14%);
+  border: 2px solid var(--zine-ink);
+  border-radius: 0;
+  background: var(--zine-paper);
+  box-shadow: 8px 8px 0 rgb(0 0 0 / 92%);
+  color: var(--zine-ink);
 }
 
 .editor-info-panel h1 {
   margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.25;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
 }
 
 .editor-info-panel p {
@@ -143,15 +159,38 @@ useHead({
 .editor-loading {
   min-height: 60dvh;
   padding: 24px;
-  color: var(--zine-muted);
+  color: rgb(238 232 216 / 72%);
   font-size: 0.95rem;
+}
+
+@media (max-width: 1023px) {
+  .editor-info {
+    top: 74px;
+    right: 12px;
+  }
 }
 
 @media (max-width: 720px) {
   .editor-info {
+    top: 12px;
     right: 12px;
+    left: auto;
+    width: max-content;
+    max-width: calc(100% - 24px);
+  }
+
+  .editor-info[open] {
     left: 12px;
-    width: auto;
+    width: calc(100% - 24px);
+  }
+
+  .editor-info-label {
+    display: none;
+  }
+
+  .editor-info-panel {
+    max-height: calc(100dvh - 92px);
+    overflow: auto;
   }
 }
 

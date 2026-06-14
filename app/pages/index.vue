@@ -28,13 +28,7 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl },
-    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Special+Elite&display=swap'
-    }
+    { rel: 'canonical', href: siteUrl }
   ]
 })
 
@@ -185,8 +179,6 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <div class="tear-strip" aria-hidden="true"></div>
-
     <section id="editor" class="definition section-panel" aria-labelledby="definition-title">
       <div class="definition-copy">
         <h2 id="definition-title">Editor A4</h2>
@@ -244,12 +236,12 @@ onBeforeUnmount(() => {
 }
 
 .home-page {
-  --ink: #070706;
-  --paper: #eee8d8;
+  --ink: var(--zine-bg);
+  --paper: var(--zine-paper);
   --paper-hot: #fff6c8;
-  --acid: #e7ff36;
-  --red: #f23d25;
-  --cyan: #17b6c8;
+  --acid: var(--zine-accent);
+  --red: var(--zine-cut);
+  --cyan: var(--zine-cyan);
   position: relative;
   width: 100%;
   min-width: 320px;
@@ -546,27 +538,6 @@ footer {
   line-height: 1.12;
   transform: rotate(4deg);
   box-shadow: 8px 8px 0 rgb(0 0 0 / 92%);
-}
-
-.tear-strip {
-  position: relative;
-  z-index: 1;
-  height: 54px;
-  border-block: 2px solid rgb(238 232 216 / 76%);
-  background:
-    linear-gradient(90deg, transparent 0 10%, rgb(7 7 6 / 36%) 10% 12%, transparent 12% 24%),
-    var(--acid);
-}
-
-.tear-strip::after {
-  display: block;
-  width: min(1240px, calc(100% - 36px));
-  height: 100%;
-  margin-inline: auto;
-  background:
-    linear-gradient(135deg, transparent 0 34%, rgb(7 7 6 / 86%) 34% 36%, transparent 36%),
-    repeating-linear-gradient(90deg, rgb(7 7 6 / 16%) 0 1px, transparent 1px 18px);
-  content: "";
 }
 
 .definition {

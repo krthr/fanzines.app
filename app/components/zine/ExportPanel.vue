@@ -35,7 +35,7 @@ async function handleExport() {
 </script>
 
 <template>
-  <section class="space-y-4">
+  <section class="zine-export-panel space-y-4">
     <div>
       <h2 class="text-sm font-semibold text-default">
         Exportar
