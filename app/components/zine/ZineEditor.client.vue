@@ -5,13 +5,13 @@ import ExportPanel from '~/components/zine/ExportPanel.vue'
 import PageCanvas from '~/components/zine/PageCanvas.vue'
 import PageSelector from '~/components/zine/PageSelector.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
-import { PAGE_LABELS } from '~/types/zine'
+import { PAGE_LABELS, type ImageBatchSkippedFile } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 
 const {
   state,
   selectedElement,
-  addImageElement,
+  addImageElements,
   addTextElement,
   deleteElement,
   selectElement,
@@ -35,31 +35,49 @@ function openFilePicker() {
   fileInput.value?.click()
 }
 
+function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
+  const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
+  const extraCount = files.length - 3
+
+  return extraCount > 0 ? `${names} y ${extraCount} más` : names
+}
+
 async function handleFileChange(event: Event) {
   const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
+  const files = Array.from(input.files ?? [])
   input.value = ''
 
-  if (!file) return
+  if (files.length === 0) return
 
-  const result = await addImageElement(file)
+  const result = await addImageElements(files)
+  const failedFiles = result.skippedFiles.filter((file) => file.reason !== 'no-page')
 
-  if (!result.ok) {
+  if (failedFiles.length > 0) {
     toast.add({
       color: 'error',
       icon: 'i-lucide-triangle-alert',
-      title: 'Imagen no cargada',
-      description: result.error
+      title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
+      description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? '' : 's'}: ${formatSkippedFiles(failedFiles)}.`
     })
-    return
   }
 
-  if (result.warning) {
+  if (result.overflowCount > 0) {
     toast.add({
       color: 'warning',
       icon: 'i-lucide-info',
-      title: 'Imagen grande',
-      description: result.warning
+      title: 'No caben todas las imágenes',
+      description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? '' : 's'} porque no quedaban páginas disponibles.`
+    })
+  }
+
+  if (result.largeFileCount > 0) {
+    toast.add({
+      color: 'warning',
+      icon: 'i-lucide-info',
+      title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
+      description: result.largeFileCount === 1
+        ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
+        : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`
     })
   }
 }
@@ -102,6 +120,7 @@ onBeforeUnmount(() => {
       class="hidden"
       type="file"
       accept="image/*"
+      multiple
       @change="handleFileChange"
     >
 
@@ -123,7 +142,7 @@ onBeforeUnmount(() => {
       <div class="flex flex-1 flex-wrap items-center justify-end gap-2">
         <UButton
           icon="i-lucide-image-plus"
-          label="Subir imagen"
+          label="Subir imágenes"
           variant="outline"
           size="sm"
           class="zine-toolbar-button"

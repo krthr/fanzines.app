@@ -93,3 +93,18 @@ export type ImageInsertResult = {
   error?: string
   warning?: string
 }
+
+export type ImageBatchSkippedFile = {
+  fileName: string
+  reason: 'browser-only' | 'not-image' | 'load-error' | 'no-page'
+  message: string
+}
+
+export type ImageBatchInsertResult = {
+  importedCount: number
+  skippedFiles: ImageBatchSkippedFile[]
+  errors: string[]
+  warnings: string[]
+  largeFileCount: number
+  overflowCount: number
+}
