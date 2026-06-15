@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { exportZinePdf } from '~/utils/exportPdf.client'
 import { useZineStore } from '~/composables/useZineStore'
 
 const { state, elementCount } = useZineStore()
@@ -25,6 +24,7 @@ async function handleExport() {
   isExporting.value = true
 
   try {
+    const { exportZinePdf } = await import('~/utils/exportPdf.client')
     await exportZinePdf(state.value)
   } catch {
     errorMessage.value = 'No se pudo generar el PDF. Revisa las imágenes cargadas e inténtalo de nuevo.'

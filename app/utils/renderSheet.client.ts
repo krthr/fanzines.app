@@ -1,4 +1,7 @@
-import Konva from 'konva'
+import { Group } from 'konva/lib/Group'
+import { Layer } from 'konva/lib/Layer'
+import { Stage } from 'konva/lib/Stage'
+import { Rect } from 'konva/lib/shapes/Rect'
 import type { PageId, ZineElement, ZineState } from '~/types/zine'
 import {
   A4_H_MM,
@@ -17,6 +20,7 @@ type RenderSheetDataUrlOptions = {
   pxPerMm: number
   pixelRatio?: number
   mimeType?: string
+  quality?: number
 }
 
 function createOffscreenContainer(width: number, height: number) {
@@ -37,8 +41,8 @@ function getPageElements(state: ZineState, pageId: PageId): ZineElement[] {
     .filter((element): element is ZineElement => Boolean(element))
 }
 
-async function renderSheetIntoRoot(root: Konva.Group, state: ZineState) {
-  root.add(new Konva.Rect({
+async function renderSheetIntoRoot(root: Group, state: ZineState) {
+  root.add(new Rect({
     x: 0,
     y: 0,
     width: A4_W_MM,
@@ -50,7 +54,7 @@ async function renderSheetIntoRoot(root: Konva.Group, state: ZineState) {
   for (const pageId of IMPOSED_PAGE_IDS) {
     const slot = IMPOSITION_SLOTS[pageId]
     const transform = getImposedGroupTransform(slot)
-    const pageGroup = new Konva.Group({
+    const pageGroup = new Group({
       x: transform.x,
       y: transform.y,
       rotation: transform.rotation,
@@ -63,7 +67,7 @@ async function renderSheetIntoRoot(root: Konva.Group, state: ZineState) {
       listening: false
     })
 
-    pageGroup.add(new Konva.Rect({
+    pageGroup.add(new Rect({
       x: 0,
       y: 0,
       width: PAGE_W,
@@ -77,17 +81,17 @@ async function renderSheetIntoRoot(root: Konva.Group, state: ZineState) {
   }
 }
 
-export async function renderSheetDataUrl(state: ZineState, options: RenderSheetDataUrlOptions) {
-  if (!import.meta.client) return ''
+export async function renderSheetCanvas(state: ZineState, options: RenderSheetDataUrlOptions) {
+  if (!import.meta.client) return null
 
   const width = A4_W_MM * options.pxPerMm
   const height = A4_H_MM * options.pxPerMm
   const container = createOffscreenContainer(width, height)
-  const stage = new Konva.Stage({ container, width, height })
+  const stage = new Stage({ container, width, height })
 
   try {
-    const layer = new Konva.Layer()
-    const root = new Konva.Group({
+    const layer = new Layer()
+    const root = new Group({
       scaleX: options.pxPerMm,
       scaleY: options.pxPerMm
     })
@@ -97,12 +101,25 @@ export async function renderSheetDataUrl(state: ZineState, options: RenderSheetD
     await renderSheetIntoRoot(root, state)
     layer.draw()
 
-    return stage.toDataURL({
-      mimeType: options.mimeType ?? 'image/png',
+    return stage.toCanvas({
       pixelRatio: options.pixelRatio ?? 1
     })
   } finally {
     stage.destroy()
     container.remove()
   }
+}
+
+export async function renderSheetBlob(state: ZineState, options: RenderSheetDataUrlOptions) {
+  const canvas = await renderSheetCanvas(state, options)
+  if (!canvas) return null
+
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, options.mimeType ?? 'image/png', options.quality)
+  })
+}
+
+export async function renderSheetDataUrl(state: ZineState, options: RenderSheetDataUrlOptions) {
+  const canvas = await renderSheetCanvas(state, options)
+  return canvas?.toDataURL(options.mimeType ?? 'image/png', options.quality) ?? ''
 }
