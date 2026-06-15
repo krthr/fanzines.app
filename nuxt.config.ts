@@ -44,6 +44,38 @@ export default defineNuxtConfig({
       include: ['vue-konva', 'jspdf', 'konva', 'gsap', 'gsap/ScrollTrigger', '@unhead/schema-org/vue']
     }
   },
+  icon: {
+    serverBundle: {
+      collections: ['lucide']
+    },
+    clientBundle: {
+      scan: false,
+      icons: [
+        'lucide:align-center',
+        'lucide:align-horizontal-justify-center',
+        'lucide:align-horizontal-justify-end',
+        'lucide:align-horizontal-justify-start',
+        'lucide:align-left',
+        'lucide:align-right',
+        'lucide:align-vertical-justify-center',
+        'lucide:align-vertical-justify-end',
+        'lucide:align-vertical-justify-start',
+        'lucide:bring-to-front',
+        'lucide:download',
+        'lucide:expand',
+        'lucide:image-plus',
+        'lucide:info',
+        'lucide:maximize',
+        'lucide:refresh-cw',
+        'lucide:send-to-back',
+        'lucide:sliders-horizontal',
+        'lucide:trash-2',
+        'lucide:triangle-alert',
+        'lucide:type'
+      ],
+      sizeLimitKb: 64
+    }
+  },
   ui: {
     colorMode: false,
     fonts: false

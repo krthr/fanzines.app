@@ -21,6 +21,10 @@ const {
 const toast = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 const mobileToolsOpen = ref(false)
+const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 1024px)').matches : false)
+
+let desktopMediaQuery: MediaQueryList | null = null
+let removeDesktopMediaQueryListener: (() => void) | null = null
 
 const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
 
@@ -105,10 +109,19 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 onMounted(() => {
+  desktopMediaQuery = window.matchMedia('(min-width: 1024px)')
+  const syncDesktopLayout = () => {
+    isDesktopLayout.value = Boolean(desktopMediaQuery?.matches)
+  }
+
+  syncDesktopLayout()
+  desktopMediaQuery.addEventListener('change', syncDesktopLayout)
+  removeDesktopMediaQueryListener = () => desktopMediaQuery?.removeEventListener('change', syncDesktopLayout)
   window.addEventListener('keydown', handleKeydown)
 })
 
 onBeforeUnmount(() => {
+  removeDesktopMediaQueryListener?.()
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
@@ -217,7 +230,7 @@ onBeforeUnmount(() => {
                 class="zine-contrast-switch"
               />
             </div>
-            <SheetPreview />
+            <SheetPreview v-if="isDesktopLayout" />
           </section>
         </div>
       </aside>
@@ -250,7 +263,7 @@ onBeforeUnmount(() => {
         <div class="zine-mobile-panel space-y-3 p-3 lg:hidden">
           <PageSelector compact />
           <div class="mx-auto max-w-sm">
-            <SheetPreview />
+            <SheetPreview v-if="!isDesktopLayout" />
           </div>
         </div>
       </section>

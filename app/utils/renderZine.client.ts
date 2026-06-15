@@ -1,25 +1,11 @@
-import Konva from 'konva'
+import type { Group } from 'konva/lib/Group'
+import { Image as KonvaImage } from 'konva/lib/shapes/Image'
+import { Text as KonvaText } from 'konva/lib/shapes/Text'
 import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
-
-const imageCache = new Map<string, Promise<HTMLImageElement>>()
-
-export function loadHtmlImage(src: string): Promise<HTMLImageElement> {
-  const cached = imageCache.get(src)
-  if (cached) return cached
-
-  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image()
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('No se pudo cargar una imagen del proyecto.'))
-    image.src = src
-  })
-
-  imageCache.set(src, promise)
-  return promise
-}
+import { loadCachedHtmlImage } from '~/utils/zineImageCache'
 
 function createImageNode(element: ImageElement, image: HTMLImageElement) {
-  return new Konva.Image({
+  return new KonvaImage({
     image,
     x: element.x,
     y: element.y,
@@ -32,7 +18,7 @@ function createImageNode(element: ImageElement, image: HTMLImageElement) {
 }
 
 function createTextNode(element: TextElement) {
-  return new Konva.Text({
+  return new KonvaText({
     x: element.x,
     y: element.y,
     width: element.width,
@@ -53,14 +39,14 @@ function createTextNode(element: TextElement) {
 
 export async function createElementNode(element: ZineElement) {
   if (element.type === 'image') {
-    const image = await loadHtmlImage(element.src)
+    const image = await loadCachedHtmlImage(element.src)
     return createImageNode(element, image)
   }
 
   return createTextNode(element)
 }
 
-export async function renderElementsIntoGroup(group: Konva.Group, elements: ZineElement[]) {
+export async function renderElementsIntoGroup(group: Group, elements: ZineElement[]) {
   for (const element of elements) {
     group.add(await createElementNode(element))
   }

@@ -8,7 +8,7 @@ import {
   PANEL_W_MM,
   PX_PER_MM
 } from '~/utils/zineLayout'
-import { renderSheetDataUrl } from '~/utils/renderSheet.client'
+import { renderSheetCanvas } from '~/utils/renderSheet.client'
 
 function drawPdfGuides(pdf: jsPDF) {
   const pw = PANEL_W_MM
@@ -34,11 +34,13 @@ function drawPdfGuides(pdf: jsPDF) {
 export async function exportZinePdf(state: ZineState) {
   if (!import.meta.client) return
 
-  const dataUrl = await renderSheetDataUrl(state, {
+  const canvas = await renderSheetCanvas(state, {
     pxPerMm: PX_PER_MM,
     pixelRatio: EXPORT_PIXEL_RATIO,
     mimeType: 'image/png'
   })
+
+  if (!canvas) return
 
   const pdf = new jsPDF({
     orientation: 'landscape',
@@ -46,7 +48,7 @@ export async function exportZinePdf(state: ZineState) {
     format: 'a4'
   })
 
-  pdf.addImage(dataUrl, 'PNG', 0, 0, A4_W_MM, A4_H_MM)
+  pdf.addImage(canvas, 'PNG', 0, 0, A4_W_MM, A4_H_MM)
 
   if (state.exportGuides) {
     drawPdfGuides(pdf)

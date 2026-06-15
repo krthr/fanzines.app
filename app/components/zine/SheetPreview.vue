@@ -4,10 +4,11 @@ import type { CSSProperties } from 'vue'
 import type { PageId } from '~/types/zine'
 import { PAGE_LABELS } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
-import { renderSheetDataUrl } from '~/utils/renderSheet.client'
+import { renderSheetBlob } from '~/utils/renderSheet.client'
 import { IMPOSED_PAGE_IDS, IMPOSITION_SLOTS } from '~/utils/zineLayout'
 
 const PREVIEW_PX_PER_MM = 2
+const PREVIEW_RENDER_DELAY_MS = 140
 
 const { state, selectPage } = useZineStore()
 const previewImageUrl = ref('')
@@ -15,7 +16,7 @@ const renderFailed = ref(false)
 
 let isMounted = false
 let renderVersion = 0
-let animationFrameId: number | null = null
+let renderTimeoutId: number | null = null
 
 const slots = computed(() => IMPOSED_PAGE_IDS.map((pageId) => ({
   pageId,
@@ -41,18 +42,33 @@ async function renderPreview() {
   const version = ++renderVersion
 
   try {
-    const imageUrl = await renderSheetDataUrl(state.value, {
+    const blob = await renderSheetBlob(state.value, {
       pxPerMm: PREVIEW_PX_PER_MM,
       pixelRatio: 1,
       mimeType: 'image/png'
     })
 
-    if (version !== renderVersion) return
+    if (!blob) throw new Error('No se pudo generar la previsualización.')
+
+    const imageUrl = URL.createObjectURL(blob)
+
+    if (version !== renderVersion) {
+      URL.revokeObjectURL(imageUrl)
+      return
+    }
+
+    if (previewImageUrl.value) {
+      URL.revokeObjectURL(previewImageUrl.value)
+    }
 
     previewImageUrl.value = imageUrl
     renderFailed.value = false
   } catch {
     if (version !== renderVersion) return
+
+    if (previewImageUrl.value) {
+      URL.revokeObjectURL(previewImageUrl.value)
+    }
 
     previewImageUrl.value = ''
     renderFailed.value = true
@@ -62,14 +78,14 @@ async function renderPreview() {
 function schedulePreviewRender() {
   if (!isMounted || !import.meta.client) return
 
-  if (animationFrameId !== null) {
-    window.cancelAnimationFrame(animationFrameId)
+  if (renderTimeoutId !== null) {
+    window.clearTimeout(renderTimeoutId)
   }
 
-  animationFrameId = window.requestAnimationFrame(() => {
-    animationFrameId = null
+  renderTimeoutId = window.setTimeout(() => {
+    renderTimeoutId = null
     void renderPreview()
-  })
+  }, PREVIEW_RENDER_DELAY_MS)
 }
 
 onMounted(() => {
@@ -81,8 +97,12 @@ onBeforeUnmount(() => {
   isMounted = false
   renderVersion++
 
-  if (animationFrameId !== null) {
-    window.cancelAnimationFrame(animationFrameId)
+  if (renderTimeoutId !== null) {
+    window.clearTimeout(renderTimeoutId)
+  }
+
+  if (previewImageUrl.value) {
+    URL.revokeObjectURL(previewImageUrl.value)
   }
 })
 

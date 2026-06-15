@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
-import type Konva from 'konva'
+import 'konva/lib/shapes/Image'
+import 'konva/lib/shapes/Rect'
+import 'konva/lib/shapes/Text'
+import 'konva/lib/shapes/Transformer'
+import { Image as VImage, Layer as VLayer, Rect as VRect, Stage as VStage, Text as VText, Transformer as VTransformer } from 'vue-konva/core'
+import type { Node as KonvaNode } from 'konva/lib/Node'
+import type { Stage as KonvaStage } from 'konva/lib/Stage'
+import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
 import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { PAGE_H, PAGE_W, clampToPage } from '~/utils/zineLayout'
 
 type KonvaEvent = {
-  target: Konva.Node
+  target: KonvaNode
   cancelBubble: boolean
 }
 
@@ -18,8 +25,8 @@ const {
 } = useZineStore()
 
 const containerRef = ref<HTMLElement | null>(null)
-const stageRef = ref<{ getNode: () => Konva.Stage } | null>(null)
-const transformerRef = ref<{ getNode: () => Konva.Transformer } | null>(null)
+const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
+const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
 const size = reactive({ width: 0, height: 0 })
 const loadedImages = shallowReactive(new Map<string, HTMLImageElement>())
 const failedImages = shallowReactive(new Set<string>())
@@ -28,6 +35,9 @@ let resizeObserver: ResizeObserver | null = null
 
 const selectedId = computed(() => state.value.selectedElementId)
 const selectedElement = computed(() => selectedId.value ? state.value.elements[selectedId.value] ?? null : null)
+const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
+  .filter((element): element is ImageElement => element.type === 'image')
+  .map((element) => element.src)))
 
 const scale = computed(() => {
   const widthScale = size.width > 0 ? size.width / PAGE_W : 0.5
@@ -84,7 +94,7 @@ const transformerConfig = computed(() => {
     borderStroke: '#f23d25',
     anchorStroke: '#070706',
     anchorFill: '#e7ff36',
-    boundBoxFunc: (_oldBox: Konva.Box, newBox: Konva.Box) => {
+    boundBoxFunc: (_oldBox: Box, newBox: Box) => {
       if (newBox.width < 20 || newBox.height < 20) return _oldBox
       return newBox
     }
@@ -210,6 +220,7 @@ function updateTransformer() {
 }
 
 function loadCanvasImages() {
+  pruneCanvasImageMaps()
   const images = currentPageElements.value.filter((element): element is ImageElement => element.type === 'image')
 
   for (const element of images) {
@@ -227,6 +238,22 @@ function loadCanvasImages() {
       updateTransformer()
     }
     image.src = element.src
+  }
+}
+
+function pruneCanvasImageMaps() {
+  const activeSources = activeImageSources.value
+
+  for (const src of loadedImages.keys()) {
+    if (!activeSources.has(src)) {
+      loadedImages.delete(src)
+    }
+  }
+
+  for (const src of failedImages.keys()) {
+    if (!activeSources.has(src)) {
+      failedImages.delete(src)
+    }
   }
 }
 
@@ -252,9 +279,11 @@ watch(
     state.value.selectedPageId,
     selectedId.value,
     currentPageElements.value.length,
-    currentPageElements.value.map((element) => element.id).join(',')
+    currentPageElements.value.map((element) => element.id).join(','),
+    [...activeImageSources.value].join(',')
   ],
   () => {
+    pruneCanvasImageMaps()
     loadCanvasImages()
     updateTransformer()
   },
@@ -264,19 +293,19 @@ watch(
 
 <template>
   <div ref="containerRef" class="zine-canvas-wrap flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8">
-    <v-stage
+    <VStage
       ref="stageRef"
       :config="stageConfig"
       class="shadow-[var(--zine-shadow)]"
       @mousedown="handleStagePointer"
       @touchstart="handleStagePointer"
     >
-      <v-layer :config="layerConfig">
-        <v-rect :config="backgroundConfig" />
-        <v-rect :config="safeMarginConfig" />
+      <VLayer :config="layerConfig">
+        <VRect :config="backgroundConfig" />
+        <VRect :config="safeMarginConfig" />
 
         <template v-for="element in currentPageElements" :key="element.id">
-          <v-image
+          <VImage
             v-if="element.type === 'image' && loadedImages.has(element.src)"
             :config="imageConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
@@ -284,7 +313,7 @@ watch(
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
-          <v-rect
+          <VRect
             v-else-if="element.type === 'image'"
             :config="imageFallbackConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
@@ -292,7 +321,7 @@ watch(
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
-          <v-text
+          <VText
             v-else
             :config="textConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
@@ -302,8 +331,8 @@ watch(
           />
         </template>
 
-        <v-transformer ref="transformerRef" :config="transformerConfig" />
-      </v-layer>
-    </v-stage>
+        <VTransformer ref="transformerRef" :config="transformerConfig" />
+      </VLayer>
+    </VStage>
   </div>
 </template>
