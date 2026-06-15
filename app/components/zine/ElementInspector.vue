@@ -5,6 +5,12 @@ import { FONT_OPTIONS, PAGE_LABELS } from '~/types/zine'
 import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 
+type ImageElement = Extract<ZineElement, { type: 'image' }>
+type HorizontalImageAlignment = 'left' | 'center' | 'right'
+type VerticalImageAlignment = 'top' | 'middle' | 'bottom'
+
+const ALIGNMENT_EPSILON = 1
+
 const {
   state,
   selectedElement,
@@ -25,6 +31,16 @@ const alignItems = [
   { label: 'Centro', value: 'center', icon: 'i-lucide-align-center' },
   { label: 'Derecha', value: 'right', icon: 'i-lucide-align-right' }
 ]
+const imageHorizontalAlignItems = [
+  { label: 'Izq.', value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
+  { label: 'Centro', value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
+  { label: 'Der.', value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
+] satisfies Array<{ label: string, value: HorizontalImageAlignment, icon: string }>
+const imageVerticalAlignItems = [
+  { label: 'Arriba', value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
+  { label: 'Medio', value: 'middle', icon: 'i-lucide-align-vertical-justify-center' },
+  { label: 'Abajo', value: 'bottom', icon: 'i-lucide-align-vertical-justify-end' }
+] satisfies Array<{ label: string, value: VerticalImageAlignment, icon: string }>
 
 const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
 
@@ -52,6 +68,101 @@ function patchOpacity(value: number | number[] | undefined) {
   const next = Array.isArray(value) ? value[0] : value
   if (typeof next !== 'number') return
   patch({ opacity: next / 100 })
+}
+
+function isImageElement(element: ZineElement | null): element is ImageElement {
+  return element?.type === 'image'
+}
+
+function imageX(element: ImageElement, alignment: HorizontalImageAlignment) {
+  if (alignment === 'left') return 0
+  if (alignment === 'center') return (PAGE_W - element.width) / 2
+  return PAGE_W - element.width
+}
+
+function imageY(element: ImageElement, alignment: VerticalImageAlignment) {
+  if (alignment === 'top') return 0
+  if (alignment === 'middle') return (PAGE_H - element.height) / 2
+  return PAGE_H - element.height
+}
+
+function containedImageBounds(element: ImageElement) {
+  const sourceWidth = element.naturalWidth || element.width
+  const sourceHeight = element.naturalHeight || element.height
+  const scale = Math.min(PAGE_W / sourceWidth, PAGE_H / sourceHeight)
+  const width = sourceWidth * scale
+  const height = sourceHeight * scale
+
+  return {
+    x: (PAGE_W - width) / 2,
+    y: (PAGE_H - height) / 2,
+    width,
+    height
+  }
+}
+
+function isAligned(value: number, target: number) {
+  return Math.abs(value - target) < ALIGNMENT_EPSILON
+}
+
+function hasHorizontalImageMovement(element: ImageElement) {
+  return imageHorizontalAlignItems.some((item) => !isAligned(element.x, imageX(element, item.value)))
+}
+
+function hasVerticalImageMovement(element: ImageElement) {
+  return imageVerticalAlignItems.some((item) => !isAligned(element.y, imageY(element, item.value)))
+}
+
+function fillImagePage() {
+  const element = selectedElement.value
+  if (!isImageElement(element)) return
+
+  updateElement(element.id, {
+    ...containedImageBounds(element),
+    rotation: 0
+  })
+}
+
+function alignImageHorizontal(alignment: HorizontalImageAlignment) {
+  const element = selectedElement.value
+  if (!isImageElement(element) || !hasHorizontalImageMovement(element)) return
+
+  updateElement(element.id, {
+    x: imageX(element, alignment)
+  })
+}
+
+function alignImageVertical(alignment: VerticalImageAlignment) {
+  const element = selectedElement.value
+  if (!isImageElement(element) || !hasVerticalImageMovement(element)) return
+
+  updateElement(element.id, {
+    y: imageY(element, alignment)
+  })
+}
+
+function canAlignImageHorizontal() {
+  const element = selectedElement.value
+  return isImageElement(element) && hasHorizontalImageMovement(element)
+}
+
+function canAlignImageVertical() {
+  const element = selectedElement.value
+  return isImageElement(element) && hasVerticalImageMovement(element)
+}
+
+function isImageHorizontallyAligned(alignment: HorizontalImageAlignment) {
+  const element = selectedElement.value
+  return isImageElement(element)
+    && hasHorizontalImageMovement(element)
+    && isAligned(element.x, imageX(element, alignment))
+}
+
+function isImageVerticallyAligned(alignment: VerticalImageAlignment) {
+  const element = selectedElement.value
+  return isImageElement(element)
+    && hasVerticalImageMovement(element)
+    && isAligned(element.y, imageY(element, alignment))
 }
 
 function removeSelected() {
@@ -254,6 +365,52 @@ function sendBackward() {
           <p class="mt-1 text-xs text-muted">
             {{ selectedElement.naturalWidth }} x {{ selectedElement.naturalHeight }} px
           </p>
+        </div>
+
+        <div class="space-y-3">
+          <UButton
+            block
+            icon="i-lucide-expand"
+            label="Encajar en página"
+            color="primary"
+            variant="solid"
+            size="sm"
+            @click="fillImagePage"
+          />
+
+          <UFormField label="Alinear horizontal">
+            <div class="grid grid-cols-3 gap-2">
+              <UButton
+                v-for="item in imageHorizontalAlignItems"
+                :key="item.value"
+                :icon="item.icon"
+                :label="item.label"
+                :color="isImageHorizontallyAligned(item.value) ? 'primary' : 'neutral'"
+                :variant="isImageHorizontallyAligned(item.value) ? 'solid' : 'outline'"
+                size="sm"
+                block
+                :disabled="!canAlignImageHorizontal()"
+                @click="alignImageHorizontal(item.value)"
+              />
+            </div>
+          </UFormField>
+
+          <UFormField label="Alinear vertical">
+            <div class="grid grid-cols-3 gap-2">
+              <UButton
+                v-for="item in imageVerticalAlignItems"
+                :key="item.value"
+                :icon="item.icon"
+                :label="item.label"
+                :color="isImageVerticallyAligned(item.value) ? 'primary' : 'neutral'"
+                :variant="isImageVerticallyAligned(item.value) ? 'solid' : 'outline'"
+                size="sm"
+                block
+                :disabled="!canAlignImageVertical()"
+                @click="alignImageVertical(item.value)"
+              />
+            </div>
+          </UFormField>
         </div>
       </template>
 
