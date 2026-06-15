@@ -31,17 +31,17 @@ function choosePage(pageId: PageId) {
       v-for="page in pages"
       :key="page.id"
       type="button"
-      class="min-w-0 border px-3 py-2 text-left transition"
+      class="zine-page-tile min-w-0 px-3 py-2 text-left transition"
       :class="[
-        props.compact ? 'w-24 shrink-0 rounded-md' : 'rounded-lg',
+        props.compact ? 'w-24 shrink-0' : '',
         state.selectedPageId === page.id
-          ? 'border-[var(--zine-accent)] bg-[rgb(15_143_140_/_10%)] text-default shadow-sm'
-          : 'border-muted bg-default/70 text-muted hover:border-[var(--zine-accent)] hover:text-default'
+          ? 'zine-page-tile-active'
+          : 'zine-page-tile-idle'
       ]"
       :aria-pressed="state.selectedPageId === page.id"
       @click="choosePage(page.id)"
     >
-      <span class="block truncate text-sm font-semibold leading-5">
+      <span class="block truncate text-sm font-black uppercase leading-5">
         {{ props.compact ? page.short : page.label }}
       </span>
       <span class="mt-0.5 block text-[11px] leading-4 opacity-70">

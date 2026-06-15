@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { nextTick, onBeforeUnmount, onMounted } from 'vue'
+
 const siteUrl = 'https://fanzines.app'
 const pageTitle = 'Crea y exporta un fanzine A4'
 const socialTitle = 'Fanzines | Crea y exporta un fanzine A4'
@@ -26,13 +28,7 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl },
-    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Special+Elite&display=swap'
-    }
+    { rel: 'canonical', href: siteUrl }
   ]
 })
 
@@ -50,6 +46,97 @@ const steps = [
     text: 'Descarga el PDF, imprime, corta por la guía central y convierte la hoja en un fanzine.'
   }
 ]
+
+let animationContext: { revert: () => void } | null = null
+
+onMounted(async () => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return
+  }
+
+  const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+    import('gsap'),
+    import('gsap/ScrollTrigger')
+  ])
+
+  gsap.registerPlugin(ScrollTrigger)
+  await nextTick()
+
+  const root = document.querySelector('.home-page')
+
+  if (!root) {
+    return
+  }
+
+  animationContext = gsap.context(() => {
+    gsap.from('.site-header', {
+      y: -28,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out'
+    })
+
+    gsap.from('.hero-copy > *', {
+      y: 42,
+      opacity: 0,
+      duration: 0.9,
+      stagger: 0.08,
+      ease: 'power3.out'
+    })
+
+    gsap.from('.paper-shot', {
+      y: 76,
+      opacity: 0,
+      rotate: 0,
+      duration: 1,
+      stagger: 0.12,
+      ease: 'power3.out'
+    })
+
+    gsap.utils.toArray<HTMLElement>('.motion-image').forEach((image) => {
+      gsap.fromTo(
+        image,
+        {
+          scale: 0.9,
+          opacity: 0.72,
+          filter: 'grayscale(1) contrast(1.65)'
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          filter: 'grayscale(0.15) contrast(1.35)',
+          immediateRender: false,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: image,
+            start: 'top 88%',
+            end: 'bottom 26%',
+            scrub: true
+          }
+        }
+      )
+    })
+
+    gsap.utils.toArray<HTMLElement>('.section-panel, .step-card').forEach((panel) => {
+      gsap.from(panel, {
+        y: 58,
+        opacity: 0,
+        immediateRender: false,
+        duration: 0.75,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: panel,
+          start: 'top 86%'
+        }
+      })
+    })
+  }, root)
+})
+
+onBeforeUnmount(() => {
+  animationContext?.revert()
+  animationContext = null
+})
 </script>
 
 <template>
@@ -57,7 +144,10 @@ const steps = [
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
     <header class="site-header" aria-label="Navegación principal">
-      <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">Fanzines</NuxtLink>
+      <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">
+        <span class="brand-mark" aria-hidden="true">FZ</span>
+        <span>Fanzines</span>
+      </NuxtLink>
       <nav aria-label="Secciones">
         <a href="#editor">Qué incluye</a>
         <a href="#como-se-hace">Imprimir</a>
@@ -73,20 +163,24 @@ const steps = [
           Diseña cada panel, revisa el pliego completo y exporta un PDF listo para imprimir.
         </p>
         <div class="actions" aria-label="Acciones principales">
-          <NuxtLink class="button button-dark" to="/editor">Abrir el editor</NuxtLink>
-          <a class="button button-light" href="#como-se-hace">Ver cómo se imprime</a>
+          <NuxtLink class="button button-primary" to="/editor">Abrir el editor</NuxtLink>
+          <a class="button button-secondary" href="#como-se-hace">Ver cómo se imprime</a>
         </div>
       </div>
 
-      <div class="hero-board" aria-label="Fanzine físico hecho a mano">
-        <img class="photo photo-main" src="/images/folded-zine.webp" alt="Fanzine desplegado sobre una mesa" />
-        <img class="photo photo-small" src="/images/hand-zine.webp" alt="Fanzine pequeño abierto en una mano" />
-        <p class="tape-note">Editor A4 / 8 páginas / PDF</p>
+      <div class="hero-media" aria-label="Fanzine físico hecho a mano">
+        <div class="paper-shot shot-main motion-image">
+          <img src="/images/folded-zine.webp" alt="Fanzine desplegado sobre una mesa" />
+        </div>
+        <div class="paper-shot shot-hand motion-image">
+          <img src="/images/hand-zine.webp" alt="Fanzine pequeño abierto en una mano" />
+        </div>
+        <div class="paper-note">Editor A4 / 8 páginas / PDF</div>
       </div>
     </section>
 
-    <section id="editor" class="definition" aria-labelledby="definition-title">
-      <div>
+    <section id="editor" class="definition section-panel" aria-labelledby="definition-title">
+      <div class="definition-copy">
         <h2 id="definition-title">Editor A4</h2>
         <p>
           Empieza con una portada vacía y trabaja panel por panel. El editor coloca cada página en
@@ -94,7 +188,11 @@ const steps = [
         </p>
       </div>
       <figure class="table-photo">
-        <img src="/images/making-table.webp" alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras" />
+        <img
+          class="motion-image"
+          src="/images/making-table.webp"
+          alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+        />
         <figcaption>Diseña en pantalla. Termina con papel, tijeras y una mesa.</figcaption>
       </figure>
     </section>
@@ -105,10 +203,14 @@ const steps = [
         <p>El PDF sale impuesto para una hoja A4. Imprime, corta la línea central y dobla.</p>
       </div>
 
-      <div class="fold-layout">
-        <img src="/images/fold-guide.webp" alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine" />
+      <div class="fold-layout section-panel">
+        <img
+          class="fold-guide motion-image"
+          src="/images/fold-guide.webp"
+          alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine"
+        />
         <ol>
-          <li v-for="step in steps" :key="step.title">
+          <li v-for="step in steps" :key="step.title" class="step-card">
             <strong>{{ step.title }}</strong>
             <span>{{ step.text }}</span>
           </li>
@@ -118,7 +220,7 @@ const steps = [
 
     <section class="final-cta" aria-labelledby="cta-title">
       <h2 id="cta-title">Empieza con una portada y una imagen.</h2>
-      <NuxtLink class="button button-dark" to="/editor">Crear fanzine</NuxtLink>
+      <NuxtLink class="button button-primary" to="/editor">Crear fanzine</NuxtLink>
     </section>
 
     <footer>
@@ -134,17 +236,51 @@ const steps = [
 }
 
 .home-page {
+  --ink: var(--zine-bg);
+  --paper: var(--zine-paper);
+  --paper-hot: #fff6c8;
+  --acid: var(--zine-accent);
+  --red: var(--zine-cut);
+  --cyan: var(--zine-cyan);
   position: relative;
+  width: 100%;
   min-width: 320px;
   min-height: 100dvh;
   overflow-x: hidden;
   background:
-    linear-gradient(rgba(12, 11, 9, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 11, 9, 0.025) 1px, transparent 1px),
-    #f6f0df;
-  background-size: 26px 26px;
-  color: #14120f;
-  font-family: 'Special Elite', 'Courier New', monospace;
+    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
+    radial-gradient(circle at 72% 10%, rgb(242 61 37 / 18%), transparent 26rem),
+    var(--ink);
+  background-size: 24px 24px, 24px 24px, auto, auto;
+  color: var(--paper);
+  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.home-page::before,
+.home-page::after {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.home-page::before {
+  opacity: 0.2;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 9%) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 45%) 0 2px, transparent 2px 7px);
+  mix-blend-mode: overlay;
+}
+
+.home-page::after {
+  opacity: 0.24;
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 26%) 0 1px, transparent 1px),
+    radial-gradient(circle, rgb(0 0 0 / 42%) 0 1px, transparent 1px);
+  background-position: 0 0, 9px 13px;
+  background-size: 18px 18px, 22px 22px;
 }
 
 .home-page a {
@@ -158,27 +294,15 @@ const steps = [
   left: 10px;
   z-index: 5;
   padding: 10px 14px;
-  border: 2px solid #14120f;
-  background: #fffaf0;
-  color: #14120f;
+  border: 2px solid var(--paper);
+  background: var(--acid);
+  color: var(--ink);
   transform: translateY(-140%);
   transition: transform 180ms ease;
 }
 
 .skip-link:focus {
   transform: translateY(0);
-}
-
-.home-page::before {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  content: '';
-  opacity: 0.32;
-  background:
-    radial-gradient(circle at 24% 12%, rgba(255, 72, 44, 0.22), transparent 22rem),
-    radial-gradient(circle at 82% 48%, rgba(48, 106, 160, 0.16), transparent 24rem);
 }
 
 .site-header,
@@ -189,7 +313,7 @@ const steps = [
 footer {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100% - 36px));
+  width: min(1240px, calc(100% - 36px));
   margin-inline: auto;
 }
 
@@ -202,224 +326,309 @@ footer {
 }
 
 .brand {
-  font-family: 'Patrick Hand', 'Comic Sans MS', cursive;
-  font-size: clamp(1.65rem, 3vw, 2.2rem);
-  font-weight: 400;
-  transform: rotate(-2deg);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--paper);
+  font-size: 1.18rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid var(--paper);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.96rem;
+  transform: rotate(-4deg);
 }
 
 .site-header nav {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2.4vw, 28px);
-  font-size: 0.94rem;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.site-header a {
-  text-decoration-thickness: 2px;
-  text-underline-offset: 5px;
+.site-header nav a {
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 1px solid rgb(238 232 216 / 34%);
+  background: rgb(238 232 216 / 6%);
+  color: var(--paper);
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.site-header a:hover {
-  text-decoration-line: underline;
+.site-header nav a:hover {
+  background: var(--acid);
+  color: var(--ink);
 }
 
 .site-header a:focus-visible,
 .button:focus-visible {
-  outline: 3px solid #ff4c2e;
+  outline: 3px solid var(--acid);
   outline-offset: 4px;
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(360px, 1fr);
-  gap: clamp(34px, 6vw, 86px);
+  grid-template-columns: minmax(0, 0.96fr) minmax(390px, 0.74fr);
+  gap: clamp(40px, 7vw, 100px);
   align-items: center;
-  min-height: calc(86svh - 92px);
-  padding: 24px 0 48px;
+  min-height: calc(100svh - 92px);
+  padding: 34px 0 78px;
 }
 
-.hero-copy h1 {
-  max-width: 760px;
+.hero-copy h1,
+.definition h2,
+.making h2,
+.final-cta h2 {
   margin: 0;
-  font-family: Impact, 'Arial Black', sans-serif;
-  font-size: clamp(3.6rem, 7.4vw, 7.5rem);
+  color: var(--paper);
+  font-family: Impact, "Arial Black", Outfit, sans-serif;
   font-weight: 900;
-  line-height: 0.88;
+  line-height: 0.86;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
+.hero-copy h1 {
+  max-width: min(960px, 100%);
+  font-size: 5.15rem;
+}
+
 .hero-copy p,
 .definition p,
-.making-intro p {
-  max-width: 620px;
-  margin: 28px 0 0;
-  font-size: clamp(1.06rem, 1.5vw, 1.28rem);
-  line-height: 1.55;
+.making-intro p,
+.final-cta p {
+  max-width: 690px;
+  margin: 30px 0 0;
+  color: rgb(238 232 216 / 82%);
+  font-size: 1.18rem;
+  font-weight: 600;
+  line-height: 1.52;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 34px;
+  gap: 14px;
+  margin-top: 36px;
 }
 
-.button {
+.home-page .button {
   display: inline-flex;
+  min-height: 52px;
   align-items: center;
   justify-content: center;
-  min-height: 50px;
-  padding: 0 20px;
-  border: 2px solid #14120f;
-  color: #14120f;
-  font-family: 'Special Elite', 'Courier New', monospace;
-  font-size: 0.98rem;
+  padding: 0 22px;
+  border: 2px solid currentColor;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
   transition:
     transform 180ms ease,
-    box-shadow 180ms ease;
+    box-shadow 180ms ease,
+    background 180ms ease;
 }
 
 .button:hover {
-  transform: translate(-3px, -3px) rotate(-1deg);
-  box-shadow: 5px 5px 0 #14120f;
+  transform: translate(-4px, -4px);
+  box-shadow: 6px 6px 0 var(--paper);
 }
 
 .button:active {
   transform: translate(0, 0);
-  box-shadow: 2px 2px 0 #14120f;
+  box-shadow: 2px 2px 0 var(--paper);
 }
 
-.home-page .button-dark {
-  background: #14120f;
-  color: #fffaf0;
+.home-page .button-primary {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff8e2;
 }
 
-.button-light {
-  background: #fffaf0;
+.home-page .button-secondary {
+  border-color: var(--paper);
+  background: var(--paper);
+  color: var(--ink);
 }
 
-.hero-board {
+.hero-media {
   position: relative;
-  min-height: 600px;
+  min-height: 650px;
 }
 
-.photo {
-  display: block;
-  overflow: hidden;
-  border: 10px solid #fffaf0;
-  background: #fffaf0;
-  box-shadow: 10px 14px 0 rgba(20, 18, 15, 0.9);
-  object-fit: cover;
-}
-
-.photo-main {
-  width: min(690px, 100%);
-  aspect-ratio: 1.3;
-  transform: rotate(2deg);
-}
-
-.photo-small {
+.paper-shot {
   position: absolute;
-  right: 2%;
-  bottom: 18px;
-  width: min(250px, 44%);
+  overflow: hidden;
+  border: 9px solid var(--paper);
+  background: var(--paper);
+  box-shadow: 14px 16px 0 rgb(0 0 0 / 88%);
+  transition:
+    transform 700ms ease,
+    filter 700ms ease;
+}
+
+.paper-shot::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(135deg, transparent 0 84%, rgb(231 255 54 / 72%) 84% 90%, transparent 90%),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 4px);
+  mix-blend-mode: multiply;
+}
+
+.paper-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.35);
+  transition: transform 700ms ease;
+}
+
+.paper-shot:hover img,
+.table-photo:hover img,
+.fold-layout:hover .fold-guide {
+  transform: scale(1.05);
+}
+
+.shot-main {
+  top: 36px;
+  right: 0;
+  width: min(570px, 96%);
+  aspect-ratio: 1.28;
+  transform: rotate(2deg);
+  clip-path: polygon(2% 0, 100% 3%, 97% 96%, 0 100%);
+}
+
+.shot-hand {
+  right: 6%;
+  bottom: 34px;
+  width: min(245px, 44%);
   aspect-ratio: 0.64;
   transform: rotate(-7deg);
+  clip-path: polygon(0 4%, 98% 0, 100% 100%, 5% 96%);
 }
 
-.tape-note {
+.paper-note {
   position: absolute;
-  left: -10px;
-  bottom: 42px;
-  width: min(280px, 58%);
-  margin: 0;
-  padding: 12px 16px;
-  background: #ff4c2e;
-  color: #14120f;
-  font-family: 'Patrick Hand', 'Comic Sans MS', cursive;
-  font-size: clamp(1.25rem, 2.4vw, 1.72rem);
-  line-height: 1;
-  transform: rotate(3deg);
-  box-shadow: 6px 6px 0 #14120f;
+  left: 0;
+  bottom: 96px;
+  z-index: 2;
+  max-width: 295px;
+  padding: 15px 18px 12px;
+  background: var(--acid);
+  color: var(--ink);
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 1.16rem;
+  line-height: 1.12;
+  transform: rotate(4deg);
+  box-shadow: 8px 8px 0 rgb(0 0 0 / 92%);
 }
 
 .definition {
   display: grid;
-  grid-template-columns: minmax(0, 0.78fr) minmax(300px, 0.72fr);
-  gap: clamp(32px, 6vw, 86px);
+  grid-template-columns: minmax(0, 0.78fr) minmax(320px, 0.66fr);
+  gap: clamp(36px, 7vw, 96px);
   align-items: center;
-  padding: clamp(44px, 7vw, 96px) 0 clamp(76px, 10vw, 130px);
-  border-top: 2px dashed rgba(20, 18, 15, 0.5);
+  padding: 150px 0 170px;
 }
 
 .definition h2,
 .making h2,
 .final-cta h2 {
-  margin: 0;
-  font-family: Impact, 'Arial Black', sans-serif;
-  font-size: clamp(2.8rem, 5.8vw, 6rem);
-  line-height: 0.9;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  font-size: 6.2rem;
 }
 
 .table-photo {
+  position: relative;
   margin: 0;
   transform: rotate(-2deg);
 }
 
-.table-photo img {
+.table-photo img,
+.fold-guide {
   display: block;
   width: 100%;
+  border: 9px solid var(--paper);
+  background: var(--paper);
+  box-shadow: 14px 14px 0 rgb(0 0 0 / 86%);
+  filter: grayscale(1) contrast(1.28);
+  transition: transform 700ms ease;
+}
+
+.table-photo img {
   max-height: 580px;
-  border: 10px solid #fffaf0;
-  box-shadow: 8px 10px 0 #14120f;
   object-fit: cover;
 }
 
 .table-photo figcaption {
+  position: relative;
+  z-index: 1;
   width: fit-content;
-  max-width: 92%;
-  margin: -18px 0 0 16px;
-  padding: 10px 14px;
-  background: #d8ff42;
-  font-family: 'Patrick Hand', 'Comic Sans MS', cursive;
-  font-size: 1.18rem;
+  max-width: 88%;
+  margin: -22px 0 0 18px;
+  padding: 13px 16px 11px;
+  background: var(--acid);
+  color: var(--ink);
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 1rem;
+  line-height: 1.25;
   transform: rotate(2deg);
+  box-shadow: 7px 7px 0 rgb(0 0 0 / 92%);
 }
 
 .making {
-  padding: clamp(70px, 10vw, 128px) 0;
-  border-top: 2px dashed rgba(20, 18, 15, 0.5);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 150px max(18px, calc((100% - 1240px) / 2)) 162px;
+  background:
+    linear-gradient(90deg, rgb(7 7 6 / 92%), rgb(7 7 6 / 78%)),
+    var(--paper);
+  border-block: 2px solid rgb(238 232 216 / 72%);
 }
 
 .making-intro {
   display: grid;
-  grid-template-columns: minmax(0, 0.62fr) minmax(260px, 0.38fr);
-  gap: 34px;
+  grid-template-columns: minmax(0, 0.7fr) minmax(280px, 0.42fr);
+  gap: clamp(32px, 6vw, 84px);
   align-items: end;
-  margin-bottom: 34px;
+  width: min(1240px, 100%);
+  margin: 0 auto 56px;
+}
+
+.making-intro p {
+  margin-top: 0;
 }
 
 .fold-layout {
   display: grid;
   grid-template-columns: minmax(320px, 0.86fr) minmax(280px, 0.58fr);
-  gap: clamp(22px, 4vw, 54px);
+  gap: clamp(24px, 5vw, 64px);
   align-items: stretch;
-  padding: clamp(16px, 3vw, 32px);
-  border: 2px solid #14120f;
-  background: #fffaf0;
-  box-shadow: 10px 10px 0 #14120f;
+  width: min(1240px, 100%);
+  margin-inline: auto;
 }
 
-.fold-layout img {
-  width: 100%;
-  height: 100%;
-  min-height: 340px;
+.fold-guide {
+  min-height: 460px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  padding: 22px;
 }
 
 .fold-layout ol {
@@ -431,40 +640,54 @@ footer {
   counter-reset: steps;
 }
 
-.fold-layout li {
+.step-card {
   position: relative;
-  padding: 18px 18px 18px 58px;
-  border: 2px solid #14120f;
-  background: #f6f0df;
+  min-height: 145px;
+  padding: 24px 24px 22px 76px;
+  border: 2px solid var(--paper);
+  background: var(--paper);
+  color: var(--ink);
   counter-increment: steps;
 }
 
-.fold-layout li::before {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 28px;
-  height: 28px;
-  border: 2px solid #14120f;
-  border-radius: 50%;
-  content: counter(steps);
-  display: grid;
-  place-items: center;
-  font-family: 'Patrick Hand', 'Comic Sans MS', cursive;
-  font-size: 1.2rem;
+.step-card:nth-child(2) {
+  background: var(--acid);
 }
 
-.fold-layout strong,
-.fold-layout span {
+.step-card:nth-child(3) {
+  background: var(--red);
+  color: #fff8e2;
+}
+
+.step-card::before {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid currentColor;
+  content: counter(steps);
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 1rem;
+}
+
+.step-card strong,
+.step-card span {
   display: block;
 }
 
-.fold-layout strong {
-  font-size: 1.08rem;
+.step-card strong {
+  font-size: 1.72rem;
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
-.fold-layout span {
-  margin-top: 8px;
+.step-card span {
+  margin-top: 12px;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -472,25 +695,39 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
-  padding: clamp(56px, 8vw, 96px) 0;
-  border-top: 2px dashed rgba(20, 18, 15, 0.5);
+  gap: 34px;
+  padding: 158px 0 132px;
 }
 
 .final-cta h2 {
-  max-width: 820px;
+  max-width: 980px;
 }
 
 footer {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  padding: 28px 0 36px;
-  border-top: 2px solid #14120f;
-  font-size: 0.95rem;
+  padding: 30px 0 40px;
+  border-top: 2px solid rgb(238 232 216 / 72%);
+  color: rgb(238 232 216 / 78%);
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-@media (max-width: 920px) {
+@media (min-width: 1180px) {
+  .hero-copy h1 {
+    font-size: 5.8rem;
+  }
+
+  .definition h2,
+  .making h2,
+  .final-cta h2 {
+    font-size: 7rem;
+  }
+}
+
+@media (max-width: 1040px) {
   .hero,
   .definition,
   .making-intro,
@@ -502,73 +739,146 @@ footer {
     min-height: auto;
   }
 
-  .hero-board {
-    min-height: 460px;
+  .hero-media {
+    min-height: 540px;
+  }
+
+  .making {
+    padding-inline: 18px;
+  }
+
+  .final-cta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 760px) {
   .site-header {
     align-items: flex-start;
   }
 
-  .site-header nav {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+  .brand {
+    font-size: 1rem;
   }
 
-  .hero-copy h1 {
-    font-size: clamp(3.1rem, 16vw, 4.8rem);
+  .site-header nav {
+    gap: 6px;
+    max-width: 220px;
+  }
+
+  .hero {
+    gap: 28px;
+    padding-top: 12px;
+    padding-bottom: 34px;
+  }
+
+  .hero-copy h1,
+  .definition h2,
+  .making h2,
+  .final-cta h2 {
+    font-size: 3.8rem;
   }
 
   .hero-copy p,
   .definition p,
   .making-intro p {
-    font-size: 1rem;
+    font-size: 1.04rem;
   }
 
   .actions,
   .final-cta {
     align-items: stretch;
-    flex-direction: column;
   }
 
-  .button {
+  .home-page .button {
     width: 100%;
   }
 
-  .hero-board {
-    min-height: 390px;
+  .hero-media {
+    min-height: 314px;
   }
 
-  .photo {
-    border-width: 7px;
-    box-shadow: 6px 8px 0 #14120f;
+  .shot-main {
+    width: 86%;
   }
 
-  .photo-main {
-    aspect-ratio: 1;
+  .shot-hand {
+    right: 2%;
+    bottom: 14px;
+    width: 32%;
   }
 
-  .photo-small {
-    right: -6px;
-    width: 46%;
+  .paper-note {
+    left: 4px;
+    bottom: 12px;
+    max-width: 250px;
+    font-size: 0.96rem;
   }
 
-  .tape-note {
-    left: 0;
-    bottom: 22px;
-    width: 68%;
+  .definition,
+  .making {
+    padding-block: 96px;
   }
 
-  .fold-layout {
-    padding: 14px;
-    box-shadow: 6px 6px 0 #14120f;
+  .fold-guide {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 500px) {
+  .site-header,
+  .hero,
+  .definition,
+  .final-cta,
+  footer {
+    width: min(100% - 28px, 1240px);
   }
 
-  .fold-layout img {
-    min-height: 260px;
+  .site-header nav a {
+    min-height: 34px;
+    padding: 8px 9px;
+    font-size: 0.76rem;
+  }
+
+  .hero-copy h1,
+  .definition h2,
+  .making h2,
+  .final-cta h2 {
+    font-size: 3.12rem;
+  }
+
+  .hero-media {
+    min-height: 292px;
+  }
+
+  .paper-shot {
+    border-width: 6px;
+    box-shadow: 8px 10px 0 rgb(0 0 0 / 88%);
+  }
+
+  .paper-note {
+    max-width: 210px;
+  }
+
+  .table-photo img,
+  .fold-guide {
+    border-width: 6px;
+    box-shadow: 8px 10px 0 rgb(0 0 0 / 86%);
+  }
+
+  .step-card {
+    min-height: auto;
+    padding: 20px 18px 18px 62px;
+  }
+
+  .step-card::before {
+    top: 18px;
+    left: 16px;
+  }
+
+  .step-card strong {
+    font-size: 1.36rem;
   }
 
   footer {

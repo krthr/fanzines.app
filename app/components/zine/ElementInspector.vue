@@ -71,7 +71,7 @@ function sendBackward() {
 </script>
 
 <template>
-  <section class="space-y-5">
+  <section class="zine-inspector space-y-5">
     <div>
       <h2 class="text-sm font-semibold text-default">
         Propiedades
@@ -81,7 +81,7 @@ function sendBackward() {
       </p>
     </div>
 
-    <div v-if="!selectedElement" class="rounded-lg border border-dashed border-muted bg-default/55 p-4 text-sm leading-6 text-muted">
+    <div v-if="!selectedElement" class="zine-empty-state p-4 text-sm leading-6">
       Selecciona un texto o una imagen para editar sus medidas, posición y estilo.
     </div>
 
@@ -236,6 +236,7 @@ function sendBackward() {
               :key="item.value"
               :icon="item.icon"
               :label="item.label"
+              :color="selectedElement.align === item.value ? 'primary' : 'neutral'"
               :variant="selectedElement.align === item.value ? 'solid' : 'outline'"
               size="sm"
               block
@@ -246,7 +247,7 @@ function sendBackward() {
       </template>
 
       <template v-else>
-        <div class="rounded-lg border border-muted bg-default/55 p-3">
+        <div class="zine-element-card p-3">
           <p class="truncate text-sm font-medium text-default">
             {{ selectedElement.fileName || 'Imagen' }}
           </p>
@@ -260,6 +261,7 @@ function sendBackward() {
         <UButton
           icon="i-lucide-bring-to-front"
           label="Adelante"
+          color="neutral"
           variant="outline"
           size="sm"
           @click="bringForward"
@@ -267,6 +269,7 @@ function sendBackward() {
         <UButton
           icon="i-lucide-send-to-back"
           label="Atrás"
+          color="neutral"
           variant="outline"
           size="sm"
           @click="sendBackward"

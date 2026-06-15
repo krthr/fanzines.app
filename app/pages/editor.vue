@@ -51,14 +51,20 @@ useHead({
   position: relative;
   min-width: 320px;
   min-height: 100dvh;
-  background: var(--zine-paper);
-  color: var(--zine-ink);
+  overflow: hidden;
+  background:
+    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
+    var(--zine-bg);
+  background-size: 24px 24px;
+  color: var(--zine-paper);
+  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .editor-loading {
   min-height: 60dvh;
   padding: 24px;
-  color: var(--zine-muted);
+  color: rgb(238 232 216 / 72%);
   font-size: 0.95rem;
 }
 

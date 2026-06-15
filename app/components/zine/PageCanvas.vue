@@ -51,7 +51,7 @@ const backgroundConfig = computed(() => ({
   width: PAGE_W,
   height: PAGE_H,
   fill: '#ffffff',
-  stroke: '#d8d0c4',
+  stroke: '#070706',
   strokeWidth: 2,
   name: 'page-background',
   listening: true
@@ -62,10 +62,10 @@ const safeMarginConfig = computed(() => ({
   y: PAGE_H * 0.05,
   width: PAGE_W * 0.86,
   height: PAGE_H * 0.9,
-  stroke: '#0f8f8c',
+  stroke: '#f23d25',
   strokeWidth: 1,
   dash: [12, 10],
-  opacity: 0.28,
+  opacity: 0.38,
   listening: false
 }))
 
@@ -81,9 +81,9 @@ const transformerConfig = computed(() => {
       : ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
     anchorSize: 10,
     anchorCornerRadius: 2,
-    borderStroke: '#0f8f8c',
-    anchorStroke: '#0f8f8c',
-    anchorFill: '#ffffff',
+    borderStroke: '#f23d25',
+    anchorStroke: '#070706',
+    anchorFill: '#e7ff36',
     boundBoxFunc: (_oldBox: Konva.Box, newBox: Konva.Box) => {
       if (newBox.width < 20 || newBox.height < 20) return _oldBox
       return newBox
@@ -116,8 +116,8 @@ function imageFallbackConfig(element: ImageElement) {
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    fill: failedImages.has(element.src) ? '#f7d5cf' : '#f1ece4',
-    stroke: failedImages.has(element.src) ? '#a3362b' : '#d8d0c4',
+    fill: failedImages.has(element.src) ? '#ffd3ca' : '#fff6c8',
+    stroke: failedImages.has(element.src) ? '#f23d25' : '#070706',
     dash: [12, 8],
     draggable: !element.locked
   }
