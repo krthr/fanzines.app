@@ -2,6 +2,8 @@ import { computed } from 'vue'
 import {
   FONT_OPTIONS,
   PAGE_IDS,
+  type ImageBatchInsertResult,
+  type ImageBatchSkippedFile,
   type ImageElement,
   type ImageInsertResult,
   type PageId,
@@ -55,6 +57,20 @@ function loadImageFromObjectUrl(src: string): Promise<HTMLImageElement> {
   })
 }
 
+function getImageWarning(file: File) {
+  return file.size > MAX_WARN_SIZE
+    ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
+    : undefined
+}
+
+function createSkippedFile(file: File, reason: ImageBatchSkippedFile['reason'], message: string): ImageBatchSkippedFile {
+  return {
+    fileName: file.name || 'Archivo sin nombre',
+    reason,
+    message
+  }
+}
+
 export function useZineStore() {
   const state = useState<ZineState>('mini-zine-a4-state', createInitialZineState)
 
@@ -85,7 +101,7 @@ export function useZineStore() {
     state.value.selectedElementId = element.id
   }
 
-  async function addImageElement(file: File): Promise<ImageInsertResult> {
+  async function addImageElement(file: File, pageId: PageId = state.value.selectedPageId): Promise<ImageInsertResult> {
     if (!import.meta.client) {
       return { ok: false, error: 'La carga de imágenes solo está disponible en el navegador.' }
     }
@@ -108,7 +124,7 @@ export function useZineStore() {
       const element: ImageElement = {
         id: createId(),
         type: 'image',
-        pageId: state.value.selectedPageId,
+        pageId,
         src,
         fileName: file.name,
         naturalWidth: image.naturalWidth,
@@ -125,14 +141,79 @@ export function useZineStore() {
 
       return {
         ok: true,
-        warning: file.size > MAX_WARN_SIZE
-          ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-          : undefined
+        warning: getImageWarning(file)
       }
     } catch {
       URL.revokeObjectURL(src)
       return { ok: false, error: 'No se pudo cargar la imagen seleccionada.' }
     }
+  }
+
+  async function addImageElements(files: File[]): Promise<ImageBatchInsertResult> {
+    const result: ImageBatchInsertResult = {
+      importedCount: 0,
+      skippedFiles: [],
+      errors: [],
+      warnings: [],
+      largeFileCount: 0,
+      overflowCount: 0
+    }
+
+    const startIndex = PAGE_IDS.indexOf(state.value.selectedPageId)
+    const targetPageIds = PAGE_IDS.slice(Math.max(startIndex, 0))
+    let targetPageIndex = 0
+    let lastInsertedPageId: PageId | null = null
+
+    for (const file of files) {
+      const pageId = targetPageIds[targetPageIndex]
+
+      if (!pageId) {
+        result.overflowCount += 1
+        result.skippedFiles.push(createSkippedFile(
+          file,
+          'no-page',
+          'No quedan páginas disponibles para esta imagen.'
+        ))
+        continue
+      }
+
+      const insertResult = await addImageElement(file, pageId)
+
+      if (!insertResult.ok) {
+        const reason: ImageBatchSkippedFile['reason'] = !import.meta.client
+          ? 'browser-only'
+          : file.type.startsWith('image/')
+            ? 'load-error'
+            : 'not-image'
+
+        result.skippedFiles.push(createSkippedFile(
+          file,
+          reason,
+          insertResult.error ?? 'No se pudo cargar este archivo.'
+        ))
+        result.errors.push(insertResult.error ?? 'No se pudo cargar un archivo.')
+        continue
+      }
+
+      result.importedCount += 1
+      targetPageIndex += 1
+      lastInsertedPageId = pageId
+
+      if (insertResult.warning) {
+        result.largeFileCount += 1
+        result.warnings.push(insertResult.warning)
+      }
+    }
+
+    if (result.overflowCount > 0) {
+      result.warnings.push('Algunas imágenes se omitieron porque no quedaban páginas disponibles.')
+    }
+
+    if (lastInsertedPageId) {
+      state.value.selectedPageId = lastInsertedPageId
+    }
+
+    return result
   }
 
   function addTextElement() {
@@ -218,6 +299,7 @@ export function useZineStore() {
     selectPage,
     selectElement,
     addImageElement,
+    addImageElements,
     addTextElement,
     updateElement,
     deleteElement,
