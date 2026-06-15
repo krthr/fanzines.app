@@ -19,5 +19,6 @@
       "pattern": "beta.fanzines.app",
       "custom_domain": true
     }
-  ]
+  ],
+  "preview_urls": true
 }
