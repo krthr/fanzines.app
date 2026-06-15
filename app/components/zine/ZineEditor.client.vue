@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
           v-model="previewGuides"
           label="Guías"
           size="sm"
-          class="hidden md:flex"
+          class="zine-contrast-switch hidden md:flex"
         />
         <UDrawer
           v-model:open="mobileToolsOpen"
@@ -191,7 +191,12 @@ onBeforeUnmount(() => {
               <h2 class="text-sm font-semibold text-default">
                 Vista del pliego
               </h2>
-              <USwitch v-model="previewGuides" size="sm" aria-label="Mostrar guías" />
+              <USwitch
+                v-model="previewGuides"
+                size="sm"
+                aria-label="Mostrar guías"
+                class="zine-contrast-switch"
+              />
             </div>
             <SheetPreview />
           </section>

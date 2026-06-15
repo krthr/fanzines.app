@@ -50,6 +50,7 @@ async function handleExport() {
       label="Incluir guías"
       size="md"
       color="primary"
+      class="zine-contrast-switch"
     />
 
     <UButton

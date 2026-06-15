@@ -150,6 +150,39 @@ select {
   text-transform: uppercase;
 }
 
+.zine-contrast-switch [data-slot="base"] {
+  border-color: var(--zine-ink);
+  background: var(--zine-paper-deep);
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 72%);
+}
+
+.zine-contrast-switch [data-slot="base"][data-state="checked"] {
+  background: var(--zine-accent);
+}
+
+.zine-contrast-switch [data-slot="base"][data-state="unchecked"] {
+  background: var(--zine-paper);
+}
+
+.zine-contrast-switch [data-slot="thumb"] {
+  border: 1px solid var(--zine-ink);
+  background: var(--zine-ink);
+  box-shadow: none;
+}
+
+.zine-contrast-switch [data-slot="thumb"][data-state="unchecked"] {
+  background: var(--zine-paper-hot);
+}
+
+.zine-contrast-switch:hover [data-slot="base"] {
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 86%);
+}
+
+.zine-contrast-switch [data-slot="base"]:focus-visible {
+  outline: 3px solid var(--zine-cut);
+  outline-offset: 3px;
+}
+
 .zine-workspace {
   min-width: 0;
 }
