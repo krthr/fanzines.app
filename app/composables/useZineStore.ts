@@ -39,7 +39,8 @@ function createInitialZineState(): ZineState {
     elements: {},
     pageElementIds: createInitialPageElementIds(),
     previewGuides: true,
-    exportGuides: true
+    exportGuides: true,
+    exportSafeMargins: true
   }
 }
 
