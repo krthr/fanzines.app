@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     sitemap: ['https://fanzines.app/sitemap.xml']
   },
   image: {
+    provider: 'ipxStatic',
     format: ['webp'],
     screens: {
       xs: 320,
