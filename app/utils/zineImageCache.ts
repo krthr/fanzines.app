@@ -6,7 +6,7 @@ export function loadCachedHtmlImage(src: string): Promise<HTMLImageElement> {
 
   const promise = new Promise<HTMLImageElement>((resolve, reject) => {
     if (!import.meta.client) {
-      reject(new Error('La carga de imágenes solo está disponible en el navegador.'))
+      reject(new Error('Image loading is only available in the browser.'))
       return
     }
 
@@ -14,7 +14,7 @@ export function loadCachedHtmlImage(src: string): Promise<HTMLImageElement> {
     image.onload = () => resolve(image)
     image.onerror = () => {
       imageCache.delete(src)
-      reject(new Error('No se pudo cargar una imagen del proyecto.'))
+      reject(new Error('Project image could not be loaded.'))
     }
     image.src = src
   })

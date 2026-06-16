@@ -17,18 +17,17 @@ export type ImpositionSlot = {
   col: number
   row: number
   rotation: 0 | 180
-  label: string
 }
 
 export const IMPOSITION_SLOTS: Record<PageId, ImpositionSlot> = {
-  p6: { col: 0, row: 0, rotation: 180, label: '6' },
-  p5: { col: 1, row: 0, rotation: 180, label: '5' },
-  p4: { col: 2, row: 0, rotation: 180, label: '4' },
-  p3: { col: 3, row: 0, rotation: 180, label: '3' },
-  'back-cover': { col: 0, row: 1, rotation: 0, label: 'Contraportada' },
-  'front-cover': { col: 1, row: 1, rotation: 0, label: 'Portada' },
-  p1: { col: 2, row: 1, rotation: 0, label: '1' },
-  p2: { col: 3, row: 1, rotation: 0, label: '2' }
+  p6: { col: 0, row: 0, rotation: 180 },
+  p5: { col: 1, row: 0, rotation: 180 },
+  p4: { col: 2, row: 0, rotation: 180 },
+  p3: { col: 3, row: 0, rotation: 180 },
+  'back-cover': { col: 0, row: 1, rotation: 0 },
+  'front-cover': { col: 1, row: 1, rotation: 0 },
+  p1: { col: 2, row: 1, rotation: 0 },
+  p2: { col: 3, row: 1, rotation: 0 }
 }
 
 export const IMPOSED_PAGE_IDS = Object.keys(IMPOSITION_SLOTS) as PageId[]

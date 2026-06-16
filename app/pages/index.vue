@@ -1,34 +1,33 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted } from 'vue'
+import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 
 const siteUrl = 'https://fanzines.app'
-const pageTitle = 'Crea y exporta un fanzine A4'
-const socialTitle = 'Fanzines | Crea y exporta un fanzine A4'
-const pageDescription =
-  'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
-const socialDescription = 'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
 const socialImage = `${siteUrl}/images/og-fanzines.webp`
+const { t } = useI18n()
+const localePath = useLocalePath()
+const route = useRoute()
+const pageUrl = computed(() => new URL(route.path, siteUrl).href)
 
 useSeoMeta({
-  title: pageTitle,
-  description: pageDescription,
+  title: () => t('home.seo.title'),
+  description: () => t('home.seo.description'),
   robots: 'index, follow',
-  ogTitle: socialTitle,
-  ogDescription: socialDescription,
+  ogTitle: () => t('home.seo.socialTitle'),
+  ogDescription: () => t('home.seo.socialDescription'),
   ogType: 'website',
-  ogUrl: siteUrl,
+  ogUrl: () => pageUrl.value,
   ogSiteName: 'Fanzines',
   ogImage: socialImage,
-  ogImageAlt: 'Fanzine plegable y herramientas de edición en Fanzines',
+  ogImageAlt: () => t('home.seo.imageAlt'),
   twitterCard: 'summary_large_image',
-  twitterTitle: socialTitle,
-  twitterDescription: socialDescription,
+  twitterTitle: () => t('home.seo.socialTitle'),
+  twitterDescription: () => t('home.seo.socialDescription'),
   twitterImage: socialImage
 })
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl },
     {
       rel: 'preload',
       as: 'image',
@@ -42,20 +41,20 @@ useHead({
   ]
 })
 
-const steps = [
+const steps = computed(() => [
   {
-    title: 'Monta el pliego',
-    text: 'El editor ordena las ocho caras en una hoja A4 horizontal, lista para imprimir.'
+    title: t('home.steps.layout.title'),
+    text: t('home.steps.layout.text')
   },
   {
-    title: 'Añade texto e imágenes',
-    text: 'Sube fotos o escribe directamente en cada panel. Puedes mover, girar y ajustar cada pieza.'
+    title: t('home.steps.content.title'),
+    text: t('home.steps.content.text')
   },
   {
-    title: 'Exporta y dobla',
-    text: 'Descarga el PDF, imprime, corta por la guía central y convierte la hoja en un fanzine.'
+    title: t('home.steps.export.title'),
+    text: t('home.steps.export.text')
   }
-]
+])
 
 let animationContext: { revert: () => void } | null = null
 
@@ -151,41 +150,41 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="home-page">
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <a class="skip-link" href="#contenido">{{ t('home.skipLink') }}</a>
 
-    <header class="site-header" aria-label="Navegación principal">
-      <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">
+    <header class="site-header" :aria-label="t('home.header.ariaLabel')">
+      <NuxtLink class="brand" :to="localePath('/')" :aria-label="t('home.header.homeAriaLabel')">
         <span class="brand-mark" aria-hidden="true">FZ</span>
         <span>Fanzines</span>
       </NuxtLink>
-      <nav aria-label="Secciones">
-        <a href="#editor">Qué incluye</a>
-        <a href="#como-se-hace">Imprimir</a>
-        <NuxtLink to="/editor">Abrir editor</NuxtLink>
+      <nav :aria-label="t('home.header.navLabel')">
+        <a href="#editor">{{ t('home.header.include') }}</a>
+        <a href="#como-se-hace">{{ t('home.header.print') }}</a>
+        <NuxtLink :to="localePath('/editor')">{{ t('home.header.openEditor') }}</NuxtLink>
+        <LocaleSwitcher />
       </nav>
     </header>
 
     <section id="contenido" class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <h1 id="hero-title">
-          <span>Haz un fanzine&nbsp;</span>
-          <span class="hero-title-tail">en el <br class="mobile-title-break" />navegador.</span>
+          <span>{{ t('home.hero.titleLead') }}&nbsp;</span>
+          <span class="hero-title-tail">{{ t('home.hero.titleTailLead') }} <br class="mobile-title-break" />{{ t('home.hero.titleTailBreak') }}</span>
         </h1>
         <p>
-          Fanzines te da un editor para colocar textos e imágenes en una hoja A4 plegable.
-          Diseña cada panel, revisa el pliego completo y exporta un PDF listo para imprimir.
+          {{ t('home.hero.description') }}
         </p>
-        <div class="actions" aria-label="Acciones principales">
-          <NuxtLink class="button button-primary" to="/editor">Abrir el editor</NuxtLink>
-          <a class="button button-secondary" href="#como-se-hace">Ver cómo se imprime</a>
+        <div class="actions" :aria-label="t('home.hero.actionsLabel')">
+          <NuxtLink class="button button-primary" :to="localePath('/editor')">{{ t('home.hero.openEditor') }}</NuxtLink>
+          <a class="button button-secondary" href="#como-se-hace">{{ t('home.hero.printGuide') }}</a>
         </div>
       </div>
 
-      <div class="hero-media" aria-label="Fanzine físico hecho a mano">
+      <div class="hero-media" :aria-label="t('home.hero.mediaLabel')">
         <div class="paper-shot shot-main">
           <NuxtImg
             src="/images/folded-zine.webp"
-            alt="Fanzine desplegado sobre una mesa"
+            :alt="t('home.hero.foldedAlt')"
             width="570"
             height="445"
             sizes="326px sm:430px md:570px lg:430px xl:570px"
@@ -198,7 +197,7 @@ onBeforeUnmount(() => {
         <div class="paper-shot shot-hand motion-image">
           <NuxtImg
             src="/images/hand-zine.webp"
-            alt="Fanzine pequeño abierto en una mano"
+            :alt="t('home.hero.handAlt')"
             width="245"
             height="383"
             sizes="130px sm:160px md:190px lg:245px"
@@ -207,23 +206,22 @@ onBeforeUnmount(() => {
             decoding="async"
           />
         </div>
-        <div class="paper-note">Editor A4 / 8 páginas / PDF</div>
+        <div class="paper-note">{{ t('home.hero.note') }}</div>
       </div>
     </section>
 
     <section id="editor" class="definition section-panel" aria-labelledby="definition-title">
       <div class="definition-copy">
-        <h2 id="definition-title">Editor A4</h2>
+        <h2 id="definition-title">{{ t('home.definition.title') }}</h2>
         <p>
-          Empieza con una portada vacía y trabaja panel por panel. El editor coloca cada página en
-          el orden correcto del pliego, con guías de corte y doblez para que no tengas que calcularlo.
+          {{ t('home.definition.description') }}
         </p>
       </div>
       <figure class="table-photo">
         <NuxtImg
           class="motion-image"
           src="/images/making-table.webp"
-          alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+          :alt="t('home.definition.tableAlt')"
           width="514"
           height="913"
           sizes="376px sm:472px md:514px lg:514px"
@@ -231,21 +229,21 @@ onBeforeUnmount(() => {
           loading="lazy"
           decoding="async"
         />
-        <figcaption>Diseña en pantalla. Termina con papel, tijeras y una mesa.</figcaption>
+        <figcaption>{{ t('home.definition.caption') }}</figcaption>
       </figure>
     </section>
 
     <section id="como-se-hace" class="making" aria-labelledby="making-title">
       <div class="making-intro">
-        <h2 id="making-title">Del editor al papel</h2>
-        <p>El PDF sale impuesto para una hoja A4. Imprime, corta la línea central y dobla.</p>
+        <h2 id="making-title">{{ t('home.making.title') }}</h2>
+        <p>{{ t('home.making.description') }}</p>
       </div>
 
       <div class="fold-layout section-panel">
         <NuxtImg
           class="fold-guide motion-image"
           src="/images/fold-guide.webp"
-          alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine"
+          :alt="t('home.making.foldGuideAlt')"
           width="560"
           height="420"
           sizes="376px sm:472px md:560px lg:560px xl:560px"
@@ -263,8 +261,8 @@ onBeforeUnmount(() => {
     </section>
 
     <section class="final-cta" aria-labelledby="cta-title">
-      <h2 id="cta-title">Empieza con una portada y una imagen.</h2>
-      <NuxtLink class="button button-primary" to="/editor">Crear fanzine</NuxtLink>
+      <h2 id="cta-title">{{ t('home.finalCta.title') }}</h2>
+      <NuxtLink class="button button-primary" :to="localePath('/editor')">{{ t('home.finalCta.button') }}</NuxtLink>
     </section>
 
     <footer>

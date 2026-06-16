@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
+  modules: ['@nuxtjs/i18n', '@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
   runtimeConfig: {
     public: {
       scripts: {
@@ -14,23 +14,52 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      htmlAttrs: {
-        lang: 'es'
-      },
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
       ]
+    }
+  },
+  i18n: {
+    baseUrl: 'https://fanzines.app',
+    defaultLocale: 'en',
+    strategy: 'prefix_except_default',
+    langDir: 'locales',
+    locales: [
+      {
+        code: 'en',
+        language: 'en-US',
+        name: 'English',
+        file: 'en.json'
+      },
+      {
+        code: 'es',
+        language: 'es-ES',
+        name: 'Español',
+        file: 'es.json'
+      },
+      {
+        code: 'pt-br',
+        language: 'pt-BR',
+        name: 'Português (Brasil)',
+        file: 'pt-BR.json'
+      }
+    ],
+    detectBrowserLanguage: {
+      redirectOn: 'root',
+      fallbackLocale: 'en',
+      useCookie: true,
+      cookieKey: 'i18n_redirected'
     }
   },
   css: ['~/assets/css/main.css'],
   site: {
     url: 'https://fanzines.app',
     name: 'Fanzines',
-    description: 'Editor en el navegador para crear, imprimir y exportar fanzines A4 plegables.',
-    defaultLocale: 'es'
+    description: 'Browser editor for creating, printing, and exporting foldable A4 fanzines.',
+    defaultLocale: 'en'
   },
   sitemap: {
-    urls: ['/', '/editor']
+    urls: ['/', '/editor', '/es', '/es/editor', '/pt-br', '/pt-br/editor']
   },
   robots: {
     sitemap: ['https://fanzines.app/sitemap.xml']
@@ -57,7 +86,11 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
-    '/editor': { prerender: true, robots: true }
+    '/editor': { prerender: true, robots: true },
+    '/es': { prerender: true },
+    '/es/editor': { prerender: true, robots: true },
+    '/pt-br': { prerender: true },
+    '/pt-br/editor': { prerender: true, robots: true }
   },
   scripts: {
     registry: {

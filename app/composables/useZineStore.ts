@@ -50,29 +50,38 @@ function revokeIfObjectUrl(element?: ZineElement) {
   }
 }
 
-function loadImageFromObjectUrl(src: string): Promise<HTMLImageElement> {
+function loadImageFromObjectUrl(src: string, errorMessage = 'Image could not be loaded.'): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image()
 
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('No se pudo cargar la imagen.'))
+    image.onerror = () => reject(new Error(errorMessage))
     image.src = src
   })
 }
 
-function createCanvasBlob(canvas: HTMLCanvasElement, mimeType: string, quality?: number): Promise<Blob> {
+function createCanvasBlob(
+  canvas: HTMLCanvasElement,
+  mimeType: string,
+  quality: number | undefined,
+  errorMessage: string
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) {
         resolve(blob)
       } else {
-        reject(new Error('No se pudo optimizar la imagen.'))
+        reject(new Error(errorMessage))
       }
     }, mimeType, quality)
   })
 }
 
-async function createDownsampledImageUrl(image: HTMLImageElement, file: File) {
+async function createDownsampledImageUrl(
+  image: HTMLImageElement,
+  file: File,
+  imageOptimizeError: string
+) {
   const longEdge = Math.max(image.naturalWidth, image.naturalHeight)
   if (longEdge <= MAX_IMAGE_LONG_EDGE) return null
 
@@ -89,17 +98,29 @@ async function createDownsampledImageUrl(image: HTMLImageElement, file: File) {
   context.drawImage(image, 0, 0, width, height)
 
   const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
-  const blob = await createCanvasBlob(canvas, mimeType, mimeType === 'image/jpeg' ? 0.9 : undefined)
+  const blob = await createCanvasBlob(
+    canvas,
+    mimeType,
+    mimeType === 'image/jpeg' ? 0.9 : undefined,
+    imageOptimizeError
+  )
 
   return URL.createObjectURL(blob)
 }
 
-async function prepareImageFile(file: File) {
+async function prepareImageFile(
+  file: File,
+  messages: {
+    imageLoadError: string
+    optimizedImageLoadError: string
+    imageOptimizeError: string
+  }
+) {
   const originalSrc = URL.createObjectURL(file)
 
   try {
-    const originalImage = await loadImageFromObjectUrl(originalSrc)
-    const downsampledSrc = await createDownsampledImageUrl(originalImage, file)
+    const originalImage = await loadImageFromObjectUrl(originalSrc, messages.imageLoadError)
+    const downsampledSrc = await createDownsampledImageUrl(originalImage, file, messages.imageOptimizeError)
 
     if (!downsampledSrc) {
       return {
@@ -113,11 +134,11 @@ async function prepareImageFile(file: File) {
     try {
       return {
         src: downsampledSrc,
-        image: await loadImageFromObjectUrl(downsampledSrc)
+        image: await loadImageFromObjectUrl(downsampledSrc, messages.optimizedImageLoadError)
       }
     } catch {
       URL.revokeObjectURL(downsampledSrc)
-      throw new Error('No se pudo cargar la imagen optimizada.')
+      throw new Error(messages.optimizedImageLoadError)
     }
   } catch (error) {
     URL.revokeObjectURL(originalSrc)
@@ -125,15 +146,20 @@ async function prepareImageFile(file: File) {
   }
 }
 
-function getImageWarning(file: File) {
+function getImageWarning(file: File, message: string) {
   return file.size > MAX_WARN_SIZE
-    ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
+    ? message
     : undefined
 }
 
-function createSkippedFile(file: File, reason: ImageBatchSkippedFile['reason'], message: string): ImageBatchSkippedFile {
+function createSkippedFile(
+  file: File,
+  reason: ImageBatchSkippedFile['reason'],
+  message: string,
+  fallbackFileName: string
+): ImageBatchSkippedFile {
   return {
-    fileName: file.name || 'Archivo sin nombre',
+    fileName: file.name || fallbackFileName,
     reason,
     message
   }
@@ -146,6 +172,7 @@ function activeImageSources(state: ZineState) {
 }
 
 export function useZineStore() {
+  const { t } = useI18n()
   const state = useState<ZineState>('mini-zine-a4-state', createInitialZineState)
   const cachePruneWatchRegistered = useState('mini-zine-a4-cache-prune-watch-registered', () => false)
 
@@ -185,15 +212,19 @@ export function useZineStore() {
 
   async function addImageElement(file: File, pageId: PageId = state.value.selectedPageId): Promise<ImageInsertResult> {
     if (!import.meta.client) {
-      return { ok: false, error: 'La carga de imágenes solo está disponible en el navegador.' }
+      return { ok: false, error: t('zineStore.browserOnly') }
     }
 
     if (!file.type.startsWith('image/')) {
-      return { ok: false, error: 'El archivo seleccionado no parece ser una imagen compatible.' }
+      return { ok: false, error: t('zineStore.invalidImage') }
     }
 
     try {
-      const { src, image } = await prepareImageFile(file)
+      const { src, image } = await prepareImageFile(file, {
+        imageLoadError: t('zineStore.imageLoadError'),
+        optimizedImageLoadError: t('zineStore.optimizedImageLoadError'),
+        imageOptimizeError: t('zineStore.imageOptimizeError')
+      })
       const margin = PAGE_W * 0.1
       const maxW = PAGE_W - margin * 2
       const maxH = PAGE_H - margin * 2
@@ -221,10 +252,10 @@ export function useZineStore() {
 
       return {
         ok: true,
-        warning: getImageWarning(file)
+        warning: getImageWarning(file, t('zineStore.largeImageWarning'))
       }
     } catch {
-      return { ok: false, error: 'No se pudo cargar la imagen seleccionada.' }
+      return { ok: false, error: t('zineStore.imageLoadError') }
     }
   }
 
@@ -251,7 +282,8 @@ export function useZineStore() {
         result.skippedFiles.push(createSkippedFile(
           file,
           'no-page',
-          'No quedan páginas disponibles para esta imagen.'
+          t('zineStore.noPage'),
+          t('zineStore.untitledFile')
         ))
         continue
       }
@@ -268,9 +300,10 @@ export function useZineStore() {
         result.skippedFiles.push(createSkippedFile(
           file,
           reason,
-          insertResult.error ?? 'No se pudo cargar este archivo.'
+          insertResult.error ?? t('zineStore.fileLoadError'),
+          t('zineStore.untitledFile')
         ))
-        result.errors.push(insertResult.error ?? 'No se pudo cargar un archivo.')
+        result.errors.push(insertResult.error ?? t('zineStore.genericFileLoadError'))
         continue
       }
 
@@ -285,7 +318,7 @@ export function useZineStore() {
     }
 
     if (result.overflowCount > 0) {
-      result.warnings.push('Algunas imágenes se omitieron porque no quedaban páginas disponibles.')
+      result.warnings.push(t('zineStore.overflowWarning'))
     }
 
     if (lastInsertedPageId) {
@@ -300,7 +333,7 @@ export function useZineStore() {
       id: createId(),
       type: 'text',
       pageId: state.value.selectedPageId,
-      text: 'Escribe aquí',
+      text: t('zineStore.defaultText'),
       x: PAGE_W * 0.15,
       y: PAGE_H * 0.16,
       width: PAGE_W * 0.7,

@@ -1,0 +1,217 @@
+{
+  "localeSwitcher": {
+    "label": "Language"
+  },
+  "seo": {
+    "siteDescription": "Browser editor for creating, printing, and exporting foldable A4 fanzines.",
+    "appDescription": "Browser editor for designing the eight panels of a foldable A4 fanzine and exporting a print-ready PDF."
+  },
+  "home": {
+    "seo": {
+      "title": "Create and export an A4 fanzine",
+      "socialTitle": "Fanzines | Create and export an A4 fanzine",
+      "description": "Fanzines is an editor for assembling a foldable publication on one A4 sheet, adding text and images, and exporting it as a PDF.",
+      "socialDescription": "A simple editor for designing, previewing, printing, and folding your own fanzine.",
+      "imageAlt": "Foldable fanzine and editing tools in Fanzines"
+    },
+    "skipLink": "Skip to content",
+    "header": {
+      "ariaLabel": "Main navigation",
+      "homeAriaLabel": "Fanzines home",
+      "navLabel": "Sections",
+      "include": "What is included",
+      "print": "Print",
+      "openEditor": "Open editor"
+    },
+    "hero": {
+      "titleLead": "Make a fanzine",
+      "titleTailLead": "in the",
+      "titleTailBreak": "browser.",
+      "description": "Fanzines gives you an editor for placing text and images on a foldable A4 sheet. Design each panel, review the full sheet, and export a print-ready PDF.",
+      "actionsLabel": "Primary actions",
+      "openEditor": "Open the editor",
+      "printGuide": "See how to print it",
+      "mediaLabel": "Handmade physical fanzine",
+      "foldedAlt": "Fanzine unfolded on a table",
+      "handAlt": "Small fanzine opened in a hand",
+      "note": "A4 editor / 8 pages / PDF"
+    },
+    "definition": {
+      "title": "A4 editor",
+      "description": "Start with a blank cover and work panel by panel. The editor places each page in the correct sheet order, with cut and fold guides so you do not have to calculate it.",
+      "tableAlt": "Work table with printed photos, utility knife, ruler, and scissors",
+      "caption": "Design on screen. Finish with paper, scissors, and a table."
+    },
+    "making": {
+      "title": "From editor to paper",
+      "description": "The PDF is imposed for one A4 sheet. Print, cut the center line, and fold.",
+      "foldGuideAlt": "Hand-drawn instructions for folding, cutting, and opening a fanzine"
+    },
+    "steps": {
+      "layout": {
+        "title": "Set up the sheet",
+        "text": "The editor orders the eight faces on a landscape A4 sheet, ready to print."
+      },
+      "content": {
+        "title": "Add text and images",
+        "text": "Upload photos or write directly on each panel. You can move, rotate, and adjust every piece."
+      },
+      "export": {
+        "title": "Export and fold",
+        "text": "Download the PDF, print, cut along the center guide, and turn the sheet into a fanzine."
+      }
+    },
+    "finalCta": {
+      "title": "Start with a cover and an image.",
+      "button": "Create fanzine"
+    }
+  },
+  "editorPage": {
+    "seo": {
+      "title": "A4 fanzine editor",
+      "socialTitle": "A4 fanzine editor | Fanzines",
+      "description": "Design an eight-panel fanzine in the browser, review the A4 sheet, and export a PDF ready to print and fold.",
+      "imageAlt": "Fanzines editor with A4 sheet and fanzine panels"
+    },
+    "loadingAria": "Loading editor",
+    "loading": "Loading editor."
+  },
+  "editorShell": {
+    "title": "Fanzine editor",
+    "sheetStatus": "A4 sheet · {page}",
+    "uploadImages": "Upload images",
+    "addText": "Add text",
+    "guides": "Guides",
+    "properties": "Properties",
+    "propertiesDescription": "Settings for the active panel",
+    "panels": "Panels",
+    "resetAria": "Reset fanzine",
+    "sheetPreview": "Sheet preview",
+    "showGuidesAria": "Show guides",
+    "selectedElement": "Element selected",
+    "noSelection": "No selection",
+    "center": "Center",
+    "confirmReset": "Reset the fanzine and delete all elements?",
+    "toasts": {
+      "moreFiles": "{names} and {count} more",
+      "uploadFailedTitleSingle": "Image not loaded",
+      "uploadFailedTitleMultiple": "Some images were not loaded",
+      "skippedFiles": "Skipped {count} {fileLabel}: {names}.",
+      "fileSingular": "file",
+      "filePlural": "files",
+      "overflowTitle": "Not all images fit",
+      "overflowDescription": "Skipped {count} {fileLabel} because there were no pages available.",
+      "largeImageTitleSingle": "Large image",
+      "largeImageTitleMultiple": "Large images",
+      "largeImageDescriptionSingle": "The image is large; if you notice slowness, use a reduced version.",
+      "largeImageDescriptionMultiple": "{count} images are large; if you notice slowness, use reduced versions."
+    }
+  },
+  "inspector": {
+    "title": "Properties",
+    "imageSelected": "Image selected",
+    "textSelected": "Text selected",
+    "empty": "Select text or an image to edit its size, position, and style.",
+    "width": "Width",
+    "height": "Height",
+    "rotation": "Rotation",
+    "opacity": "Opacity",
+    "text": "Text",
+    "font": "Font",
+    "style": "Style",
+    "size": "Size",
+    "color": "Color",
+    "alignment": "Alignment",
+    "imageFallback": "Image",
+    "fitPage": "Fit to page",
+    "fillPage": "Fill page",
+    "alignHorizontal": "Align horizontally",
+    "alignVertical": "Align vertically",
+    "bringForward": "Forward",
+    "sendBackward": "Back",
+    "delete": "Delete",
+    "styles": {
+      "normal": "Normal",
+      "bold": "Bold",
+      "italic": "Italic"
+    },
+    "align": {
+      "left": "Left",
+      "center": "Center",
+      "right": "Right",
+      "leftShort": "Left",
+      "rightShort": "Right",
+      "top": "Top",
+      "middle": "Middle",
+      "bottom": "Bottom"
+    }
+  },
+  "exportPanel": {
+    "title": "Export",
+    "description": "Landscape A4 PDF, ready to print, cut, and fold.",
+    "includeGuides": "Include guides",
+    "safeMargins": "Safe margin 5 mm",
+    "download": "Download PDF",
+    "elementCountSingle": "1 element in the fanzine.",
+    "elementCountMultiple": "{count} elements in the fanzine.",
+    "error": "The PDF could not be generated. Check the uploaded images and try again."
+  },
+  "pageSelector": {
+    "ariaLabel": "Fanzine panels",
+    "elementCountSingle": "1 element",
+    "elementCountMultiple": "{count} elements"
+  },
+  "sheetPreview": {
+    "alt": "A4 sheet preview of the fanzine",
+    "renderError": "The preview could not be generated."
+  },
+  "zineStore": {
+    "browserOnly": "Image uploads are only available in the browser.",
+    "invalidImage": "The selected file does not look like a compatible image.",
+    "imageLoadError": "The selected image could not be loaded.",
+    "optimizedImageLoadError": "The optimized image could not be loaded.",
+    "imageOptimizeError": "The image could not be optimized.",
+    "largeImageWarning": "The image is large; if you notice slowness, use a reduced version.",
+    "untitledFile": "Untitled file",
+    "noPage": "No pages are available for this image.",
+    "fileLoadError": "This file could not be loaded.",
+    "genericFileLoadError": "A file could not be loaded.",
+    "overflowWarning": "Some images were skipped because there were no pages available.",
+    "defaultText": "Write here"
+  },
+  "pages": {
+    "frontCover": {
+      "label": "Cover",
+      "short": "Cover"
+    },
+    "backCover": {
+      "label": "Back cover",
+      "short": "Back"
+    },
+    "p1": {
+      "label": "Page 1",
+      "short": "1"
+    },
+    "p2": {
+      "label": "Page 2",
+      "short": "2"
+    },
+    "p3": {
+      "label": "Page 3",
+      "short": "3"
+    },
+    "p4": {
+      "label": "Page 4",
+      "short": "4"
+    },
+    "p5": {
+      "label": "Page 5",
+      "short": "5"
+    },
+    "p6": {
+      "label": "Page 6",
+      "short": "6"
+    },
+    "sheetPageLabel": "p. {number}"
+  }
+}

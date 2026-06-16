@@ -5,13 +5,14 @@ import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
 const { state, elementCount } = useZineStore()
 const { trackZineEvent, trackZineException } = useZineAnalytics()
+const { t } = useI18n()
 
 const isExporting = ref(false)
 const errorMessage = ref('')
 const elementCountLabel = computed(() => (
   elementCount.value === 1
-    ? '1 elemento en el fanzine.'
-    : `${elementCount.value} elementos en el fanzine.`
+    ? t('exportPanel.elementCountSingle')
+    : t('exportPanel.elementCountMultiple', { count: elementCount.value })
 ))
 
 const exportGuides = computed({
@@ -51,7 +52,7 @@ async function handleExport() {
       duration_ms: Math.round(performance.now() - startedAt)
     })
   } catch (error) {
-    errorMessage.value = 'No se pudo generar el PDF. Revisa las imágenes cargadas e inténtalo de nuevo.'
+    errorMessage.value = t('exportPanel.error')
     trackZineEvent('zine_pdf_export_failed', {
       page_id: state.value.selectedPageId,
       element_count: elementCount.value,
@@ -74,16 +75,16 @@ async function handleExport() {
   <section class="zine-export-panel space-y-4">
     <div>
       <h2 class="text-sm font-semibold text-default">
-        Exportar
+        {{ t('exportPanel.title') }}
       </h2>
       <p class="mt-1 text-xs leading-5 text-muted">
-        PDF A4 horizontal, listo para imprimir, cortar y doblar.
+        {{ t('exportPanel.description') }}
       </p>
     </div>
 
     <USwitch
       v-model="exportGuides"
-      label="Incluir guías"
+      :label="t('exportPanel.includeGuides')"
       size="md"
       color="primary"
       class="zine-contrast-switch"
@@ -91,7 +92,7 @@ async function handleExport() {
 
     <USwitch
       v-model="exportSafeMargins"
-      label="Margen seguro 5 mm"
+      :label="t('exportPanel.safeMargins')"
       size="md"
       color="primary"
       class="zine-contrast-switch"
@@ -100,7 +101,7 @@ async function handleExport() {
     <UButton
       block
       icon="i-lucide-download"
-      label="Descargar PDF"
+      :label="t('exportPanel.download')"
       :loading="isExporting"
       @click="handleExport"
     />

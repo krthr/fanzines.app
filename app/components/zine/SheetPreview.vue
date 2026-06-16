@@ -2,9 +2,9 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import type { PageId } from '~/types/zine'
-import { PAGE_LABELS } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import { renderSheetBlob } from '~/utils/renderSheet.client'
 import { IMPOSED_PAGE_IDS, IMPOSITION_SLOTS } from '~/utils/zineLayout'
 
@@ -13,6 +13,8 @@ const PREVIEW_RENDER_DELAY_MS = 140
 
 const { state } = useZineStore()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+const { t } = useI18n()
+const { pageLabel, sheetPageLabel } = useZinePageLabels()
 const previewImageUrl = ref('')
 const renderFailed = ref(false)
 
@@ -22,7 +24,9 @@ let renderTimeoutId: number | null = null
 
 const slots = computed(() => IMPOSED_PAGE_IDS.map((pageId) => ({
   pageId,
-  slot: IMPOSITION_SLOTS[pageId]
+  slot: IMPOSITION_SLOTS[pageId],
+  label: sheetPageLabel(pageId),
+  srLabel: pageLabel(pageId)
 })))
 
 const renderKey = computed(() => JSON.stringify({
@@ -50,7 +54,7 @@ async function renderPreview() {
       mimeType: 'image/png'
     })
 
-    if (!blob) throw new Error('No se pudo generar la previsualización.')
+    if (!blob) throw new Error(t('sheetPreview.renderError'))
 
     const imageUrl = URL.createObjectURL(blob)
 
@@ -116,7 +120,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
     <img
       v-if="previewImageUrl && !renderFailed"
       :src="previewImageUrl"
-      alt="Previsualización del pliego A4 del fanzine"
+      :alt="t('sheetPreview.alt')"
       class="absolute inset-0 size-full select-none object-fill"
       draggable="false"
     >
@@ -140,9 +144,9 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
         class="zine-sheet-label absolute left-1 top-1 z-[22] max-w-[calc(100%-0.5rem)] truncate px-1 text-[9px] font-medium shadow-sm transition-opacity"
         :class="state.previewGuides || state.selectedPageId === item.pageId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'"
       >
-        {{ item.slot.label === 'Portada' || item.slot.label === 'Contraportada' ? item.slot.label : `p. ${item.slot.label}` }}
+        {{ item.label }}
       </span>
-      <span class="sr-only">{{ PAGE_LABELS[item.pageId] }}</span>
+      <span class="sr-only">{{ item.srLabel }}</span>
     </button>
 
     <template v-if="state.previewGuides">
