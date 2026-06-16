@@ -4,6 +4,7 @@ import type { FontOption, ZineElement } from '~/types/zine'
 import { FONT_OPTIONS, PAGE_LABELS } from '~/types/zine'
 import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
+import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
 type ImageElement = Extract<ZineElement, { type: 'image' }>
 type HorizontalImageAlignment = 'left' | 'center' | 'right'
@@ -13,12 +14,14 @@ const ALIGNMENT_EPSILON = 1
 
 const {
   state,
+  elementCount,
   selectedElement,
   updateElement,
   deleteElement,
   moveElementForward,
   moveElementBackward
 } = useZineStore()
+const { trackZineEvent } = useZineAnalytics()
 
 const fontItems = FONT_OPTIONS.map((font) => ({ label: font, value: font }))
 const styleItems = [
@@ -199,7 +202,16 @@ function isImageVerticallyAligned(alignment: VerticalImageAlignment) {
 
 function removeSelected() {
   if (!selectedElement.value) return
-  deleteElement(selectedElement.value.id)
+
+  const element = selectedElement.value
+
+  deleteElement(element.id)
+  trackZineEvent('zine_element_deleted', {
+    page_id: element.pageId,
+    element_type: element.type,
+    input_method: 'inspector',
+    element_count: elementCount.value
+  })
 }
 
 function bringForward() {

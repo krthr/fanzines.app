@@ -2,7 +2,16 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts'],
+  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
+  runtimeConfig: {
+    public: {
+      scripts: {
+        posthog: {
+          apiKey: process.env.NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY || ''
+        }
+      }
+    }
+  },
   app: {
     head: {
       htmlAttrs: {
@@ -50,9 +59,42 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
   },
+  scripts: {
+    registry: {
+      posthog: {
+        trigger: 'onNuxtReady',
+        autocapture: false,
+        capturePageview: 'history_change',
+        disableSessionRecording: true,
+        config: {
+          defaults: '2026-01-30',
+          capture_exceptions: {
+            capture_unhandled_errors: true,
+            capture_unhandled_rejections: true,
+            capture_console_errors: false
+          }
+        }
+      }
+    }
+  },
   vite: {
     optimizeDeps: {
-      include: ['vue-konva', 'jspdf', 'konva', 'gsap', 'gsap/ScrollTrigger', '@unhead/schema-org/vue']
+      include: [
+        'vue-konva',
+        'vue-konva/core',
+        'jspdf',
+        'konva',
+        'konva/lib/Group',
+        'konva/lib/Layer',
+        'konva/lib/Stage',
+        'konva/lib/shapes/Image',
+        'konva/lib/shapes/Rect',
+        'konva/lib/shapes/Text',
+        'konva/lib/shapes/Transformer',
+        'gsap',
+        'gsap/ScrollTrigger',
+        '@unhead/schema-org/vue'
+      ]
     }
   },
   icon: {

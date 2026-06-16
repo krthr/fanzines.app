@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { PAGE_IDS, PAGE_LABELS, PAGE_SHORT_LABELS, type PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 
 const props = defineProps<{
   compact?: boolean
 }>()
 
-const { state, selectPage } = useZineStore()
+const { state } = useZineStore()
+const { selectTrackedPage } = useTrackedZinePageSelection()
 
 const pages = computed(() => PAGE_IDS.map((id) => ({
   id,
@@ -17,7 +19,10 @@ const pages = computed(() => PAGE_IDS.map((id) => ({
 })))
 
 function choosePage(pageId: PageId) {
-  selectPage(pageId)
+  selectTrackedPage(pageId, {
+    compact: props.compact === true,
+    input_method: props.compact === true ? 'page_selector_compact' : 'page_selector'
+  })
 }
 </script>
 

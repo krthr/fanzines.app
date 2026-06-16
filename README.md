@@ -38,6 +38,8 @@ yarn dev
 bun run dev
 ```
 
+For PostHog analytics, set `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` in the environment.
+
 ## Production
 
 Build the application for production:

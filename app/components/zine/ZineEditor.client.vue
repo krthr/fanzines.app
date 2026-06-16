@@ -7,9 +7,11 @@ import PageSelector from '~/components/zine/PageSelector.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
 import { PAGE_LABELS, type ImageBatchSkippedFile } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
 const {
   state,
+  elementCount,
   selectedElement,
   addImageElements,
   addTextElement,
@@ -19,6 +21,7 @@ const {
 } = useZineStore()
 
 const toast = useToast()
+const { trackZineEvent } = useZineAnalytics()
 const fileInput = ref<HTMLInputElement | null>(null)
 const mobileToolsOpen = ref(false)
 const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 1024px)').matches : false)
@@ -39,6 +42,16 @@ function openFilePicker() {
   fileInput.value?.click()
 }
 
+function handleAddTextElement() {
+  const pageId = state.value.selectedPageId
+
+  addTextElement()
+  trackZineEvent('zine_text_element_added', {
+    page_id: pageId,
+    element_count: elementCount.value
+  })
+}
+
 function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
   const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
   const extraCount = files.length - 3
@@ -53,8 +66,22 @@ async function handleFileChange(event: Event) {
 
   if (files.length === 0) return
 
+  const initialPageId = state.value.selectedPageId
   const result = await addImageElements(files)
   const failedFiles = result.skippedFiles.filter((file) => file.reason !== 'no-page')
+  const skippedCount = result.skippedFiles.length
+
+  trackZineEvent('zine_images_uploaded', {
+    page_id: initialPageId,
+    file_count: files.length,
+    imported_count: result.importedCount,
+    skipped_count: skippedCount,
+    failed_count: failedFiles.length,
+    overflow_count: result.overflowCount,
+    large_file_count: result.largeFileCount,
+    status: result.importedCount === files.length ? 'succeeded' : result.importedCount > 0 ? 'partial' : 'failed',
+    element_count: elementCount.value
+  })
 
   if (failedFiles.length > 0) {
     toast.add({
@@ -88,7 +115,13 @@ async function handleFileChange(event: Event) {
 
 function confirmReset() {
   if (window.confirm('¿Reiniciar el fanzine y eliminar todos los elementos?')) {
+    const previousElementCount = elementCount.value
+
     resetZine()
+    trackZineEvent('zine_reset_confirmed', {
+      previous_element_count: previousElementCount,
+      element_count: elementCount.value
+    })
   }
 }
 
@@ -103,8 +136,16 @@ function handleKeydown(event: KeyboardEvent) {
   }
 
   if ((event.key === 'Delete' || event.key === 'Backspace') && selectedElement.value) {
+    const element = selectedElement.value
+
     event.preventDefault()
-    deleteElement(selectedElement.value.id)
+    deleteElement(element.id)
+    trackZineEvent('zine_element_deleted', {
+      page_id: element.pageId,
+      element_type: element.type,
+      input_method: 'keyboard',
+      element_count: elementCount.value
+    })
   }
 }
 
@@ -118,6 +159,12 @@ onMounted(() => {
   desktopMediaQuery.addEventListener('change', syncDesktopLayout)
   removeDesktopMediaQueryListener = () => desktopMediaQuery?.removeEventListener('change', syncDesktopLayout)
   window.addEventListener('keydown', handleKeydown)
+  trackZineEvent('zine_editor_opened', {
+    layout: isDesktopLayout.value ? 'desktop' : 'mobile',
+    initial_page_id: state.value.selectedPageId,
+    page_count: Object.keys(state.value.pageElementIds).length,
+    element_count: elementCount.value
+  })
 })
 
 onBeforeUnmount(() => {
@@ -167,7 +214,7 @@ onBeforeUnmount(() => {
           variant="soft"
           size="sm"
           class="zine-toolbar-button"
-          @click="addTextElement"
+          @click="handleAddTextElement"
         />
         <USwitch
           v-model="previewGuides"
