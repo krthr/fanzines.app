@@ -19,6 +19,13 @@ const exportGuides = computed({
   }
 })
 
+const exportSafeMargins = computed({
+  get: () => state.value.exportSafeMargins !== false,
+  set: (value: boolean) => {
+    state.value.exportSafeMargins = value
+  }
+})
+
 async function handleExport() {
   errorMessage.value = ''
   isExporting.value = true
@@ -48,6 +55,14 @@ async function handleExport() {
     <USwitch
       v-model="exportGuides"
       label="Incluir guías"
+      size="md"
+      color="primary"
+      class="zine-contrast-switch"
+    />
+
+    <USwitch
+      v-model="exportSafeMargins"
+      label="Margen seguro 5 mm"
       size="md"
       color="primary"
       class="zine-contrast-switch"
