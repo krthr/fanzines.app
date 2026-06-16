@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { PAGE_IDS, PAGE_LABELS, PAGE_SHORT_LABELS, type PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
 const props = defineProps<{
   compact?: boolean
 }>()
 
-const { state, selectPage } = useZineStore()
+const { state, elementCount, selectPage } = useZineStore()
+const { trackZineEvent } = useZineAnalytics()
 
 const pages = computed(() => PAGE_IDS.map((id) => ({
   id,
@@ -17,7 +19,18 @@ const pages = computed(() => PAGE_IDS.map((id) => ({
 })))
 
 function choosePage(pageId: PageId) {
+  if (pageId === state.value.selectedPageId) return
+
+  const previousPageId = state.value.selectedPageId
+
   selectPage(pageId)
+  trackZineEvent('zine_page_selected', {
+    page_id: pageId,
+    from_page_id: previousPageId,
+    page_element_count: state.value.pageElementIds[pageId].length,
+    compact: props.compact === true,
+    element_count: elementCount.value
+  })
 }
 </script>
 
