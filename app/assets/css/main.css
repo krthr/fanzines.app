@@ -137,11 +137,14 @@ select {
 }
 
 .zine-editor-mark {
-  border: 2px solid var(--zine-paper);
-  background: var(--zine-paper);
-  box-shadow: 5px 5px 0 rgb(0 0 0 / 92%);
-  color: var(--zine-ink);
-  transform: rotate(-4deg);
+  color: var(--zine-cut);
+  line-height: 0;
+  transform: rotate(-6deg);
+}
+
+.zine-editor-mark-icon {
+  width: 26px;
+  height: 26px;
 }
 
 .zine-toolbar-button {

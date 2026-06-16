@@ -155,7 +155,9 @@ onBeforeUnmount(() => {
 
     <header class="site-header" aria-label="Navegación principal">
       <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">
-        <span class="brand-mark" aria-hidden="true">FZ</span>
+        <span class="brand-mark" aria-hidden="true">
+          <UIcon class="brand-mark-icon" name="i-lucide-scissors" />
+        </span>
         <span>Fanzines</span>
       </NuxtLink>
       <nav aria-label="Secciones">
@@ -380,15 +382,20 @@ footer {
 }
 
 .brand-mark {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 2px solid var(--paper);
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 0.96rem;
-  transform: rotate(-4deg);
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+  line-height: 0;
+  transform: rotate(-6deg);
+}
+
+.brand-mark-icon {
+  width: 25px;
+  height: 25px;
 }
 
 .site-header nav {

@@ -121,6 +121,7 @@ export default defineNuxtConfig({
         'lucide:info',
         'lucide:maximize',
         'lucide:refresh-cw',
+        'lucide:scissors',
         'lucide:send-to-back',
         'lucide:sliders-horizontal',
         'lucide:trash-2',
