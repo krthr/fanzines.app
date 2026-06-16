@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/scripts'],
+  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
   runtimeConfig: {
     public: {
       scripts: {
@@ -18,13 +18,7 @@ export default defineNuxtConfig({
         lang: 'es'
       },
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Special+Elite&display=swap'
-        }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
       ]
     }
   },
@@ -40,6 +34,23 @@ export default defineNuxtConfig({
   },
   robots: {
     sitemap: ['https://fanzines.app/sitemap.xml']
+  },
+  image: {
+    provider: 'ipxStatic',
+    format: ['webp'],
+    screens: {
+      xs: 320,
+      sm: 500,
+      md: 760,
+      lg: 1040,
+      xl: 1240
+    }
+  },
+  fonts: {
+    families: [
+      { name: 'Outfit', weights: [400, 600, 700, 800, 900] },
+      { name: 'Special Elite', weights: [400] }
+    ]
   },
   ogImage: {
     enabled: false

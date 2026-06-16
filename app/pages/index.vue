@@ -28,7 +28,17 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl }
+    { rel: 'canonical', href: siteUrl },
+    {
+      rel: 'preload',
+      as: 'image',
+      href: '/_ipx/s_326x255/images/folded-zine.webp',
+      imagesrcset:
+        '/_ipx/s_326x255/images/folded-zine.webp 326w, /_ipx/s_430x336/images/folded-zine.webp 430w, /_ipx/s_570x445/images/folded-zine.webp 570w',
+      imagesizes:
+        '(max-width: 500px) 326px, (max-width: 760px) 430px, (max-width: 1040px) 570px, (max-width: 1240px) 430px, 570px',
+      fetchpriority: 'high'
+    }
   ]
 })
 
@@ -84,7 +94,7 @@ onMounted(async () => {
       ease: 'power3.out'
     })
 
-    gsap.from('.paper-shot', {
+    gsap.from('.paper-shot:not(.shot-main)', {
       y: 76,
       opacity: 0,
       rotate: 0,
@@ -157,7 +167,10 @@ onBeforeUnmount(() => {
 
     <section id="contenido" class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <h1 id="hero-title">Haz un fanzine en el navegador.</h1>
+        <h1 id="hero-title">
+          <span>Haz un fanzine&nbsp;</span>
+          <span class="hero-title-tail">en el <br class="mobile-title-break" />navegador.</span>
+        </h1>
         <p>
           Fanzines te da un editor para colocar textos e imágenes en una hoja A4 plegable.
           Diseña cada panel, revisa el pliego completo y exporta un PDF listo para imprimir.
@@ -169,11 +182,30 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="hero-media" aria-label="Fanzine físico hecho a mano">
-        <div class="paper-shot shot-main motion-image">
-          <img src="/images/folded-zine.webp" alt="Fanzine desplegado sobre una mesa" />
+        <div class="paper-shot shot-main">
+          <NuxtImg
+            src="/images/folded-zine.webp"
+            alt="Fanzine desplegado sobre una mesa"
+            width="570"
+            height="445"
+            sizes="326px sm:430px md:570px lg:430px xl:570px"
+            densities="x1"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
         </div>
         <div class="paper-shot shot-hand motion-image">
-          <img src="/images/hand-zine.webp" alt="Fanzine pequeño abierto en una mano" />
+          <NuxtImg
+            src="/images/hand-zine.webp"
+            alt="Fanzine pequeño abierto en una mano"
+            width="245"
+            height="383"
+            sizes="130px sm:160px md:190px lg:245px"
+            densities="x1"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="paper-note">Editor A4 / 8 páginas / PDF</div>
       </div>
@@ -188,10 +220,16 @@ onBeforeUnmount(() => {
         </p>
       </div>
       <figure class="table-photo">
-        <img
+        <NuxtImg
           class="motion-image"
           src="/images/making-table.webp"
           alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+          width="514"
+          height="913"
+          sizes="376px sm:472px md:514px lg:514px"
+          densities="x1"
+          loading="lazy"
+          decoding="async"
         />
         <figcaption>Diseña en pantalla. Termina con papel, tijeras y una mesa.</figcaption>
       </figure>
@@ -204,10 +242,16 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="fold-layout section-panel">
-        <img
+        <NuxtImg
           class="fold-guide motion-image"
           src="/images/fold-guide.webp"
           alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine"
+          width="560"
+          height="420"
+          sizes="376px sm:472px md:560px lg:560px xl:560px"
+          densities="x1"
+          loading="lazy"
+          decoding="async"
         />
         <ol>
           <li v-for="step in steps" :key="step.title" class="step-card">
@@ -404,6 +448,10 @@ footer {
   font-size: 5.15rem;
 }
 
+.mobile-title-break {
+  display: none;
+}
+
 .hero-copy p,
 .definition p,
 .making-intro p,
@@ -454,7 +502,7 @@ footer {
 .home-page .button-primary {
   border-color: var(--red);
   background: var(--red);
-  color: #fff8e2;
+  color: var(--ink);
 }
 
 .home-page .button-secondary {
@@ -656,7 +704,7 @@ footer {
 
 .step-card:nth-child(3) {
   background: var(--red);
-  color: #fff8e2;
+  color: var(--ink);
 }
 
 .step-card::before {
@@ -835,10 +883,37 @@ footer {
     width: min(100% - 28px, 1240px);
   }
 
+  .site-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .site-header nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    max-width: none;
+    justify-content: stretch;
+  }
+
+  .site-header nav a {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .hero-copy h1 span:first-child,
+  .hero-title-tail {
+    display: block;
+  }
+
+  .mobile-title-break {
+    display: block;
+  }
+
   .site-header nav a {
     min-height: 34px;
-    padding: 8px 9px;
-    font-size: 0.76rem;
+    padding: 8px 4px;
+    font-size: 0.68rem;
   }
 
   .hero-copy h1,
