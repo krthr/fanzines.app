@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const posthogEnabled = process.env.POSTHOG_ENABLED === 'true' || process.env.NUXT_PUBLIC_POSTHOG_ENABLED === 'true'
 const posthogPublicKey = process.env.NUXT_PUBLIC_POSTHOG_KEY ?? 'phc_DcGSF2PLvD4w6d3SVUqu8VokXReq3FTZcH6vnsZMzGmC'
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com'
 const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
@@ -7,32 +8,40 @@ const posthogReleaseVersion = process.env.CF_PAGES_COMMIT_SHA ?? process.env.GIT
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo', '@posthog/nuxt'],
-  posthogConfig: {
-    publicKey: posthogPublicKey,
-    host: posthogHost,
-    debug: process.env.NUXT_PUBLIC_POSTHOG_DEBUG === 'true',
-    clientConfig: {
-      autocapture: true,
-      capture_exceptions: true,
-      capture_pageleave: 'if_capture_pageview',
-      capture_pageview: 'history_change',
-      disable_session_recording: true,
-      person_profiles: 'identified_only'
-    },
-    serverConfig: {
-      enableExceptionAutocapture: true
-    },
-    sourcemaps: posthogPersonalApiKey
-      ? {
-          enabled: true,
-          projectId: '473281',
-          personalApiKey: posthogPersonalApiKey,
-          releaseName: 'fanzines',
-          ...(posthogReleaseVersion ? { releaseVersion: posthogReleaseVersion } : {})
+  modules: [
+    '@nuxt/ui',
+    '@nuxtjs/seo',
+    ...(posthogEnabled ? ['@posthog/nuxt'] : [])
+  ],
+  ...(posthogEnabled
+    ? {
+        posthogConfig: {
+          publicKey: posthogPublicKey,
+          host: posthogHost,
+          debug: process.env.NUXT_PUBLIC_POSTHOG_DEBUG === 'true',
+          clientConfig: {
+            autocapture: true,
+            capture_exceptions: true,
+            capture_pageleave: 'if_capture_pageview',
+            capture_pageview: 'history_change',
+            disable_session_recording: true,
+            person_profiles: 'identified_only'
+          },
+          serverConfig: {
+            enableExceptionAutocapture: true
+          },
+          sourcemaps: posthogPersonalApiKey
+            ? {
+                enabled: true,
+                projectId: '473281',
+                personalApiKey: posthogPersonalApiKey,
+                releaseName: 'fanzines',
+                ...(posthogReleaseVersion ? { releaseVersion: posthogReleaseVersion } : {})
+              }
+            : undefined
         }
-      : undefined
-  },
+      }
+    : {}),
   app: {
     head: {
       htmlAttrs: {

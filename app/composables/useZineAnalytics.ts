@@ -1,4 +1,9 @@
+import type { PostHog } from 'posthog-js'
+
 type ZineAnalyticsProperties = Record<string, string | number | boolean | null | undefined>
+type NuxtAppWithPostHog = ReturnType<typeof useNuxtApp> & {
+  $posthog?: () => PostHog
+}
 
 const zineAnalyticsBaseProperties = {
   app: 'fanzines',
@@ -6,17 +11,21 @@ const zineAnalyticsBaseProperties = {
 } satisfies ZineAnalyticsProperties
 
 export function useZineAnalytics() {
-  const posthog = usePostHog()
+  const nuxtApp = useNuxtApp() as NuxtAppWithPostHog
+
+  function getPostHog() {
+    return nuxtApp.$posthog?.()
+  }
 
   function capture(event: string, properties: ZineAnalyticsProperties = {}) {
-    posthog?.capture(event, {
+    getPostHog()?.capture(event, {
       ...zineAnalyticsBaseProperties,
       ...properties
     })
   }
 
   function captureException(error: unknown, properties: ZineAnalyticsProperties = {}) {
-    posthog?.captureException(error, {
+    getPostHog()?.captureException(error, {
       ...zineAnalyticsBaseProperties,
       ...properties
     })

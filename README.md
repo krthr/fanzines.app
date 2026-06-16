@@ -38,6 +38,12 @@ yarn dev
 bun run dev
 ```
 
+## Analytics
+
+PostHog is disabled by default so local development, preview deploys, and CI builds do not send traffic into production analytics.
+
+Set `POSTHOG_ENABLED=true` in the production environment to enable PostHog app usage and error tracking.
+
 ## Production
 
 Build the application for production:
