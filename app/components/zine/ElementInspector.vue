@@ -86,10 +86,14 @@ function imageY(element: ImageElement, alignment: VerticalImageAlignment) {
   return PAGE_H - element.height
 }
 
-function containedImageBounds(element: ImageElement) {
-  const sourceWidth = element.naturalWidth || element.width
-  const sourceHeight = element.naturalHeight || element.height
-  const scale = Math.min(PAGE_W / sourceWidth, PAGE_H / sourceHeight)
+function imageSourceSize(element: ImageElement) {
+  return {
+    width: element.naturalWidth || element.width,
+    height: element.naturalHeight || element.height
+  }
+}
+
+function centeredImageBounds(sourceWidth: number, sourceHeight: number, scale: number) {
   const width = sourceWidth * scale
   const height = sourceHeight * scale
 
@@ -99,6 +103,24 @@ function containedImageBounds(element: ImageElement) {
     width,
     height
   }
+}
+
+function containedImageBounds(element: ImageElement) {
+  const source = imageSourceSize(element)
+  return centeredImageBounds(
+    source.width,
+    source.height,
+    Math.min(PAGE_W / source.width, PAGE_H / source.height)
+  )
+}
+
+function coveredImageBounds(element: ImageElement) {
+  const source = imageSourceSize(element)
+  return centeredImageBounds(
+    source.width,
+    source.height,
+    Math.max(PAGE_W / source.width, PAGE_H / source.height)
+  )
 }
 
 function isAligned(value: number, target: number) {
@@ -119,6 +141,16 @@ function fillImagePage() {
 
   updateElement(element.id, {
     ...containedImageBounds(element),
+    rotation: 0
+  })
+}
+
+function coverImagePage() {
+  const element = selectedElement.value
+  if (!isImageElement(element)) return
+
+  updateElement(element.id, {
+    ...coveredImageBounds(element),
     rotation: 0
   })
 }
@@ -376,6 +408,16 @@ function sendBackward() {
             variant="solid"
             size="sm"
             @click="fillImagePage"
+          />
+
+          <UButton
+            block
+            icon="i-lucide-maximize"
+            label="Rellenar página"
+            color="secondary"
+            variant="solid"
+            size="sm"
+            @click="coverImagePage"
           />
 
           <UFormField label="Alinear horizontal">
