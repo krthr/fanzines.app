@@ -37,7 +37,8 @@ export async function exportZinePdf(state: ZineState) {
   const canvas = await renderSheetCanvas(state, {
     pxPerMm: PX_PER_MM,
     pixelRatio: EXPORT_PIXEL_RATIO,
-    mimeType: 'image/png'
+    mimeType: 'image/png',
+    applySafeMargins: state.exportSafeMargins
   })
 
   if (!canvas) return

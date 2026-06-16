@@ -39,7 +39,8 @@ function createInitialZineState(): ZineState {
     elements: {},
     pageElementIds: createInitialPageElementIds(),
     previewGuides: true,
-    exportGuides: true
+    exportGuides: true,
+    exportSafeMargins: true
   }
 }
 
@@ -147,6 +148,10 @@ function activeImageSources(state: ZineState) {
 export function useZineStore() {
   const state = useState<ZineState>('mini-zine-a4-state', createInitialZineState)
   const cachePruneWatchRegistered = useState('mini-zine-a4-cache-prune-watch-registered', () => false)
+
+  if (typeof state.value.exportSafeMargins !== 'boolean') {
+    state.value.exportSafeMargins = true
+  }
 
   if (import.meta.client && !cachePruneWatchRegistered.value) {
     cachePruneWatchRegistered.value = true

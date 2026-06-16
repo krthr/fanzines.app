@@ -2,7 +2,7 @@ import { Group } from 'konva/lib/Group'
 import { Layer } from 'konva/lib/Layer'
 import { Stage } from 'konva/lib/Stage'
 import { Rect } from 'konva/lib/shapes/Rect'
-import type { PageId, ZineElement, ZineState } from '~/types/zine'
+import type { ImageElement, PageId, ZineElement, ZineState } from '~/types/zine'
 import {
   A4_H_MM,
   A4_W_MM,
@@ -12,7 +12,9 @@ import {
   PAGE_W,
   PANEL_H_MM,
   PANEL_W_MM,
-  getImposedGroupTransform
+  fitImageToSafeArea,
+  getImposedGroupTransform,
+  getPageSafeAreaRect
 } from '~/utils/zineLayout'
 import { renderElementsIntoGroup } from '~/utils/renderZine.client'
 
@@ -21,6 +23,7 @@ type RenderSheetDataUrlOptions = {
   pixelRatio?: number
   mimeType?: string
   quality?: number
+  applySafeMargins?: boolean
 }
 
 function createOffscreenContainer(width: number, height: number) {
@@ -35,13 +38,21 @@ function createOffscreenContainer(width: number, height: number) {
   return container
 }
 
-function getPageElements(state: ZineState, pageId: PageId): ZineElement[] {
+function getSafeImageElement(element: ImageElement): ImageElement {
+  return {
+    ...element,
+    ...fitImageToSafeArea(element, getPageSafeAreaRect(element.pageId))
+  }
+}
+
+function getPageElements(state: ZineState, pageId: PageId, applySafeMargins: boolean): ZineElement[] {
   return state.pageElementIds[pageId]
     .map((id) => state.elements[id])
     .filter((element): element is ZineElement => Boolean(element))
+    .map((element) => (applySafeMargins && element.type === 'image' ? getSafeImageElement(element) : element))
 }
 
-async function renderSheetIntoRoot(root: Group, state: ZineState) {
+async function renderSheetIntoRoot(root: Group, state: ZineState, options: RenderSheetDataUrlOptions) {
   root.add(new Rect({
     x: 0,
     y: 0,
@@ -76,7 +87,7 @@ async function renderSheetIntoRoot(root: Group, state: ZineState) {
       listening: false
     }))
 
-    await renderElementsIntoGroup(pageGroup, getPageElements(state, pageId))
+    await renderElementsIntoGroup(pageGroup, getPageElements(state, pageId, Boolean(options.applySafeMargins)))
     root.add(pageGroup)
   }
 }
@@ -98,7 +109,7 @@ export async function renderSheetCanvas(state: ZineState, options: RenderSheetDa
 
     stage.add(layer)
     layer.add(root)
-    await renderSheetIntoRoot(root, state)
+    await renderSheetIntoRoot(root, state, options)
     layer.draw()
 
     return stage.toCanvas({

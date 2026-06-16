@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useZineStore } from '~/composables/useZineStore'
+import { SAFE_MARGIN_MM } from '~/utils/zineLayout'
 
-const { state, elementCount } = useZineStore()
+const {
+  state,
+  elementCount
+} = useZineStore()
 
 const isExporting = ref(false)
 const errorMessage = ref('')
@@ -16,6 +20,12 @@ const exportGuides = computed({
   get: () => state.value.exportGuides,
   set: (value: boolean) => {
     state.value.exportGuides = value
+  }
+})
+const exportSafeMargins = computed({
+  get: () => state.value.exportSafeMargins,
+  set: (value: boolean) => {
+    state.value.exportSafeMargins = value
   }
 })
 
@@ -48,6 +58,14 @@ async function handleExport() {
     <USwitch
       v-model="exportGuides"
       label="Incluir guías"
+      size="md"
+      color="primary"
+      class="zine-contrast-switch"
+    />
+
+    <USwitch
+      v-model="exportSafeMargins"
+      :label="`Aplicar margen seguro ${SAFE_MARGIN_MM} mm`"
       size="md"
       color="primary"
       class="zine-contrast-switch"
