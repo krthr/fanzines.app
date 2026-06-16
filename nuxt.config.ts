@@ -1,8 +1,38 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const posthogPublicKey = process.env.NUXT_PUBLIC_POSTHOG_KEY ?? 'phc_DcGSF2PLvD4w6d3SVUqu8VokXReq3FTZcH6vnsZMzGmC'
+const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com'
+const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY
+const posthogReleaseVersion = process.env.CF_PAGES_COMMIT_SHA ?? process.env.GITHUB_SHA
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo'],
+  modules: ['@nuxt/ui', '@nuxtjs/seo', '@posthog/nuxt'],
+  posthogConfig: {
+    publicKey: posthogPublicKey,
+    host: posthogHost,
+    debug: process.env.NUXT_PUBLIC_POSTHOG_DEBUG === 'true',
+    clientConfig: {
+      autocapture: true,
+      capture_exceptions: true,
+      capture_pageleave: 'if_capture_pageview',
+      capture_pageview: 'history_change',
+      disable_session_recording: true,
+      person_profiles: 'identified_only'
+    },
+    serverConfig: {
+      enableExceptionAutocapture: true
+    },
+    sourcemaps: posthogPersonalApiKey
+      ? {
+          enabled: true,
+          projectId: '473281',
+          personalApiKey: posthogPersonalApiKey,
+          releaseName: 'fanzines',
+          ...(posthogReleaseVersion ? { releaseVersion: posthogReleaseVersion } : {})
+        }
+      : undefined
+  },
   app: {
     head: {
       htmlAttrs: {
@@ -41,7 +71,22 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: ['vue-konva', 'jspdf', 'konva', 'gsap', 'gsap/ScrollTrigger', '@unhead/schema-org/vue']
+      include: [
+        'vue-konva',
+        'vue-konva/core',
+        'jspdf',
+        'konva',
+        'konva/lib/Group',
+        'konva/lib/Layer',
+        'konva/lib/Stage',
+        'konva/lib/shapes/Image',
+        'konva/lib/shapes/Rect',
+        'konva/lib/shapes/Text',
+        'konva/lib/shapes/Transformer',
+        'gsap',
+        'gsap/ScrollTrigger',
+        '@unhead/schema-org/vue'
+      ]
     }
   },
   icon: {

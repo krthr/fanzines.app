@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useZineStore } from '~/composables/useZineStore'
 
 const { state, elementCount } = useZineStore()
+const { capture, captureException } = useZineAnalytics()
 
 const isExporting = ref(false)
 const errorMessage = ref('')
@@ -26,15 +27,30 @@ const exportSafeMargins = computed({
   }
 })
 
+function createExportAnalyticsProperties() {
+  return {
+    element_count: elementCount.value,
+    export_guides: exportGuides.value,
+    export_safe_margins: exportSafeMargins.value
+  }
+}
+
 async function handleExport() {
   errorMessage.value = ''
   isExporting.value = true
+  capture('zine_pdf_export_started', createExportAnalyticsProperties())
 
   try {
     const { exportZinePdf } = await import('~/utils/exportPdf.client')
     await exportZinePdf(state.value)
-  } catch {
+    capture('zine_pdf_exported', createExportAnalyticsProperties())
+  } catch (error) {
     errorMessage.value = 'No se pudo generar el PDF. Revisa las imágenes cargadas e inténtalo de nuevo.'
+    capture('zine_pdf_export_failed', createExportAnalyticsProperties())
+    captureException(error, {
+      ...createExportAnalyticsProperties(),
+      feature: 'pdf_export'
+    })
   } finally {
     isExporting.value = false
   }

@@ -8,6 +8,7 @@ const props = defineProps<{
 }>()
 
 const { state, selectPage } = useZineStore()
+const { capture } = useZineAnalytics()
 
 const pages = computed(() => PAGE_IDS.map((id) => ({
   id,
@@ -17,7 +18,17 @@ const pages = computed(() => PAGE_IDS.map((id) => ({
 })))
 
 function choosePage(pageId: PageId) {
+  const previousPageId = state.value.selectedPageId
+
   selectPage(pageId)
+
+  if (previousPageId !== pageId) {
+    capture('zine_page_selected', {
+      layout: props.compact ? 'compact' : 'full',
+      page_id: pageId,
+      previous_page_id: previousPageId
+    })
+  }
 }
 </script>
 
