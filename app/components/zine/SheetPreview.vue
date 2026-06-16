@@ -4,13 +4,15 @@ import type { CSSProperties } from 'vue'
 import type { PageId } from '~/types/zine'
 import { PAGE_LABELS } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { renderSheetBlob } from '~/utils/renderSheet.client'
 import { IMPOSED_PAGE_IDS, IMPOSITION_SLOTS } from '~/utils/zineLayout'
 
 const PREVIEW_PX_PER_MM = 2
 const PREVIEW_RENDER_DELAY_MS = 140
 
-const { state, selectPage } = useZineStore()
+const { state } = useZineStore()
+const { selectTrackedPage } = useTrackedZinePageSelection()
 const previewImageUrl = ref('')
 const renderFailed = ref(false)
 
@@ -132,7 +134,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
           : 'hover:ring-1 hover:ring-[var(--zine-accent)] hover:ring-inset'
       ]"
       :style="slotStyle(item.pageId)"
-      @click="selectPage(item.pageId)"
+      @click="selectTrackedPage(item.pageId, { input_method: 'sheet_preview' })"
     >
       <span
         class="zine-sheet-label absolute left-1 top-1 z-[22] max-w-[calc(100%-0.5rem)] truncate px-1 text-[9px] font-medium shadow-sm transition-opacity"
