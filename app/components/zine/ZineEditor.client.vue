@@ -186,8 +186,8 @@ onBeforeUnmount(() => {
 
     <header class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4">
       <div class="flex min-w-0 items-center gap-3">
-        <div class="zine-editor-mark grid size-10 place-items-center text-sm font-black">
-          FZ
+        <div class="zine-editor-mark grid size-10 place-items-center" aria-hidden="true">
+          <UIcon class="zine-editor-mark-icon" name="i-lucide-scissors" />
         </div>
         <div class="min-w-0">
           <p class="m-0 truncate text-base font-semibold leading-5 text-default">
