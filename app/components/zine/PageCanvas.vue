@@ -67,18 +67,6 @@ const backgroundConfig = computed(() => ({
   listening: true
 }))
 
-const safeMarginConfig = computed(() => ({
-  x: PAGE_W * 0.07,
-  y: PAGE_H * 0.05,
-  width: PAGE_W * 0.86,
-  height: PAGE_H * 0.9,
-  stroke: '#f23d25',
-  strokeWidth: 1,
-  dash: [12, 10],
-  opacity: 0.38,
-  listening: false
-}))
-
 const transformerConfig = computed(() => {
   const element = selectedElement.value
   const isText = element?.type === 'text'
@@ -302,7 +290,6 @@ watch(
     >
       <VLayer :config="layerConfig">
         <VRect :config="backgroundConfig" />
-        <VRect :config="safeMarginConfig" />
 
         <template v-for="element in currentPageElements" :key="element.id">
           <VImage

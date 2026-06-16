@@ -86,6 +86,7 @@ export type ZineState = {
   pageElementIds: Record<PageId, string[]>
   previewGuides: boolean
   exportGuides: boolean
+  exportSafeMargins: boolean
 }
 
 export type ImageInsertResult = {
