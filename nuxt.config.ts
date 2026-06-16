@@ -62,7 +62,7 @@ export default defineNuxtConfig({
     urls: ['/', '/editor', '/es', '/es/editor', '/pt-br', '/pt-br/editor']
   },
   robots: {
-    sitemap: ['https://fanzines.app/sitemap.xml']
+    sitemap: ['https://fanzines.app/sitemap_index.xml']
   },
   image: {
     provider: 'ipxStatic',
