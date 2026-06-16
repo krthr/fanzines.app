@@ -1,0 +1,217 @@
+{
+  "localeSwitcher": {
+    "label": "Idioma"
+  },
+  "seo": {
+    "siteDescription": "Editor no navegador para criar, imprimir e exportar fanzines A4 dobráveis.",
+    "appDescription": "Editor no navegador para desenhar os oito painéis de um fanzine A4 dobrável e exportá-lo como PDF pronto para impressão."
+  },
+  "home": {
+    "seo": {
+      "title": "Crie e exporte um fanzine A4",
+      "socialTitle": "Fanzines | Crie e exporte um fanzine A4",
+      "description": "Fanzines é um editor para montar uma publicação dobrável em uma folha A4, adicionar texto e imagens, e exportar como PDF.",
+      "socialDescription": "Um editor simples para desenhar, pré-visualizar, imprimir e dobrar seu próprio fanzine.",
+      "imageAlt": "Fanzine dobrável e ferramentas de edição no Fanzines"
+    },
+    "skipLink": "Pular para o conteúdo",
+    "header": {
+      "ariaLabel": "Navegação principal",
+      "homeAriaLabel": "Início do Fanzines",
+      "navLabel": "Seções",
+      "include": "O que inclui",
+      "print": "Imprimir",
+      "openEditor": "Abrir editor"
+    },
+    "hero": {
+      "titleLead": "Crie um fanzine",
+      "titleTailLead": "no",
+      "titleTailBreak": "navegador.",
+      "description": "Fanzines oferece um editor para posicionar textos e imagens em uma folha A4 dobrável. Desenhe cada painel, revise a folha completa e exporte um PDF pronto para impressão.",
+      "actionsLabel": "Ações principais",
+      "openEditor": "Abrir o editor",
+      "printGuide": "Ver como imprimir",
+      "mediaLabel": "Fanzine físico feito à mão",
+      "foldedAlt": "Fanzine aberto sobre uma mesa",
+      "handAlt": "Pequeno fanzine aberto em uma mão",
+      "note": "Editor A4 / 8 páginas / PDF"
+    },
+    "definition": {
+      "title": "Editor A4",
+      "description": "Comece com uma capa em branco e trabalhe painel por painel. O editor coloca cada página na ordem correta da folha, com guias de corte e dobra para você não precisar calcular.",
+      "tableAlt": "Mesa de trabalho com fotos impressas, estilete, régua e tesoura",
+      "caption": "Desenhe na tela. Finalize com papel, tesoura e uma mesa."
+    },
+    "making": {
+      "title": "Do editor ao papel",
+      "description": "O PDF sai imposto para uma folha A4. Imprima, corte a linha central e dobre.",
+      "foldGuideAlt": "Instruções desenhadas à mão para dobrar, cortar e abrir um fanzine"
+    },
+    "steps": {
+      "layout": {
+        "title": "Monte a folha",
+        "text": "O editor organiza as oito faces em uma folha A4 horizontal, pronta para imprimir."
+      },
+      "content": {
+        "title": "Adicione texto e imagens",
+        "text": "Envie fotos ou escreva diretamente em cada painel. Você pode mover, girar e ajustar cada peça."
+      },
+      "export": {
+        "title": "Exporte e dobre",
+        "text": "Baixe o PDF, imprima, corte pela guia central e transforme a folha em um fanzine."
+      }
+    },
+    "finalCta": {
+      "title": "Comece com uma capa e uma imagem.",
+      "button": "Criar fanzine"
+    }
+  },
+  "editorPage": {
+    "seo": {
+      "title": "Editor de fanzines A4",
+      "socialTitle": "Editor de fanzines A4 | Fanzines",
+      "description": "Desenhe um fanzine de oito painéis no navegador, revise a folha A4 e exporte um PDF pronto para imprimir e dobrar.",
+      "imageAlt": "Editor do Fanzines com folha A4 e painéis de fanzine"
+    },
+    "loadingAria": "Carregando editor",
+    "loading": "Carregando editor."
+  },
+  "editorShell": {
+    "title": "Editor de fanzines",
+    "sheetStatus": "Folha A4 · {page}",
+    "uploadImages": "Enviar imagens",
+    "addText": "Adicionar texto",
+    "guides": "Guias",
+    "properties": "Propriedades",
+    "propertiesDescription": "Ajustes do painel ativo",
+    "panels": "Painéis",
+    "resetAria": "Reiniciar fanzine",
+    "sheetPreview": "Prévia da folha",
+    "showGuidesAria": "Mostrar guias",
+    "selectedElement": "Elemento selecionado",
+    "noSelection": "Sem seleção",
+    "center": "Centralizar",
+    "confirmReset": "Reiniciar o fanzine e remover todos os elementos?",
+    "toasts": {
+      "moreFiles": "{names} e mais {count}",
+      "uploadFailedTitleSingle": "Imagem não carregada",
+      "uploadFailedTitleMultiple": "Algumas imagens não foram carregadas",
+      "skippedFiles": "{count} {fileLabel} ignorado(s): {names}.",
+      "fileSingular": "arquivo",
+      "filePlural": "arquivos",
+      "overflowTitle": "Nem todas as imagens cabem",
+      "overflowDescription": "{count} {fileLabel} ignorado(s) porque não havia páginas disponíveis.",
+      "largeImageTitleSingle": "Imagem grande",
+      "largeImageTitleMultiple": "Imagens grandes",
+      "largeImageDescriptionSingle": "A imagem é grande; se notar lentidão, use uma versão reduzida.",
+      "largeImageDescriptionMultiple": "{count} imagens são grandes; se notar lentidão, use versões reduzidas."
+    }
+  },
+  "inspector": {
+    "title": "Propriedades",
+    "imageSelected": "Imagem selecionada",
+    "textSelected": "Texto selecionado",
+    "empty": "Selecione um texto ou uma imagem para editar medidas, posição e estilo.",
+    "width": "Largura",
+    "height": "Altura",
+    "rotation": "Rotação",
+    "opacity": "Opacidade",
+    "text": "Texto",
+    "font": "Fonte",
+    "style": "Estilo",
+    "size": "Tamanho",
+    "color": "Cor",
+    "alignment": "Alinhamento",
+    "imageFallback": "Imagem",
+    "fitPage": "Ajustar à página",
+    "fillPage": "Preencher página",
+    "alignHorizontal": "Alinhar horizontalmente",
+    "alignVertical": "Alinhar verticalmente",
+    "bringForward": "Para frente",
+    "sendBackward": "Para trás",
+    "delete": "Excluir",
+    "styles": {
+      "normal": "Normal",
+      "bold": "Negrito",
+      "italic": "Itálico"
+    },
+    "align": {
+      "left": "Esquerda",
+      "center": "Centro",
+      "right": "Direita",
+      "leftShort": "Esq.",
+      "rightShort": "Dir.",
+      "top": "Topo",
+      "middle": "Meio",
+      "bottom": "Base"
+    }
+  },
+  "exportPanel": {
+    "title": "Exportar",
+    "description": "PDF A4 horizontal, pronto para imprimir, cortar e dobrar.",
+    "includeGuides": "Incluir guias",
+    "safeMargins": "Margem segura 5 mm",
+    "download": "Baixar PDF",
+    "elementCountSingle": "1 elemento no fanzine.",
+    "elementCountMultiple": "{count} elementos no fanzine.",
+    "error": "Não foi possível gerar o PDF. Verifique as imagens carregadas e tente novamente."
+  },
+  "pageSelector": {
+    "ariaLabel": "Painéis do fanzine",
+    "elementCountSingle": "1 elemento",
+    "elementCountMultiple": "{count} elementos"
+  },
+  "sheetPreview": {
+    "alt": "Prévia da folha A4 do fanzine",
+    "renderError": "Não foi possível gerar a prévia."
+  },
+  "zineStore": {
+    "browserOnly": "O envio de imagens só está disponível no navegador.",
+    "invalidImage": "O arquivo selecionado não parece ser uma imagem compatível.",
+    "imageLoadError": "Não foi possível carregar a imagem selecionada.",
+    "optimizedImageLoadError": "Não foi possível carregar a imagem otimizada.",
+    "imageOptimizeError": "Não foi possível otimizar a imagem.",
+    "largeImageWarning": "A imagem é grande; se notar lentidão, use uma versão reduzida.",
+    "untitledFile": "Arquivo sem nome",
+    "noPage": "Não há páginas disponíveis para esta imagem.",
+    "fileLoadError": "Não foi possível carregar este arquivo.",
+    "genericFileLoadError": "Não foi possível carregar um arquivo.",
+    "overflowWarning": "Algumas imagens foram ignoradas porque não havia páginas disponíveis.",
+    "defaultText": "Escreva aqui"
+  },
+  "pages": {
+    "frontCover": {
+      "label": "Capa",
+      "short": "Capa"
+    },
+    "backCover": {
+      "label": "Contracapa",
+      "short": "Contra"
+    },
+    "p1": {
+      "label": "Página 1",
+      "short": "1"
+    },
+    "p2": {
+      "label": "Página 2",
+      "short": "2"
+    },
+    "p3": {
+      "label": "Página 3",
+      "short": "3"
+    },
+    "p4": {
+      "label": "Página 4",
+      "short": "4"
+    },
+    "p5": {
+      "label": "Página 5",
+      "short": "5"
+    },
+    "p6": {
+      "label": "Página 6",
+      "short": "6"
+    },
+    "sheetPageLabel": "p. {number}"
+  }
+}

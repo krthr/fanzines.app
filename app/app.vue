@@ -1,10 +1,27 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const siteUrl = 'https://fanzines.app'
 const ogImage = `${siteUrl}/images/og-fanzines.webp`
+const localeLanguages: Record<string, string> = {
+  en: 'en-US',
+  es: 'es-ES',
+  'pt-br': 'pt-BR'
+}
 
-useHead({
+const { locale, t } = useI18n()
+const i18nHead = useLocaleHead({ seo: true })
+const currentLanguage = computed(() => localeLanguages[locale.value] ?? 'en-US')
+
+useHead(() => ({
+  htmlAttrs: {
+    ...i18nHead.value.htmlAttrs
+  },
+  link: i18nHead.value.link,
+  meta: i18nHead.value.meta,
   script: [
     {
+      key: 'schema-org-web-application',
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
@@ -14,13 +31,12 @@ useHead({
         image: ogImage,
         applicationCategory: 'DesignApplication',
         operatingSystem: 'Web',
-        inLanguage: 'es',
-        description:
-          'Editor en el navegador para diseñar ocho paneles de un fanzine A4 plegable y exportarlo como PDF listo para imprimir.'
+        inLanguage: currentLanguage.value,
+        description: t('seo.appDescription')
       })
     }
   ]
-})
+}))
 </script>
 
 <template>

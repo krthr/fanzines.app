@@ -11,26 +11,15 @@ export const PAGE_IDS = [
 
 export type PageId = typeof PAGE_IDS[number]
 
-export const PAGE_LABELS: Record<PageId, string> = {
-  'back-cover': 'Contraportada',
-  'front-cover': 'Portada',
-  p1: 'Página 1',
-  p2: 'Página 2',
-  p3: 'Página 3',
-  p4: 'Página 4',
-  p5: 'Página 5',
-  p6: 'Página 6'
-}
-
-export const PAGE_SHORT_LABELS: Record<PageId, string> = {
-  'back-cover': 'Contra',
-  'front-cover': 'Portada',
-  p1: '1',
-  p2: '2',
-  p3: '3',
-  p4: '4',
-  p5: '5',
-  p6: '6'
+export const PAGE_MESSAGE_KEYS: Record<PageId, string> = {
+  'back-cover': 'backCover',
+  'front-cover': 'frontCover',
+  p1: 'p1',
+  p2: 'p2',
+  p3: 'p3',
+  p4: 'p4',
+  p5: 'p5',
+  p6: 'p6'
 }
 
 export const FONT_OPTIONS = [

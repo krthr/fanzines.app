@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://fanzines.app/sitemap.xml
+Sitemap: https://fanzines.app/sitemap_index.xml

@@ -2,12 +2,14 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import ElementInspector from '~/components/zine/ElementInspector.vue'
 import ExportPanel from '~/components/zine/ExportPanel.vue'
+import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import PageCanvas from '~/components/zine/PageCanvas.vue'
 import PageSelector from '~/components/zine/PageSelector.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
-import { PAGE_LABELS, type ImageBatchSkippedFile } from '~/types/zine'
+import type { ImageBatchSkippedFile } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 const {
   state,
@@ -20,6 +22,8 @@ const {
   resetZine
 } = useZineStore()
 
+const { t } = useI18n()
+const { pageLabel } = useZinePageLabels()
 const toast = useToast()
 const { trackZineEvent } = useZineAnalytics()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -29,7 +33,7 @@ const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 
 let desktopMediaQuery: MediaQueryList | null = null
 let removeDesktopMediaQueryListener: (() => void) | null = null
 
-const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
+const activePageLabel = computed(() => pageLabel(state.value.selectedPageId))
 
 const previewGuides = computed({
   get: () => state.value.previewGuides,
@@ -56,7 +60,13 @@ function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
   const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
   const extraCount = files.length - 3
 
-  return extraCount > 0 ? `${names} y ${extraCount} más` : names
+  return extraCount > 0 ? t('editorShell.toasts.moreFiles', { names, count: extraCount }) : names
+}
+
+function fileCountLabel(count: number) {
+  return count === 1
+    ? t('editorShell.toasts.fileSingular')
+    : t('editorShell.toasts.filePlural')
 }
 
 async function handleFileChange(event: Event) {
@@ -87,8 +97,14 @@ async function handleFileChange(event: Event) {
     toast.add({
       color: 'error',
       icon: 'i-lucide-triangle-alert',
-      title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
-      description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? '' : 's'}: ${formatSkippedFiles(failedFiles)}.`
+      title: failedFiles.length === 1
+        ? t('editorShell.toasts.uploadFailedTitleSingle')
+        : t('editorShell.toasts.uploadFailedTitleMultiple'),
+      description: t('editorShell.toasts.skippedFiles', {
+        count: failedFiles.length,
+        fileLabel: fileCountLabel(failedFiles.length),
+        names: formatSkippedFiles(failedFiles)
+      })
     })
   }
 
@@ -96,8 +112,11 @@ async function handleFileChange(event: Event) {
     toast.add({
       color: 'warning',
       icon: 'i-lucide-info',
-      title: 'No caben todas las imágenes',
-      description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? '' : 's'} porque no quedaban páginas disponibles.`
+      title: t('editorShell.toasts.overflowTitle'),
+      description: t('editorShell.toasts.overflowDescription', {
+        count: result.overflowCount,
+        fileLabel: fileCountLabel(result.overflowCount)
+      })
     })
   }
 
@@ -105,16 +124,18 @@ async function handleFileChange(event: Event) {
     toast.add({
       color: 'warning',
       icon: 'i-lucide-info',
-      title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
+      title: result.largeFileCount === 1
+        ? t('editorShell.toasts.largeImageTitleSingle')
+        : t('editorShell.toasts.largeImageTitleMultiple'),
       description: result.largeFileCount === 1
-        ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-        : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`
+        ? t('editorShell.toasts.largeImageDescriptionSingle')
+        : t('editorShell.toasts.largeImageDescriptionMultiple', { count: result.largeFileCount })
     })
   }
 }
 
 function confirmReset() {
-  if (window.confirm('¿Reiniciar el fanzine y eliminar todos los elementos?')) {
+  if (window.confirm(t('editorShell.confirmReset'))) {
     const previousElementCount = elementCount.value
 
     resetZine()
@@ -191,10 +212,10 @@ onBeforeUnmount(() => {
         </div>
         <div class="min-w-0">
           <p class="m-0 truncate text-base font-semibold leading-5 text-default">
-            Editor de fanzines
+            {{ t('editorShell.title') }}
           </p>
           <p class="truncate text-xs text-muted">
-            Pliego A4 · {{ activePageLabel }}
+            {{ t('editorShell.sheetStatus', { page: activePageLabel }) }}
           </p>
         </div>
       </div>
@@ -202,7 +223,7 @@ onBeforeUnmount(() => {
       <div class="flex flex-1 flex-wrap items-center justify-end gap-2">
         <UButton
           icon="i-lucide-image-plus"
-          label="Subir imágenes"
+          :label="t('editorShell.uploadImages')"
           variant="outline"
           size="sm"
           class="zine-toolbar-button"
@@ -210,7 +231,7 @@ onBeforeUnmount(() => {
         />
         <UButton
           icon="i-lucide-type"
-          label="Añadir texto"
+          :label="t('editorShell.addText')"
           variant="soft"
           size="sm"
           class="zine-toolbar-button"
@@ -218,19 +239,20 @@ onBeforeUnmount(() => {
         />
         <USwitch
           v-model="previewGuides"
-          label="Guías"
+          :label="t('editorShell.guides')"
           size="sm"
           class="zine-contrast-switch hidden md:flex"
         />
+        <LocaleSwitcher />
         <UDrawer
           v-model:open="mobileToolsOpen"
-          title="Propiedades"
-          description="Ajustes del panel activo"
+          :title="t('editorShell.properties')"
+          :description="t('editorShell.propertiesDescription')"
           :ui="{ content: 'max-h-[88dvh]', body: 'space-y-6 overflow-y-auto' }"
         >
           <UButton
             icon="i-lucide-sliders-horizontal"
-            label="Propiedades"
+            :label="t('editorShell.properties')"
             variant="outline"
             size="sm"
             class="zine-toolbar-button lg:hidden"
@@ -251,14 +273,14 @@ onBeforeUnmount(() => {
           <section class="space-y-3">
             <div class="flex items-center justify-between gap-3">
               <h2 class="text-sm font-semibold text-default">
-                Paneles
+                {{ t('editorShell.panels') }}
               </h2>
               <UButton
                 icon="i-lucide-refresh-cw"
                 variant="ghost"
                 color="neutral"
                 size="xs"
-                aria-label="Reiniciar fanzine"
+                :aria-label="t('editorShell.resetAria')"
                 @click="confirmReset"
               />
             </div>
@@ -268,12 +290,12 @@ onBeforeUnmount(() => {
           <section class="space-y-3">
             <div class="flex items-center justify-between gap-3">
               <h2 class="text-sm font-semibold text-default">
-                Vista del pliego
+                {{ t('editorShell.sheetPreview') }}
               </h2>
               <USwitch
                 v-model="previewGuides"
                 size="sm"
-                aria-label="Mostrar guías"
+                :aria-label="t('editorShell.showGuidesAria')"
                 class="zine-contrast-switch"
               />
             </div>
@@ -289,12 +311,12 @@ onBeforeUnmount(() => {
               {{ activePageLabel }}
             </h2>
             <p class="truncate text-xs text-muted">
-              {{ selectedElement ? 'Elemento seleccionado' : 'Sin selección' }}
+              {{ selectedElement ? t('editorShell.selectedElement') : t('editorShell.noSelection') }}
             </p>
           </div>
           <UButton
             icon="i-lucide-maximize"
-            label="Centrar"
+            :label="t('editorShell.center')"
             variant="ghost"
             color="neutral"
             size="xs"

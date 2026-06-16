@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PAGE_IDS, PAGE_LABELS, PAGE_SHORT_LABELS, type PageId } from '~/types/zine'
+import { PAGE_IDS, type PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 const props = defineProps<{
   compact?: boolean
@@ -10,13 +11,21 @@ const props = defineProps<{
 
 const { state } = useZineStore()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+const { t } = useI18n()
+const { pageLabel, pageShortLabel } = useZinePageLabels()
 
 const pages = computed(() => PAGE_IDS.map((id) => ({
   id,
-  label: PAGE_LABELS[id],
-  short: PAGE_SHORT_LABELS[id],
+  label: pageLabel(id),
+  short: pageShortLabel(id),
   count: state.value.pageElementIds[id].length
 })))
+
+function elementCountLabel(count: number) {
+  return count === 1
+    ? t('pageSelector.elementCountSingle')
+    : t('pageSelector.elementCountMultiple', { count })
+}
 
 function choosePage(pageId: PageId) {
   selectTrackedPage(pageId, {
@@ -30,7 +39,7 @@ function choosePage(pageId: PageId) {
   <div
     class="zine-scrollbar"
     :class="props.compact ? 'flex gap-2 overflow-x-auto pb-1' : 'grid grid-cols-2 gap-2'"
-    aria-label="Paneles del fanzine"
+    :aria-label="t('pageSelector.ariaLabel')"
   >
     <button
       v-for="page in pages"
@@ -50,7 +59,7 @@ function choosePage(pageId: PageId) {
         {{ props.compact ? page.short : page.label }}
       </span>
       <span class="mt-0.5 block text-[11px] leading-4 opacity-70">
-        {{ page.count === 1 ? '1 elemento' : `${page.count} elementos` }}
+        {{ elementCountLabel(page.count) }}
       </span>
     </button>
   </div>

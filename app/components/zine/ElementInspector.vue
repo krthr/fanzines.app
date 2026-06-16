@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { FontOption, ZineElement } from '~/types/zine'
-import { FONT_OPTIONS, PAGE_LABELS } from '~/types/zine'
+import { FONT_OPTIONS } from '~/types/zine'
 import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 type ImageElement = Extract<ZineElement, { type: 'image' }>
 type HorizontalImageAlignment = 'left' | 'center' | 'right'
@@ -21,31 +22,33 @@ const {
   moveElementForward,
   moveElementBackward
 } = useZineStore()
+const { t } = useI18n()
+const { pageLabel } = useZinePageLabels()
 const { trackZineEvent } = useZineAnalytics()
 
 const fontItems = FONT_OPTIONS.map((font) => ({ label: font, value: font }))
-const styleItems = [
-  { label: 'Normal', value: 'normal' },
-  { label: 'Negrita', value: 'bold' },
-  { label: 'Cursiva', value: 'italic' }
-]
-const alignItems = [
-  { label: 'Izquierda', value: 'left', icon: 'i-lucide-align-left' },
-  { label: 'Centro', value: 'center', icon: 'i-lucide-align-center' },
-  { label: 'Derecha', value: 'right', icon: 'i-lucide-align-right' }
-]
-const imageHorizontalAlignItems = [
-  { label: 'Izq.', value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
-  { label: 'Centro', value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
-  { label: 'Der.', value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
-] satisfies Array<{ label: string, value: HorizontalImageAlignment, icon: string }>
-const imageVerticalAlignItems = [
-  { label: 'Arriba', value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
-  { label: 'Medio', value: 'middle', icon: 'i-lucide-align-vertical-justify-center' },
-  { label: 'Abajo', value: 'bottom', icon: 'i-lucide-align-vertical-justify-end' }
-] satisfies Array<{ label: string, value: VerticalImageAlignment, icon: string }>
+const styleItems = computed(() => [
+  { label: t('inspector.styles.normal'), value: 'normal' },
+  { label: t('inspector.styles.bold'), value: 'bold' },
+  { label: t('inspector.styles.italic'), value: 'italic' }
+])
+const alignItems = computed(() => [
+  { label: t('inspector.align.left'), value: 'left', icon: 'i-lucide-align-left' },
+  { label: t('inspector.align.center'), value: 'center', icon: 'i-lucide-align-center' },
+  { label: t('inspector.align.right'), value: 'right', icon: 'i-lucide-align-right' }
+])
+const imageHorizontalAlignItems = computed(() => [
+  { label: t('inspector.align.leftShort'), value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
+  { label: t('inspector.align.center'), value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
+  { label: t('inspector.align.rightShort'), value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
+] satisfies Array<{ label: string, value: HorizontalImageAlignment, icon: string }>)
+const imageVerticalAlignItems = computed(() => [
+  { label: t('inspector.align.top'), value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
+  { label: t('inspector.align.middle'), value: 'middle', icon: 'i-lucide-align-vertical-justify-center' },
+  { label: t('inspector.align.bottom'), value: 'bottom', icon: 'i-lucide-align-vertical-justify-end' }
+] satisfies Array<{ label: string, value: VerticalImageAlignment, icon: string }>)
 
-const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
+const activePageLabel = computed(() => pageLabel(state.value.selectedPageId))
 
 function fontPreviewStyle(value: unknown) {
   return {
@@ -131,11 +134,11 @@ function isAligned(value: number, target: number) {
 }
 
 function hasHorizontalImageMovement(element: ImageElement) {
-  return imageHorizontalAlignItems.some((item) => !isAligned(element.x, imageX(element, item.value)))
+  return imageHorizontalAlignItems.value.some((item) => !isAligned(element.x, imageX(element, item.value)))
 }
 
 function hasVerticalImageMovement(element: ImageElement) {
-  return imageVerticalAlignItems.some((item) => !isAligned(element.y, imageY(element, item.value)))
+  return imageVerticalAlignItems.value.some((item) => !isAligned(element.y, imageY(element, item.value)))
 }
 
 function fillImagePage() {
@@ -229,15 +232,15 @@ function sendBackward() {
   <section class="zine-inspector space-y-5">
     <div>
       <h2 class="text-sm font-semibold text-default">
-        Propiedades
+        {{ t('inspector.title') }}
       </h2>
       <p class="mt-1 text-xs leading-5 text-muted">
-        {{ selectedElement ? (selectedElement.type === 'image' ? 'Imagen seleccionada' : 'Texto seleccionado') : activePageLabel }}
+        {{ selectedElement ? (selectedElement.type === 'image' ? t('inspector.imageSelected') : t('inspector.textSelected')) : activePageLabel }}
       </p>
     </div>
 
     <div v-if="!selectedElement" class="zine-empty-state p-4 text-sm leading-6">
-      Selecciona un texto o una imagen para editar sus medidas, posición y estilo.
+      {{ t('inspector.empty') }}
     </div>
 
     <template v-else>
@@ -264,7 +267,7 @@ function sendBackward() {
           />
         </UFormField>
 
-        <UFormField label="Ancho">
+        <UFormField :label="t('inspector.width')">
           <UInputNumber
             :model-value="Math.round(selectedElement.width)"
             :min="20"
@@ -275,7 +278,7 @@ function sendBackward() {
           />
         </UFormField>
 
-        <UFormField label="Alto">
+        <UFormField :label="t('inspector.height')">
           <UInputNumber
             :model-value="Math.round(selectedElement.height)"
             :min="20"
@@ -287,7 +290,7 @@ function sendBackward() {
         </UFormField>
       </div>
 
-      <UFormField label="Rotación">
+      <UFormField :label="t('inspector.rotation')">
         <div class="flex items-center gap-3">
           <USlider
             :model-value="selectedElement.rotation"
@@ -301,7 +304,7 @@ function sendBackward() {
         </div>
       </UFormField>
 
-      <UFormField label="Opacidad">
+      <UFormField :label="t('inspector.opacity')">
         <div class="flex items-center gap-3">
           <USlider
             :model-value="Math.round(selectedElement.opacity * 100)"
@@ -316,7 +319,7 @@ function sendBackward() {
       </UFormField>
 
       <template v-if="selectedElement.type === 'text'">
-        <UFormField label="Texto">
+        <UFormField :label="t('inspector.text')">
           <UTextarea
             :model-value="selectedElement.text"
             :rows="4"
@@ -327,7 +330,7 @@ function sendBackward() {
         </UFormField>
 
         <div class="grid grid-cols-2 gap-3">
-          <UFormField label="Fuente">
+          <UFormField :label="t('inspector.font')">
             <USelect
               :model-value="selectedElement.fontFamily"
               :items="fontItems"
@@ -354,7 +357,7 @@ function sendBackward() {
             </USelect>
           </UFormField>
 
-          <UFormField label="Estilo">
+          <UFormField :label="t('inspector.style')">
             <USelect
               :model-value="selectedElement.fontStyle"
               :items="styleItems"
@@ -363,7 +366,7 @@ function sendBackward() {
             />
           </UFormField>
 
-          <UFormField label="Tamaño">
+          <UFormField :label="t('inspector.size')">
             <UInputNumber
               :model-value="selectedElement.fontSize"
               :min="12"
@@ -374,7 +377,7 @@ function sendBackward() {
             />
           </UFormField>
 
-          <UFormField label="Color">
+          <UFormField :label="t('inspector.color')">
             <input
               class="zine-input-color"
               type="color"
@@ -384,7 +387,7 @@ function sendBackward() {
           </UFormField>
         </div>
 
-        <UFormField label="Alineación">
+        <UFormField :label="t('inspector.alignment')">
           <div class="grid grid-cols-3 gap-2">
             <UButton
               v-for="item in alignItems"
@@ -404,7 +407,7 @@ function sendBackward() {
       <template v-else>
         <div class="zine-element-card p-3">
           <p class="truncate text-sm font-medium text-default">
-            {{ selectedElement.fileName || 'Imagen' }}
+            {{ selectedElement.fileName || t('inspector.imageFallback') }}
           </p>
           <p class="mt-1 text-xs text-muted">
             {{ selectedElement.naturalWidth }} x {{ selectedElement.naturalHeight }} px
@@ -415,7 +418,7 @@ function sendBackward() {
           <UButton
             block
             icon="i-lucide-expand"
-            label="Encajar en página"
+            :label="t('inspector.fitPage')"
             color="primary"
             variant="solid"
             size="sm"
@@ -425,14 +428,14 @@ function sendBackward() {
           <UButton
             block
             icon="i-lucide-maximize"
-            label="Rellenar página"
+            :label="t('inspector.fillPage')"
             color="secondary"
             variant="solid"
             size="sm"
             @click="coverImagePage"
           />
 
-          <UFormField label="Alinear horizontal">
+          <UFormField :label="t('inspector.alignHorizontal')">
             <div class="grid grid-cols-3 gap-2">
               <UButton
                 v-for="item in imageHorizontalAlignItems"
@@ -449,7 +452,7 @@ function sendBackward() {
             </div>
           </UFormField>
 
-          <UFormField label="Alinear vertical">
+          <UFormField :label="t('inspector.alignVertical')">
             <div class="grid grid-cols-3 gap-2">
               <UButton
                 v-for="item in imageVerticalAlignItems"
@@ -471,7 +474,7 @@ function sendBackward() {
       <div class="grid grid-cols-2 gap-2">
         <UButton
           icon="i-lucide-bring-to-front"
-          label="Adelante"
+          :label="t('inspector.bringForward')"
           color="neutral"
           variant="outline"
           size="sm"
@@ -479,7 +482,7 @@ function sendBackward() {
         />
         <UButton
           icon="i-lucide-send-to-back"
-          label="Atrás"
+          :label="t('inspector.sendBackward')"
           color="neutral"
           variant="outline"
           size="sm"
@@ -492,7 +495,7 @@ function sendBackward() {
         color="error"
         variant="soft"
         icon="i-lucide-trash-2"
-        label="Eliminar"
+        :label="t('inspector.delete')"
         @click="removeSelected"
       />
     </template>

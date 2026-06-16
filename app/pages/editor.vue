@@ -1,35 +1,28 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import ZineEditor from '~/components/zine/ZineEditor.client.vue'
 
 const siteUrl = 'https://fanzines.app'
-const pageUrl = `${siteUrl}/editor`
-const pageTitle = 'Editor de fanzines A4'
-const socialTitle = 'Editor de fanzines A4 | Fanzines'
-const pageDescription =
-  'Diseña un fanzine de ocho paneles en el navegador, revisa el pliego A4 y exporta un PDF listo para imprimir y doblar.'
 const socialImage = `${siteUrl}/images/og-fanzines.webp`
+const { t } = useI18n()
+const route = useRoute()
+const pageUrl = computed(() => new URL(route.path, siteUrl).href)
 
 useSeoMeta({
-  title: pageTitle,
-  description: pageDescription,
+  title: () => t('editorPage.seo.title'),
+  description: () => t('editorPage.seo.description'),
   robots: 'index, follow',
-  ogTitle: socialTitle,
-  ogDescription: pageDescription,
+  ogTitle: () => t('editorPage.seo.socialTitle'),
+  ogDescription: () => t('editorPage.seo.description'),
   ogType: 'website',
-  ogUrl: pageUrl,
+  ogUrl: () => pageUrl.value,
   ogSiteName: 'Fanzines',
   ogImage: socialImage,
-  ogImageAlt: 'Editor de Fanzines con pliego A4 y paneles de fanzine',
+  ogImageAlt: () => t('editorPage.seo.imageAlt'),
   twitterCard: 'summary_large_image',
-  twitterTitle: socialTitle,
-  twitterDescription: pageDescription,
+  twitterTitle: () => t('editorPage.seo.socialTitle'),
+  twitterDescription: () => t('editorPage.seo.description'),
   twitterImage: socialImage
-})
-
-useHead({
-  link: [
-    { rel: 'canonical', href: pageUrl }
-  ]
 })
 </script>
 
@@ -38,8 +31,8 @@ useHead({
     <ClientOnly>
       <ZineEditor />
       <template #fallback>
-        <section class="editor-loading" aria-label="Cargando editor">
-          Cargando editor.
+        <section class="editor-loading" :aria-label="t('editorPage.loadingAria')">
+          {{ t('editorPage.loading') }}
         </section>
       </template>
     </ClientOnly>
