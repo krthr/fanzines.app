@@ -1,152 +1,155 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted } from "vue";
 
-const siteUrl = 'https://fanzines.app'
-const pageTitle = 'Crea y exporta un fanzine A4'
-const socialTitle = 'Fanzines | Crea y exporta un fanzine A4'
+const siteUrl = "https://fanzines.app";
+const pageTitle = "Crea y exporta un fanzine A4";
+const socialTitle = "Fanzines | Crea y exporta un fanzine A4";
 const pageDescription =
-  'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
-const socialDescription = 'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
-const socialImage = `${siteUrl}/images/og-fanzines.webp`
+  "Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.";
+const socialDescription =
+  "Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.";
+const socialImage = `${siteUrl}/images/og-fanzines.webp`;
 
 useSeoMeta({
   title: pageTitle,
   description: pageDescription,
-  robots: 'index, follow',
+  robots: "index, follow",
   ogTitle: socialTitle,
   ogDescription: socialDescription,
-  ogType: 'website',
+  ogType: "website",
   ogUrl: siteUrl,
-  ogSiteName: 'Fanzines',
+  ogSiteName: "Fanzines",
   ogImage: socialImage,
-  ogImageAlt: 'Fanzine plegable y herramientas de edición en Fanzines',
-  twitterCard: 'summary_large_image',
+  ogImageAlt: "Fanzine plegable y herramientas de edición en Fanzines",
+  twitterCard: "summary_large_image",
   twitterTitle: socialTitle,
   twitterDescription: socialDescription,
-  twitterImage: socialImage
-})
+  twitterImage: socialImage,
+});
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl },
+    { rel: "canonical", href: siteUrl },
     {
-      rel: 'preload',
-      as: 'image',
-      href: '/_ipx/s_326x255/images/folded-zine.webp',
+      rel: "preload",
+      as: "image",
+      href: "/_ipx/s_326x255/images/folded-zine.webp",
       imagesrcset:
-        '/_ipx/s_326x255/images/folded-zine.webp 326w, /_ipx/s_430x336/images/folded-zine.webp 430w, /_ipx/s_570x445/images/folded-zine.webp 570w',
+        "/_ipx/s_326x255/images/folded-zine.webp 326w, /_ipx/s_430x336/images/folded-zine.webp 430w, /_ipx/s_570x445/images/folded-zine.webp 570w",
       imagesizes:
-        '(max-width: 500px) 326px, (max-width: 760px) 430px, (max-width: 1040px) 570px, (max-width: 1240px) 430px, 570px',
-      fetchpriority: 'high'
-    }
-  ]
-})
+        "(max-width: 500px) 326px, (max-width: 760px) 430px, (max-width: 1040px) 570px, (max-width: 1240px) 430px, 570px",
+      fetchpriority: "high",
+    },
+  ],
+});
 
 const steps = [
   {
-    title: 'Monta el pliego',
-    text: 'El editor ordena las ocho caras en una hoja A4 horizontal, lista para imprimir.'
+    title: "Monta el pliego",
+    text: "El editor ordena las ocho caras en una hoja A4 horizontal, lista para imprimir.",
   },
   {
-    title: 'Añade texto e imágenes',
-    text: 'Sube fotos o escribe directamente en cada panel. Puedes mover, girar y ajustar cada pieza.'
+    title: "Añade texto e imágenes",
+    text: "Sube fotos o escribe directamente en cada panel. Puedes mover, girar y ajustar cada pieza.",
   },
   {
-    title: 'Exporta y dobla',
-    text: 'Descarga el PDF, imprime, corta por la guía central y convierte la hoja en un fanzine.'
-  }
-]
+    title: "Exporta y dobla",
+    text: "Descarga el PDF, imprime, corta por la guía central y convierte la hoja en un fanzine.",
+  },
+];
 
-let animationContext: { revert: () => void } | null = null
+let animationContext: { revert: () => void } | null = null;
 
 onMounted(async () => {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
   }
 
   const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
-    import('gsap'),
-    import('gsap/ScrollTrigger')
-  ])
+    import("gsap"),
+    import("gsap/ScrollTrigger"),
+  ]);
 
-  gsap.registerPlugin(ScrollTrigger)
-  await nextTick()
+  gsap.registerPlugin(ScrollTrigger);
+  await nextTick();
 
-  const root = document.querySelector('.home-page')
+  const root = document.querySelector(".home-page");
 
   if (!root) {
-    return
+    return;
   }
 
   animationContext = gsap.context(() => {
-    gsap.from('.site-header', {
+    gsap.from(".site-header", {
       y: -28,
       opacity: 0,
       duration: 0.8,
-      ease: 'power3.out'
-    })
+      ease: "power3.out",
+    });
 
-    gsap.from('.hero-copy > *', {
+    gsap.from(".hero-copy > *", {
       y: 42,
       opacity: 0,
       duration: 0.9,
       stagger: 0.08,
-      ease: 'power3.out'
-    })
+      ease: "power3.out",
+    });
 
-    gsap.from('.paper-shot:not(.shot-main)', {
+    gsap.from(".paper-shot:not(.shot-main)", {
       y: 76,
       opacity: 0,
       rotate: 0,
       duration: 1,
       stagger: 0.12,
-      ease: 'power3.out'
-    })
+      ease: "power3.out",
+    });
 
-    gsap.utils.toArray<HTMLElement>('.motion-image').forEach((image) => {
+    gsap.utils.toArray<HTMLElement>(".motion-image").forEach((image) => {
       gsap.fromTo(
         image,
         {
           scale: 0.9,
           opacity: 0.72,
-          filter: 'grayscale(1) contrast(1.65)'
+          filter: "grayscale(1) contrast(1.65)",
         },
         {
           scale: 1,
           opacity: 1,
-          filter: 'grayscale(0.15) contrast(1.35)',
+          filter: "grayscale(0.15) contrast(1.35)",
           immediateRender: false,
-          ease: 'none',
+          ease: "none",
           scrollTrigger: {
             trigger: image,
-            start: 'top 88%',
-            end: 'bottom 26%',
-            scrub: true
-          }
-        }
-      )
-    })
+            start: "top 88%",
+            end: "bottom 26%",
+            scrub: true,
+          },
+        },
+      );
+    });
 
-    gsap.utils.toArray<HTMLElement>('.section-panel, .step-card').forEach((panel) => {
-      gsap.from(panel, {
-        y: 58,
-        opacity: 0,
-        immediateRender: false,
-        duration: 0.75,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: panel,
-          start: 'top 86%'
-        }
-      })
-    })
-  }, root)
-})
+    gsap.utils
+      .toArray<HTMLElement>(".section-panel, .step-card")
+      .forEach((panel) => {
+        gsap.from(panel, {
+          y: 58,
+          opacity: 0,
+          immediateRender: false,
+          duration: 0.75,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: panel,
+            start: "top 86%",
+          },
+        });
+      });
+  }, root);
+});
 
 onBeforeUnmount(() => {
-  animationContext?.revert()
-  animationContext = null
-})
+  animationContext?.revert();
+  animationContext = null;
+});
 </script>
 
 <template>
@@ -171,15 +174,22 @@ onBeforeUnmount(() => {
       <div class="hero-copy">
         <h1 id="hero-title">
           <span>Haz un fanzine&nbsp;</span>
-          <span class="hero-title-tail">en el <br class="mobile-title-break" />navegador.</span>
+          <span class="hero-title-tail"
+            >en el <br class="mobile-title-break" />navegador.</span
+          >
         </h1>
         <p>
-          Fanzines te da un editor para colocar textos e imágenes en una hoja A4 plegable.
-          Diseña cada panel, revisa el pliego completo y exporta un PDF listo para imprimir.
+          Fanzines te da un editor para colocar textos e imágenes en una hoja A4
+          plegable. Diseña cada panel, revisa el pliego completo y exporta un
+          PDF listo para imprimir.
         </p>
         <div class="actions" aria-label="Acciones principales">
-          <NuxtLink class="button button-primary" to="/editor">Abrir el editor</NuxtLink>
-          <a class="button button-secondary" href="#como-se-hace">Ver cómo se imprime</a>
+          <NuxtLink class="button button-primary" to="/editor"
+            >Abrir el editor</NuxtLink
+          >
+          <a class="button button-secondary" href="#como-se-hace"
+            >Ver cómo se imprime</a
+          >
         </div>
       </div>
 
@@ -213,12 +223,17 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <section id="editor" class="definition section-panel" aria-labelledby="definition-title">
+    <section
+      id="editor"
+      class="definition section-panel"
+      aria-labelledby="definition-title"
+    >
       <div class="definition-copy">
         <h2 id="definition-title">Editor A4</h2>
         <p>
-          Empieza con una portada vacía y trabaja panel por panel. El editor coloca cada página en
-          el orden correcto del pliego, con guías de corte y doblez para que no tengas que calcularlo.
+          Empieza con una portada vacía y trabaja panel por panel. El editor
+          coloca cada página en el orden correcto del pliego, con guías de corte
+          y doblez para que no tengas que calcularlo.
         </p>
       </div>
       <figure class="table-photo">
@@ -233,14 +248,19 @@ onBeforeUnmount(() => {
           loading="lazy"
           decoding="async"
         />
-        <figcaption>Diseña en pantalla. Termina con papel, tijeras y una mesa.</figcaption>
+        <figcaption>
+          Diseña en pantalla. Termina con papel, tijeras y una mesa.
+        </figcaption>
       </figure>
     </section>
 
     <section id="como-se-hace" class="making" aria-labelledby="making-title">
       <div class="making-intro">
         <h2 id="making-title">Del editor al papel</h2>
-        <p>El PDF sale impuesto para una hoja A4. Imprime, corta la línea central y dobla.</p>
+        <p>
+          El PDF sale impuesto para una hoja A4. Imprime, corta la línea central
+          y dobla.
+        </p>
       </div>
 
       <div class="fold-layout section-panel">
@@ -266,7 +286,9 @@ onBeforeUnmount(() => {
 
     <section class="final-cta" aria-labelledby="cta-title">
       <h2 id="cta-title">Empieza con una portada y una imagen.</h2>
-      <NuxtLink class="button button-primary" to="/editor">Crear fanzine</NuxtLink>
+      <NuxtLink class="button button-primary" to="/editor"
+        >Crear fanzine</NuxtLink
+      >
     </section>
 
     <footer>
@@ -298,9 +320,19 @@ onBeforeUnmount(() => {
     linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
     radial-gradient(circle at 72% 10%, rgb(242 61 37 / 18%), transparent 26rem),
     var(--ink);
-  background-size: 24px 24px, 24px 24px, auto, auto;
+  background-size:
+    24px 24px,
+    24px 24px,
+    auto,
+    auto;
   color: var(--paper);
-  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Outfit,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 .home-page::before,
@@ -315,8 +347,16 @@ onBeforeUnmount(() => {
 .home-page::before {
   opacity: 0.2;
   background:
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 9%) 0 1px, transparent 1px 5px),
-    repeating-linear-gradient(90deg, rgb(0 0 0 / 45%) 0 2px, transparent 2px 7px);
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 9%) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 45%) 0 2px,
+      transparent 2px 7px
+    );
   mix-blend-mode: overlay;
 }
 
@@ -325,8 +365,12 @@ onBeforeUnmount(() => {
   background-image:
     radial-gradient(circle, rgb(255 255 255 / 26%) 0 1px, transparent 1px),
     radial-gradient(circle, rgb(0 0 0 / 42%) 0 1px, transparent 1px);
-  background-position: 0 0, 9px 13px;
-  background-size: 18px 18px, 22px 22px;
+  background-position:
+    0 0,
+    9px 13px;
+  background-size:
+    18px 18px,
+    22px 22px;
 }
 
 .home-page a {
@@ -541,8 +585,17 @@ footer {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(135deg, transparent 0 84%, rgb(231 255 54 / 72%) 84% 90%, transparent 90%),
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 4px);
+    linear-gradient(
+      135deg,
+      transparent 0 84%,
+      rgb(231 255 54 / 72%) 84% 90%,
+      transparent 90%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 16%) 0 1px,
+      transparent 1px 4px
+    );
   mix-blend-mode: multiply;
 }
 
@@ -653,8 +706,7 @@ footer {
   width: 100%;
   padding: 150px max(18px, calc((100% - 1240px) / 2)) 162px;
   background:
-    linear-gradient(90deg, rgb(7 7 6 / 92%), rgb(7 7 6 / 78%)),
-    var(--paper);
+    linear-gradient(90deg, rgb(7 7 6 / 92%), rgb(7 7 6 / 78%)), var(--paper);
   border-block: 2px solid rgb(238 232 216 / 72%);
 }
 

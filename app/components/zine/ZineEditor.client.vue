@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import ElementInspector from '~/components/zine/ElementInspector.vue'
-import ExportPanel from '~/components/zine/ExportPanel.vue'
-import PageCanvas from '~/components/zine/PageCanvas.vue'
-import PageSelector from '~/components/zine/PageSelector.vue'
-import SheetPreview from '~/components/zine/SheetPreview.vue'
-import { PAGE_LABELS, type ImageBatchSkippedFile } from '~/types/zine'
-import { useZineStore } from '~/composables/useZineStore'
-import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import ElementInspector from "~/components/zine/ElementInspector.vue";
+import ExportPanel from "~/components/zine/ExportPanel.vue";
+import PageCanvas from "~/components/zine/PageCanvas.vue";
+import PageSelector from "~/components/zine/PageSelector.vue";
+import SheetPreview from "~/components/zine/SheetPreview.vue";
+import { PAGE_LABELS, type ImageBatchSkippedFile } from "~/types/zine";
+import { useZineStore } from "~/composables/useZineStore";
+import { useZineAnalytics } from "~/composables/useZineAnalytics.client";
 
 const {
   state,
@@ -17,61 +17,68 @@ const {
   addTextElement,
   deleteElement,
   selectElement,
-  resetZine
-} = useZineStore()
+  resetZine,
+} = useZineStore();
 
-const toast = useToast()
-const { trackZineEvent } = useZineAnalytics()
-const fileInput = ref<HTMLInputElement | null>(null)
-const mobileToolsOpen = ref(false)
-const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 1024px)').matches : false)
+const toast = useToast();
+const { trackZineEvent } = useZineAnalytics();
+const fileInput = ref<HTMLInputElement | null>(null);
+const mobileToolsOpen = ref(false);
+const isDesktopLayout = ref(
+  import.meta.client ? window.matchMedia("(min-width: 1024px)").matches : false,
+);
 
-let desktopMediaQuery: MediaQueryList | null = null
-let removeDesktopMediaQueryListener: (() => void) | null = null
+let desktopMediaQuery: MediaQueryList | null = null;
+let removeDesktopMediaQueryListener: (() => void) | null = null;
 
-const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
+const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId]);
 
 const previewGuides = computed({
   get: () => state.value.previewGuides,
   set: (value: boolean) => {
-    state.value.previewGuides = value
-  }
-})
+    state.value.previewGuides = value;
+  },
+});
 
 function openFilePicker() {
-  fileInput.value?.click()
+  fileInput.value?.click();
 }
 
 function handleAddTextElement() {
-  const pageId = state.value.selectedPageId
+  const pageId = state.value.selectedPageId;
 
-  addTextElement()
-  trackZineEvent('zine_text_element_added', {
+  addTextElement();
+  trackZineEvent("zine_text_element_added", {
     page_id: pageId,
-    element_count: elementCount.value
-  })
+    element_count: elementCount.value,
+  });
 }
 
 function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
-  const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
-  const extraCount = files.length - 3
+  const names = files
+    .slice(0, 3)
+    .map((file) => file.fileName)
+    .join(", ");
+  const extraCount = files.length - 3;
 
-  return extraCount > 0 ? `${names} y ${extraCount} más` : names
+  return extraCount > 0 ? `${names} y ${extraCount} más` : names;
 }
 
 async function handleFileChange(event: Event) {
-  const input = event.target as HTMLInputElement
-  const files = Array.from(input.files ?? [])
-  input.value = ''
+  const input = event.target as HTMLInputElement;
+  const files = Array.from(input.files ?? []);
+  input.value = "";
 
-  if (files.length === 0) return
+  if (files.length === 0) return;
 
-  const initialPageId = state.value.selectedPageId
-  const result = await addImageElements(files)
-  const failedFiles = result.skippedFiles.filter((file) => file.reason !== 'no-page')
-  const skippedCount = result.skippedFiles.length
+  const initialPageId = state.value.selectedPageId;
+  const result = await addImageElements(files);
+  const failedFiles = result.skippedFiles.filter(
+    (file) => file.reason !== "no-page",
+  );
+  const skippedCount = result.skippedFiles.length;
 
-  trackZineEvent('zine_images_uploaded', {
+  trackZineEvent("zine_images_uploaded", {
     page_id: initialPageId,
     file_count: files.length,
     imported_count: result.importedCount,
@@ -79,98 +86,113 @@ async function handleFileChange(event: Event) {
     failed_count: failedFiles.length,
     overflow_count: result.overflowCount,
     large_file_count: result.largeFileCount,
-    status: result.importedCount === files.length ? 'succeeded' : result.importedCount > 0 ? 'partial' : 'failed',
-    element_count: elementCount.value
-  })
+    status:
+      result.importedCount === files.length
+        ? "succeeded"
+        : result.importedCount > 0
+          ? "partial"
+          : "failed",
+    element_count: elementCount.value,
+  });
 
   if (failedFiles.length > 0) {
     toast.add({
-      color: 'error',
-      icon: 'i-lucide-triangle-alert',
-      title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
-      description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? '' : 's'}: ${formatSkippedFiles(failedFiles)}.`
-    })
+      color: "error",
+      icon: "i-lucide-triangle-alert",
+      title:
+        failedFiles.length === 1
+          ? "Imagen no cargada"
+          : "Algunas imágenes no se cargaron",
+      description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? "" : "s"}: ${formatSkippedFiles(failedFiles)}.`,
+    });
   }
 
   if (result.overflowCount > 0) {
     toast.add({
-      color: 'warning',
-      icon: 'i-lucide-info',
-      title: 'No caben todas las imágenes',
-      description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? '' : 's'} porque no quedaban páginas disponibles.`
-    })
+      color: "warning",
+      icon: "i-lucide-info",
+      title: "No caben todas las imágenes",
+      description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? "" : "s"} porque no quedaban páginas disponibles.`,
+    });
   }
 
   if (result.largeFileCount > 0) {
     toast.add({
-      color: 'warning',
-      icon: 'i-lucide-info',
-      title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
-      description: result.largeFileCount === 1
-        ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-        : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`
-    })
+      color: "warning",
+      icon: "i-lucide-info",
+      title: result.largeFileCount === 1 ? "Imagen grande" : "Imágenes grandes",
+      description:
+        result.largeFileCount === 1
+          ? "La imagen es grande; si notas lentitud, conviene usar una versión reducida."
+          : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`,
+    });
   }
 }
 
 function confirmReset() {
-  if (window.confirm('¿Reiniciar el fanzine y eliminar todos los elementos?')) {
-    const previousElementCount = elementCount.value
+  if (window.confirm("¿Reiniciar el fanzine y eliminar todos los elementos?")) {
+    const previousElementCount = elementCount.value;
 
-    resetZine()
-    trackZineEvent('zine_reset_confirmed', {
+    resetZine();
+    trackZineEvent("zine_reset_confirmed", {
       previous_element_count: previousElementCount,
-      element_count: elementCount.value
-    })
+      element_count: elementCount.value,
+    });
   }
 }
 
 function handleKeydown(event: KeyboardEvent) {
-  const target = event.target as HTMLElement | null
-  const isTyping = target?.matches('input, textarea, select, [contenteditable="true"]')
+  const target = event.target as HTMLElement | null;
+  const isTyping = target?.matches(
+    'input, textarea, select, [contenteditable="true"]',
+  );
 
-  if (isTyping) return
+  if (isTyping) return;
 
-  if (event.key === 'Escape') {
-    selectElement(null)
+  if (event.key === "Escape") {
+    selectElement(null);
   }
 
-  if ((event.key === 'Delete' || event.key === 'Backspace') && selectedElement.value) {
-    const element = selectedElement.value
+  if (
+    (event.key === "Delete" || event.key === "Backspace") &&
+    selectedElement.value
+  ) {
+    const element = selectedElement.value;
 
-    event.preventDefault()
-    deleteElement(element.id)
-    trackZineEvent('zine_element_deleted', {
+    event.preventDefault();
+    deleteElement(element.id);
+    trackZineEvent("zine_element_deleted", {
       page_id: element.pageId,
       element_type: element.type,
-      input_method: 'keyboard',
-      element_count: elementCount.value
-    })
+      input_method: "keyboard",
+      element_count: elementCount.value,
+    });
   }
 }
 
 onMounted(() => {
-  desktopMediaQuery = window.matchMedia('(min-width: 1024px)')
+  desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
   const syncDesktopLayout = () => {
-    isDesktopLayout.value = Boolean(desktopMediaQuery?.matches)
-  }
+    isDesktopLayout.value = Boolean(desktopMediaQuery?.matches);
+  };
 
-  syncDesktopLayout()
-  desktopMediaQuery.addEventListener('change', syncDesktopLayout)
-  removeDesktopMediaQueryListener = () => desktopMediaQuery?.removeEventListener('change', syncDesktopLayout)
-  window.addEventListener('keydown', handleKeydown)
-  trackZineEvent('zine_editor_opened', {
-    layout: isDesktopLayout.value ? 'desktop' : 'mobile',
+  syncDesktopLayout();
+  desktopMediaQuery.addEventListener("change", syncDesktopLayout);
+  removeDesktopMediaQueryListener = () =>
+    desktopMediaQuery?.removeEventListener("change", syncDesktopLayout);
+  window.addEventListener("keydown", handleKeydown);
+  trackZineEvent("zine_editor_opened", {
+    layout: isDesktopLayout.value ? "desktop" : "mobile",
     initial_page_id: state.value.selectedPageId,
     page_count: Object.keys(state.value.pageElementIds).length,
-    element_count: elementCount.value
-  })
-})
+    element_count: elementCount.value,
+  });
+});
 
 onBeforeUnmount(() => {
-  removeDesktopMediaQueryListener?.()
-  window.removeEventListener('keydown', handleKeydown)
-})
+  removeDesktopMediaQueryListener?.();
+  window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <template>
@@ -182,21 +204,19 @@ onBeforeUnmount(() => {
       accept="image/*"
       multiple
       @change="handleFileChange"
-    >
+    />
 
-    <header class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4">
+    <header
+      class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4"
+    >
       <div class="flex min-w-0 items-center gap-3">
-        <div class="zine-editor-mark grid size-10 place-items-center" aria-hidden="true">
+        <div
+          class="zine-editor-mark grid size-10 place-items-center"
+          aria-hidden="true"
+        >
           <UIcon class="zine-editor-mark-icon" name="i-lucide-scissors" />
         </div>
-        <div class="min-w-0">
-          <p class="m-0 truncate text-base font-semibold leading-5 text-default">
-            Editor de fanzines
-          </p>
-          <p class="truncate text-xs text-muted">
-            Pliego A4 · {{ activePageLabel }}
-          </p>
-        </div>
+        <div class="min-w-0"></div>
       </div>
 
       <div class="flex flex-1 flex-wrap items-center justify-end gap-2">
@@ -246,13 +266,13 @@ onBeforeUnmount(() => {
     </header>
 
     <section class="zine-editor-grid">
-      <aside class="zine-scrollbar zine-panel hidden overflow-y-auto p-4 lg:block">
+      <aside
+        class="zine-scrollbar zine-panel hidden overflow-y-auto p-4 lg:block"
+      >
         <div class="space-y-5">
           <section class="space-y-3">
             <div class="flex items-center justify-between gap-3">
-              <h2 class="text-sm font-semibold text-default">
-                Paneles
-              </h2>
+              <h2 class="text-sm font-semibold text-default">Paneles</h2>
               <UButton
                 icon="i-lucide-refresh-cw"
                 variant="ghost"
@@ -282,14 +302,18 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <section class="zine-workspace flex min-h-[calc(100dvh-67px)] min-w-0 flex-col">
-        <div class="zine-workbar flex items-center justify-between gap-3 px-4 py-2">
+      <section
+        class="zine-workspace flex min-h-[calc(100dvh-67px)] min-w-0 flex-col"
+      >
+        <div
+          class="zine-workbar flex items-center justify-between gap-3 px-4 py-2"
+        >
           <div class="min-w-0">
             <h2 class="truncate text-sm font-semibold text-default">
               {{ activePageLabel }}
             </h2>
             <p class="truncate text-xs text-muted">
-              {{ selectedElement ? 'Elemento seleccionado' : 'Sin selección' }}
+              {{ selectedElement ? "Elemento seleccionado" : "Sin selección" }}
             </p>
           </div>
           <UButton
@@ -315,7 +339,9 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <aside class="zine-scrollbar zine-panel hidden overflow-y-auto p-4 lg:block">
+      <aside
+        class="zine-scrollbar zine-panel hidden overflow-y-auto p-4 lg:block"
+      >
         <div class="space-y-6">
           <ElementInspector />
           <div class="border-t border-muted pt-5">

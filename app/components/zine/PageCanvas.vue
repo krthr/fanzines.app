@@ -1,98 +1,120 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
-import 'konva/lib/shapes/Image'
-import 'konva/lib/shapes/Rect'
-import 'konva/lib/shapes/Text'
-import 'konva/lib/shapes/Transformer'
-import { Image as VImage, Layer as VLayer, Rect as VRect, Stage as VStage, Text as VText, Transformer as VTransformer } from 'vue-konva/core'
-import type { Node as KonvaNode } from 'konva/lib/Node'
-import type { Stage as KonvaStage } from 'konva/lib/Stage'
-import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
-import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
-import { useZineStore } from '~/composables/useZineStore'
-import { PAGE_H, PAGE_W, clampToPage } from '~/utils/zineLayout'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  shallowReactive,
+  watch,
+} from "vue";
+import "konva/lib/shapes/Image";
+import "konva/lib/shapes/Rect";
+import "konva/lib/shapes/Text";
+import "konva/lib/shapes/Transformer";
+import {
+  Image as VImage,
+  Layer as VLayer,
+  Rect as VRect,
+  Stage as VStage,
+  Text as VText,
+  Transformer as VTransformer,
+} from "vue-konva/core";
+import type { Node as KonvaNode } from "konva/lib/Node";
+import type { Stage as KonvaStage } from "konva/lib/Stage";
+import type {
+  Box,
+  Transformer as KonvaTransformer,
+} from "konva/lib/shapes/Transformer";
+import type { ImageElement, TextElement, ZineElement } from "~/types/zine";
+import { useZineStore } from "~/composables/useZineStore";
+import { PAGE_H, PAGE_W, clampToPage } from "~/utils/zineLayout";
 
 type KonvaEvent = {
-  target: KonvaNode
-  cancelBubble: boolean
-}
+  target: KonvaNode;
+  cancelBubble: boolean;
+};
 
-const {
-  state,
-  currentPageElements,
-  selectElement,
-  updateElement
-} = useZineStore()
+const { state, currentPageElements, selectElement, updateElement } =
+  useZineStore();
 
-const containerRef = ref<HTMLElement | null>(null)
-const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
-const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
-const size = reactive({ width: 0, height: 0 })
-const loadedImages = shallowReactive(new Map<string, HTMLImageElement>())
-const failedImages = shallowReactive(new Set<string>())
+const containerRef = ref<HTMLElement | null>(null);
+const stageRef = ref<{ getNode: () => KonvaStage } | null>(null);
+const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null);
+const size = reactive({ width: 0, height: 0 });
+const loadedImages = shallowReactive(new Map<string, HTMLImageElement>());
+const failedImages = shallowReactive(new Set<string>());
 
-let resizeObserver: ResizeObserver | null = null
+let resizeObserver: ResizeObserver | null = null;
 
-const selectedId = computed(() => state.value.selectedElementId)
-const selectedElement = computed(() => selectedId.value ? state.value.elements[selectedId.value] ?? null : null)
-const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
-  .filter((element): element is ImageElement => element.type === 'image')
-  .map((element) => element.src)))
+const selectedId = computed(() => state.value.selectedElementId);
+const selectedElement = computed(() =>
+  selectedId.value ? (state.value.elements[selectedId.value] ?? null) : null,
+);
+const activeImageSources = computed(
+  () =>
+    new Set(
+      Object.values(state.value.elements)
+        .filter((element): element is ImageElement => element.type === "image")
+        .map((element) => element.src),
+    ),
+);
 
 const scale = computed(() => {
-  const widthScale = size.width > 0 ? size.width / PAGE_W : 0.5
-  const heightScale = size.height > 0 ? size.height / PAGE_H : widthScale
-  return Math.max(0.18, Math.min(widthScale, heightScale, 0.72))
-})
+  const widthScale = size.width > 0 ? size.width / PAGE_W : 0.5;
+  const heightScale = size.height > 0 ? size.height / PAGE_H : widthScale;
+  return Math.max(0.18, Math.min(widthScale, heightScale, 0.72));
+});
 
 const stageConfig = computed(() => ({
   width: Math.round(PAGE_W * scale.value),
-  height: Math.round(PAGE_H * scale.value)
-}))
+  height: Math.round(PAGE_H * scale.value),
+}));
 
 const layerConfig = computed(() => ({
   scaleX: scale.value,
-  scaleY: scale.value
-}))
+  scaleY: scale.value,
+}));
 
 const backgroundConfig = computed(() => ({
   x: 0,
   y: 0,
   width: PAGE_W,
   height: PAGE_H,
-  fill: '#ffffff',
-  stroke: '#070706',
+  fill: "#ffffff",
+  stroke: "#070706",
   strokeWidth: 2,
-  name: 'page-background',
-  listening: true
-}))
+  name: "page-background",
+  listening: true,
+}));
 
 const transformerConfig = computed(() => {
-  const element = selectedElement.value
-  const isText = element?.type === 'text'
+  const element = selectedElement.value;
+  const isText = element?.type === "text";
 
   return {
     rotateEnabled: true,
     keepRatio: !isText,
     enabledAnchors: isText
-      ? ['middle-left', 'middle-right']
-      : ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+      ? ["middle-left", "middle-right"]
+      : ["top-left", "top-right", "bottom-left", "bottom-right"],
     anchorSize: 10,
     anchorCornerRadius: 2,
-    borderStroke: '#f23d25',
-    anchorStroke: '#070706',
-    anchorFill: '#e7ff36',
+    borderStroke: "#f23d25",
+    anchorStroke: "#070706",
+    anchorFill: "#e7ff36",
     boundBoxFunc: (_oldBox: Box, newBox: Box) => {
-      if (newBox.width < 20 || newBox.height < 20) return _oldBox
-      return newBox
-    }
-  }
-})
+      if (newBox.width < 20 || newBox.height < 20) return _oldBox;
+      return newBox;
+    },
+  };
+});
 
 function imageConfig(element: ImageElement) {
   return {
     id: element.id,
-    name: 'zine-element',
+    name: "zine-element",
     image: loadedImages.get(element.src),
     x: element.x,
     y: element.y,
@@ -100,31 +122,31 @@ function imageConfig(element: ImageElement) {
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    draggable: !element.locked
-  }
+    draggable: !element.locked,
+  };
 }
 
 function imageFallbackConfig(element: ImageElement) {
   return {
     id: element.id,
-    name: 'zine-element',
+    name: "zine-element",
     x: element.x,
     y: element.y,
     width: element.width,
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    fill: failedImages.has(element.src) ? '#ffd3ca' : '#fff6c8',
-    stroke: failedImages.has(element.src) ? '#f23d25' : '#070706',
+    fill: failedImages.has(element.src) ? "#ffd3ca" : "#fff6c8",
+    stroke: failedImages.has(element.src) ? "#f23d25" : "#070706",
     dash: [12, 8],
-    draggable: !element.locked
-  }
+    draggable: !element.locked,
+  };
 }
 
 function textConfig(element: TextElement) {
   return {
     id: element.id,
-    name: 'zine-element',
+    name: "zine-element",
     x: element.x,
     y: element.y,
     width: element.width,
@@ -138,149 +160,158 @@ function textConfig(element: TextElement) {
     fill: element.fill,
     align: element.align,
     lineHeight: element.lineHeight,
-    wrap: 'word',
-    draggable: !element.locked
-  }
+    wrap: "word",
+    draggable: !element.locked,
+  };
 }
 
 function handleStagePointer(event: KonvaEvent) {
-  const stage = event.target.getStage()
-  const clickedTransformer = event.target.getParent()?.className === 'Transformer'
+  const stage = event.target.getStage();
+  const clickedTransformer =
+    event.target.getParent()?.className === "Transformer";
 
-  if (clickedTransformer) return
+  if (clickedTransformer) return;
 
-  if (event.target === stage || event.target.name() === 'page-background') {
-    selectElement(null)
+  if (event.target === stage || event.target.name() === "page-background") {
+    selectElement(null);
   }
 }
 
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
-  event.cancelBubble = true
-  selectElement(element.id)
+  event.cancelBubble = true;
+  selectElement(element.id);
 }
 
 function handleDragEnd(element: ZineElement, event: KonvaEvent) {
-  const node = event.target
+  const node = event.target;
   updateElement(element.id, {
     x: clampToPage(node.x(), PAGE_W),
-    y: clampToPage(node.y(), PAGE_H)
-  })
+    y: clampToPage(node.y(), PAGE_H),
+  });
 }
 
 function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
-  const node = event.target
-  const scaleX = node.scaleX()
-  const scaleY = node.scaleY()
+  const node = event.target;
+  const scaleX = node.scaleX();
+  const scaleY = node.scaleY();
 
-  if (element.type === 'image') {
+  if (element.type === "image") {
     updateElement(element.id, {
       x: clampToPage(node.x(), PAGE_W),
       y: clampToPage(node.y(), PAGE_H),
       width: Math.max(20, node.width() * scaleX),
       height: Math.max(20, node.height() * scaleY),
-      rotation: node.rotation()
-    })
+      rotation: node.rotation(),
+    });
   } else {
     updateElement(element.id, {
       x: clampToPage(node.x(), PAGE_W),
       y: clampToPage(node.y(), PAGE_H),
       width: Math.max(80, node.width() * scaleX),
-      rotation: node.rotation()
-    })
+      rotation: node.rotation(),
+    });
   }
 
-  node.scaleX(1)
-  node.scaleY(1)
-  updateTransformer()
+  node.scaleX(1);
+  node.scaleY(1);
+  updateTransformer();
 }
 
 function updateTransformer() {
   nextTick(() => {
-    const transformerNode = transformerRef.value?.getNode()
-    const stage = stageRef.value?.getNode()
+    const transformerNode = transformerRef.value?.getNode();
+    const stage = stageRef.value?.getNode();
 
-    if (!transformerNode || !stage) return
+    if (!transformerNode || !stage) return;
 
-    const selectedNode = selectedId.value ? stage.findOne(`#${selectedId.value}`) : null
-    transformerNode.nodes(selectedNode ? [selectedNode] : [])
-    transformerNode.getLayer()?.batchDraw()
-  })
+    const selectedNode = selectedId.value
+      ? stage.findOne(`#${selectedId.value}`)
+      : null;
+    transformerNode.nodes(selectedNode ? [selectedNode] : []);
+    transformerNode.getLayer()?.batchDraw();
+  });
 }
 
 function loadCanvasImages() {
-  pruneCanvasImageMaps()
-  const images = currentPageElements.value.filter((element): element is ImageElement => element.type === 'image')
+  pruneCanvasImageMaps();
+  const images = currentPageElements.value.filter(
+    (element): element is ImageElement => element.type === "image",
+  );
 
   for (const element of images) {
-    if (loadedImages.has(element.src) || failedImages.has(element.src)) continue
+    if (loadedImages.has(element.src) || failedImages.has(element.src))
+      continue;
 
-    const image = new Image()
+    const image = new Image();
     image.onload = () => {
-      loadedImages.set(element.src, image)
-      failedImages.delete(element.src)
-      updateTransformer()
-      stageRef.value?.getNode().batchDraw()
-    }
+      loadedImages.set(element.src, image);
+      failedImages.delete(element.src);
+      updateTransformer();
+      stageRef.value?.getNode().batchDraw();
+    };
     image.onerror = () => {
-      failedImages.add(element.src)
-      updateTransformer()
-    }
-    image.src = element.src
+      failedImages.add(element.src);
+      updateTransformer();
+    };
+    image.src = element.src;
   }
 }
 
 function pruneCanvasImageMaps() {
-  const activeSources = activeImageSources.value
+  const activeSources = activeImageSources.value;
 
   for (const src of loadedImages.keys()) {
     if (!activeSources.has(src)) {
-      loadedImages.delete(src)
+      loadedImages.delete(src);
     }
   }
 
   for (const src of failedImages.keys()) {
     if (!activeSources.has(src)) {
-      failedImages.delete(src)
+      failedImages.delete(src);
     }
   }
 }
 
 onMounted(() => {
-  if (!containerRef.value) return
+  if (!containerRef.value) return;
 
   resizeObserver = new ResizeObserver(([entry]) => {
-    const rect = entry.contentRect
-    size.width = rect.width
-    size.height = rect.height
-  })
-  resizeObserver.observe(containerRef.value)
-  loadCanvasImages()
-  updateTransformer()
-})
+    const rect = entry.contentRect;
+    size.width = rect.width;
+    size.height = rect.height;
+  });
+  resizeObserver.observe(containerRef.value);
+  loadCanvasImages();
+  updateTransformer();
+});
 
 onBeforeUnmount(() => {
-  resizeObserver?.disconnect()
-})
+  resizeObserver?.disconnect();
+});
 
 watch(
   () => [
     state.value.selectedPageId,
     selectedId.value,
     currentPageElements.value.length,
-    currentPageElements.value.map((element) => element.id).join(','),
-    [...activeImageSources.value].join(',')
+    currentPageElements.value.map((element) => element.id).join(","),
+    [...activeImageSources.value].join(","),
   ],
   () => {
-    pruneCanvasImageMaps()
-    loadCanvasImages()
-    updateTransformer()
+    pruneCanvasImageMaps();
+    loadCanvasImages();
+    updateTransformer();
   },
-  { flush: 'post' }
-)
+  { flush: "post" },
+);
 </script>
 
 <template>
-  <div ref="containerRef" class="zine-canvas-wrap flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8">
+  <div
+    ref="containerRef"
+    class="zine-canvas-wrap flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8"
+  >
     <VStage
       ref="stageRef"
       :config="stageConfig"
@@ -295,26 +326,44 @@ watch(
           <VImage
             v-if="element.type === 'image' && loadedImages.has(element.src)"
             :config="imageConfig(element)"
-            @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mousedown="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
+            @touchstart="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-            @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
+            @transformend="
+              (event: KonvaEvent) => handleTransformEnd(element, event)
+            "
           />
           <VRect
             v-else-if="element.type === 'image'"
             :config="imageFallbackConfig(element)"
-            @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mousedown="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
+            @touchstart="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-            @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
+            @transformend="
+              (event: KonvaEvent) => handleTransformEnd(element, event)
+            "
           />
           <VText
             v-else
             :config="textConfig(element)"
-            @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mousedown="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
+            @touchstart="
+              (event: KonvaEvent) => handleElementPointer(element, event)
+            "
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-            @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
+            @transformend="
+              (event: KonvaEvent) => handleTransformEnd(element, event)
+            "
           />
         </template>
 

@@ -7,18 +7,18 @@
     "enabled": true,
     "logs": {
       "enabled": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
     },
     "traces": {
       "enabled": true,
-      "head_sampling_rate": 1
-    }
+      "head_sampling_rate": 1,
+    },
   },
   "routes": [
     {
       "pattern": "beta.fanzines.app",
-      "custom_domain": true
-    }
+      "custom_domain": true,
+    },
   ],
-  "preview_urls": true
+  "preview_urls": true,
 }

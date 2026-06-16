@@ -1,36 +1,34 @@
 <script setup lang="ts">
-import ZineEditor from '~/components/zine/ZineEditor.client.vue'
+import ZineEditor from "~/components/zine/ZineEditor.client.vue";
 
-const siteUrl = 'https://fanzines.app'
-const pageUrl = `${siteUrl}/editor`
-const pageTitle = 'Editor de fanzines A4'
-const socialTitle = 'Editor de fanzines A4 | Fanzines'
+const siteUrl = "https://fanzines.app";
+const pageUrl = `${siteUrl}/editor`;
+const pageTitle = "Editor de fanzines A4";
+const socialTitle = "Editor de fanzines A4 | Fanzines";
 const pageDescription =
-  'Diseña un fanzine de ocho paneles en el navegador, revisa el pliego A4 y exporta un PDF listo para imprimir y doblar.'
-const socialImage = `${siteUrl}/images/og-fanzines.webp`
+  "Diseña un fanzine de ocho paneles en el navegador, revisa el pliego A4 y exporta un PDF listo para imprimir y doblar.";
+const socialImage = `${siteUrl}/images/og-fanzines.webp`;
 
 useSeoMeta({
   title: pageTitle,
   description: pageDescription,
-  robots: 'index, follow',
+  robots: "index, follow",
   ogTitle: socialTitle,
   ogDescription: pageDescription,
-  ogType: 'website',
+  ogType: "website",
   ogUrl: pageUrl,
-  ogSiteName: 'Fanzines',
+  ogSiteName: "Fanzines",
   ogImage: socialImage,
-  ogImageAlt: 'Editor de Fanzines con pliego A4 y paneles de fanzine',
-  twitterCard: 'summary_large_image',
+  ogImageAlt: "Editor de Fanzines con pliego A4 y paneles de fanzine",
+  twitterCard: "summary_large_image",
   twitterTitle: socialTitle,
   twitterDescription: pageDescription,
-  twitterImage: socialImage
-})
+  twitterImage: socialImage,
+});
 
 useHead({
-  link: [
-    { rel: 'canonical', href: pageUrl }
-  ]
-})
+  link: [{ rel: "canonical", href: pageUrl }],
+});
 </script>
 
 <template>
@@ -58,7 +56,13 @@ useHead({
     var(--zine-bg);
   background-size: 24px 24px;
   color: var(--zine-paper);
-  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Outfit,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 .editor-loading {
@@ -67,5 +71,4 @@ useHead({
   color: rgb(238 232 216 / 72%);
   font-size: 0.95rem;
 }
-
 </style>

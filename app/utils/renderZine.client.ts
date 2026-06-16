@@ -1,8 +1,8 @@
-import type { Group } from 'konva/lib/Group'
-import { Image as KonvaImage } from 'konva/lib/shapes/Image'
-import { Text as KonvaText } from 'konva/lib/shapes/Text'
-import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
-import { loadCachedHtmlImage } from '~/utils/zineImageCache'
+import type { Group } from "konva/lib/Group";
+import { Image as KonvaImage } from "konva/lib/shapes/Image";
+import { Text as KonvaText } from "konva/lib/shapes/Text";
+import type { ImageElement, TextElement, ZineElement } from "~/types/zine";
+import { loadCachedHtmlImage } from "~/utils/zineImageCache";
 
 function createImageNode(element: ImageElement, image: HTMLImageElement) {
   return new KonvaImage({
@@ -13,8 +13,8 @@ function createImageNode(element: ImageElement, image: HTMLImageElement) {
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    listening: false
-  })
+    listening: false,
+  });
 }
 
 function createTextNode(element: TextElement) {
@@ -32,22 +32,25 @@ function createTextNode(element: TextElement) {
     fill: element.fill,
     align: element.align,
     lineHeight: element.lineHeight,
-    wrap: 'word',
-    listening: false
-  })
+    wrap: "word",
+    listening: false,
+  });
 }
 
 export async function createElementNode(element: ZineElement) {
-  if (element.type === 'image') {
-    const image = await loadCachedHtmlImage(element.src)
-    return createImageNode(element, image)
+  if (element.type === "image") {
+    const image = await loadCachedHtmlImage(element.src);
+    return createImageNode(element, image);
   }
 
-  return createTextNode(element)
+  return createTextNode(element);
 }
 
-export async function renderElementsIntoGroup(group: Group, elements: ZineElement[]) {
+export async function renderElementsIntoGroup(
+  group: Group,
+  elements: ZineElement[],
+) {
   for (const element of elements) {
-    group.add(await createElementNode(element))
+    group.add(await createElementNode(element));
   }
 }
