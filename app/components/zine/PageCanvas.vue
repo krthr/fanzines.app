@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
+import type { CSSProperties } from 'vue'
 import 'konva/lib/shapes/Image'
 import 'konva/lib/shapes/Rect'
 import 'konva/lib/shapes/Text'
@@ -8,13 +9,23 @@ import { Image as VImage, Layer as VLayer, Rect as VRect, Stage as VStage, Text 
 import type { Node as KonvaNode } from 'konva/lib/Node'
 import type { Stage as KonvaStage } from 'konva/lib/Stage'
 import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
-import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
+import { DEFAULT_TEXT_CONTENT, type ImageElement, type TextElement, type ZineElement } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { PAGE_H, PAGE_W, clampToPage } from '~/utils/zineLayout'
 
 type KonvaEvent = {
   target: KonvaNode
   cancelBubble: boolean
+}
+
+type TextEditOptions = {
+  selectAll?: boolean
+}
+
+type TextEditState = {
+  id: string
+  draft: string
+  height: number
 }
 
 const {
@@ -27,14 +38,23 @@ const {
 const containerRef = ref<HTMLElement | null>(null)
 const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
 const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
+const editingTextareaRef = ref<HTMLTextAreaElement | null>(null)
 const size = reactive({ width: 0, height: 0 })
 const loadedImages = shallowReactive(new Map<string, HTMLImageElement>())
 const failedImages = shallowReactive(new Set<string>())
+const editingText = ref<TextEditState | null>(null)
 
 let resizeObserver: ResizeObserver | null = null
 
 const selectedId = computed(() => state.value.selectedElementId)
 const selectedElement = computed(() => selectedId.value ? state.value.elements[selectedId.value] ?? null : null)
+const editingElement = computed(() => {
+  const id = editingText.value?.id
+  const element = id ? state.value.elements[id] ?? null : null
+
+  return element?.type === 'text' ? element : null
+})
+const editingTextValue = computed(() => editingText.value?.draft ?? '')
 const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
   .filter((element): element is ImageElement => element.type === 'image')
   .map((element) => element.src)))
@@ -72,6 +92,7 @@ const transformerConfig = computed(() => {
   const isText = element?.type === 'text'
 
   return {
+    visible: !editingText.value,
     rotateEnabled: true,
     keepRatio: !isText,
     enabledAnchors: isText
@@ -86,6 +107,49 @@ const transformerConfig = computed(() => {
       if (newBox.width < 20 || newBox.height < 20) return _oldBox
       return newBox
     }
+  }
+})
+
+const textEditorStyle = computed<CSSProperties>(() => {
+  const element = editingElement.value
+  const edit = editingText.value
+
+  if (!element || !edit) return {}
+
+  const stageContainer = stageRef.value?.getNode().container()
+  const container = containerRef.value
+  const scaleValue = scale.value
+  let stageLeft = 0
+  let stageTop = 0
+
+  if (stageContainer && container) {
+    const stageRect = stageContainer.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    stageLeft = stageRect.left - containerRect.left + container.scrollLeft
+    stageTop = stageRect.top - containerRect.top + container.scrollTop
+  }
+
+  const fontSize = element.fontSize * scaleValue
+  const lineHeight = element.fontSize * element.lineHeight * scaleValue
+  const height = Math.max(lineHeight, edit.height * scaleValue)
+
+  return {
+    position: 'absolute',
+    left: `${stageLeft + element.x * scaleValue}px`,
+    top: `${stageTop + element.y * scaleValue}px`,
+    width: `${Math.max(24, element.width * scaleValue)}px`,
+    height: `${height}px`,
+    minHeight: `${lineHeight}px`,
+    color: element.fill,
+    opacity: element.opacity,
+    fontFamily: element.fontFamily,
+    fontSize: `${fontSize}px`,
+    fontStyle: element.fontStyle === 'italic' ? 'italic' : 'normal',
+    fontWeight: element.fontStyle === 'bold' ? '700' : '400',
+    lineHeight: String(element.lineHeight),
+    textAlign: element.align,
+    transform: `rotate(${element.rotation}deg)`,
+    transformOrigin: 'top left'
   }
 })
 
@@ -122,6 +186,8 @@ function imageFallbackConfig(element: ImageElement) {
 }
 
 function textConfig(element: TextElement) {
+  const isEditing = editingText.value?.id === element.id
+
   return {
     id: element.id,
     name: 'zine-element',
@@ -139,7 +205,8 @@ function textConfig(element: TextElement) {
     align: element.align,
     lineHeight: element.lineHeight,
     wrap: 'word',
-    draggable: !element.locked
+    visible: !isEditing,
+    draggable: !element.locked && !isEditing
   }
 }
 
@@ -157,6 +224,11 @@ function handleStagePointer(event: KonvaEvent) {
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
   event.cancelBubble = true
   selectElement(element.id)
+}
+
+function handleTextEditRequest(element: TextElement, event: KonvaEvent) {
+  event.cancelBubble = true
+  void startTextEditing(element.id)
 }
 
 function handleDragEnd(element: ZineElement, event: KonvaEvent) {
@@ -201,10 +273,120 @@ function updateTransformer() {
 
     if (!transformerNode || !stage) return
 
+    if (editingText.value) {
+      transformerNode.nodes([])
+      transformerNode.getLayer()?.batchDraw()
+      return
+    }
+
     const selectedNode = selectedId.value ? stage.findOne(`#${selectedId.value}`) : null
     transformerNode.nodes(selectedNode ? [selectedNode] : [])
     transformerNode.getLayer()?.batchDraw()
   })
+}
+
+function syncTextEditorHeight() {
+  const textarea = editingTextareaRef.value
+  const edit = editingText.value
+  const element = editingElement.value
+
+  if (!textarea || !edit || !element) return
+
+  textarea.style.height = 'auto'
+
+  const scaleValue = scale.value
+  const lineHeight = element.fontSize * element.lineHeight * scaleValue
+  const minHeight = Math.max(lineHeight, element.height * scaleValue)
+  const nextHeight = Math.max(minHeight, textarea.scrollHeight)
+
+  edit.height = nextHeight / scaleValue
+  textarea.style.height = `${nextHeight}px`
+}
+
+async function startTextEditing(id: string, options: TextEditOptions = {}) {
+  const element = state.value.elements[id]
+
+  if (element?.type !== 'text' || element.locked) return
+
+  selectElement(id)
+  editingText.value = {
+    id,
+    draft: element.text,
+    height: element.height
+  }
+  updateTransformer()
+
+  await nextTick()
+
+  if (editingText.value?.id !== id) return
+
+  const textarea = editingTextareaRef.value
+
+  if (!textarea) return
+
+  syncTextEditorHeight()
+  textarea.focus()
+
+  if (options.selectAll) {
+    textarea.select()
+    return
+  }
+
+  const cursorPosition = textarea.value.length
+  textarea.setSelectionRange(cursorPosition, cursorPosition)
+}
+
+function commitTextEditing() {
+  const edit = editingText.value
+  const element = editingElement.value
+
+  if (!edit) return
+
+  if (!element) {
+    editingText.value = null
+    updateTransformer()
+    return
+  }
+
+  const text = edit.draft.trim().length > 0 ? edit.draft : DEFAULT_TEXT_CONTENT
+
+  updateElement(edit.id, {
+    text,
+    height: Math.max(element.height, edit.height)
+  } as Partial<ZineElement>)
+  editingText.value = null
+  updateTransformer()
+}
+
+function cancelTextEditing() {
+  if (!editingText.value) return
+
+  editingText.value = null
+  updateTransformer()
+}
+
+function handleTextEditorInput(event: Event) {
+  const textarea = event.target as HTMLTextAreaElement
+
+  if (!editingText.value) return
+
+  editingText.value.draft = textarea.value
+  syncTextEditorHeight()
+}
+
+function handleTextEditorKeydown(event: KeyboardEvent) {
+  event.stopPropagation()
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    cancelTextEditing()
+    return
+  }
+
+  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault()
+    commitTextEditing()
+  }
 }
 
 function loadCanvasImages() {
@@ -263,6 +445,30 @@ onBeforeUnmount(() => {
 })
 
 watch(
+  () => state.value.selectedPageId,
+  () => {
+    commitTextEditing()
+  }
+)
+
+watch(
+  editingElement,
+  (element) => {
+    if (!element && editingText.value) {
+      editingText.value = null
+      updateTransformer()
+    }
+  },
+  { flush: 'post' }
+)
+
+watch(
+  () => editingText.value?.id,
+  () => updateTransformer(),
+  { flush: 'post' }
+)
+
+watch(
   () => [
     state.value.selectedPageId,
     selectedId.value,
@@ -277,10 +483,14 @@ watch(
   },
   { flush: 'post' }
 )
+
+defineExpose({
+  startTextEditing
+})
 </script>
 
 <template>
-  <div ref="containerRef" class="zine-canvas-wrap flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8">
+  <div ref="containerRef" class="zine-canvas-wrap relative flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8">
     <VStage
       ref="stageRef"
       :config="stageConfig"
@@ -313,6 +523,8 @@ watch(
             :config="textConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @dblclick="(event: KonvaEvent) => handleTextEditRequest(element, event)"
+            @dbltap="(event: KonvaEvent) => handleTextEditRequest(element, event)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -321,5 +533,44 @@ watch(
         <VTransformer ref="transformerRef" :config="transformerConfig" />
       </VLayer>
     </VStage>
+
+    <textarea
+      v-if="editingElement"
+      ref="editingTextareaRef"
+      aria-label="Editar texto del fanzine"
+      class="zine-inline-text-editor"
+      :style="textEditorStyle"
+      :value="editingTextValue"
+      spellcheck="false"
+      @input="handleTextEditorInput"
+      @keydown="handleTextEditorKeydown"
+      @blur="commitTextEditing"
+      @click.stop
+      @mousedown.stop
+      @touchstart.stop
+    />
   </div>
 </template>
+
+<style scoped>
+.zine-inline-text-editor {
+  box-sizing: border-box;
+  z-index: 20;
+  margin: 0;
+  padding: 0;
+  resize: none;
+  overflow: hidden;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #f23d25;
+  border-radius: 2px;
+  outline: 2px solid rgba(231, 255, 54, 0.84);
+  box-shadow: 0 0 0 1px rgba(7, 7, 6, 0.22);
+  letter-spacing: 0;
+  caret-color: currentColor;
+}
+
+.zine-inline-text-editor::selection {
+  background: rgba(242, 61, 37, 0.22);
+}
+</style>

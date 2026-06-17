@@ -44,6 +44,8 @@ export const FONT_OPTIONS = [
   'system-ui'
 ] as const
 
+export const DEFAULT_TEXT_CONTENT = 'Escribe aquí'
+
 export type FontOption = typeof FONT_OPTIONS[number]
 
 export type BaseElement = {

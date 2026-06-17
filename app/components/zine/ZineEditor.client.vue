@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ElementInspector from '~/components/zine/ElementInspector.vue'
 import ExportPanel from '~/components/zine/ExportPanel.vue'
 import PageCanvas from '~/components/zine/PageCanvas.vue'
@@ -23,6 +23,7 @@ const {
 const toast = useToast()
 const { trackZineEvent } = useZineAnalytics()
 const fileInput = ref<HTMLInputElement | null>(null)
+const pageCanvasRef = ref<InstanceType<typeof PageCanvas> | null>(null)
 const mobileToolsOpen = ref(false)
 const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 1024px)').matches : false)
 
@@ -42,14 +43,17 @@ function openFilePicker() {
   fileInput.value?.click()
 }
 
-function handleAddTextElement() {
+async function handleAddTextElement() {
   const pageId = state.value.selectedPageId
 
-  addTextElement()
+  const elementId = addTextElement()
   trackZineEvent('zine_text_element_added', {
     page_id: pageId,
     element_count: elementCount.value
   })
+
+  await nextTick()
+  await pageCanvasRef.value?.startTextEditing(elementId, { selectAll: true })
 }
 
 function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
@@ -304,7 +308,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="min-h-0 flex-1">
-          <PageCanvas />
+          <PageCanvas ref="pageCanvasRef" />
         </div>
 
         <div class="zine-mobile-panel space-y-3 p-3 lg:hidden">
