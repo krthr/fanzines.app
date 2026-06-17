@@ -236,6 +236,25 @@ select {
   background-size: 22px 22px;
 }
 
+.zine-inline-text-editor {
+  position: absolute;
+  z-index: 30;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0;
+  border: 2px solid var(--zine-cut);
+  border-radius: 0;
+  outline: 2px solid var(--zine-accent);
+  background: rgb(255 255 255 / 90%);
+  padding: 0;
+  resize: none;
+  box-shadow: 4px 4px 0 rgb(0 0 0 / 58%);
+  caret-color: var(--zine-cut);
+  cursor: text;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
 .zine-page-tile {
   border: 2px solid currentcolor;
   background: var(--zine-paper);
