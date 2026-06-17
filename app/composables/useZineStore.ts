@@ -145,6 +145,10 @@ function activeImageSources(state: ZineState) {
     .map((element) => element.src))
 }
 
+function isEmptyTextElement(element: ZineElement | undefined): element is TextElement {
+  return element?.type === 'text' && element.text.trim().length === 0
+}
+
 export function useZineStore() {
   const state = useState<ZineState>('mini-zine-a4-state', createInitialZineState)
   const cachePruneWatchRegistered = useState('mini-zine-a4-cache-prune-watch-registered', () => false)
@@ -168,16 +172,31 @@ export function useZineStore() {
 
   const elementCount = computed(() => Object.keys(state.value.elements).length)
 
+  function deleteSelectedEmptyTextElement() {
+    const selectedId = state.value.selectedElementId
+    const element = selectedId ? state.value.elements[selectedId] : undefined
+
+    if (selectedId && isEmptyTextElement(element)) {
+      deleteElement(selectedId)
+    }
+  }
+
   function selectPage(pageId: PageId) {
+    deleteSelectedEmptyTextElement()
     state.value.selectedPageId = pageId
     state.value.selectedElementId = null
   }
 
   function selectElement(id: string | null) {
+    if (id !== state.value.selectedElementId) {
+      deleteSelectedEmptyTextElement()
+    }
+
     state.value.selectedElementId = id
   }
 
   function insertElement(element: ZineElement) {
+    deleteSelectedEmptyTextElement()
     state.value.elements[element.id] = element
     state.value.pageElementIds[element.pageId].push(element.id)
     state.value.selectedElementId = element.id
