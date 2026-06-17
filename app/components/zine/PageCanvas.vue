@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
+import type { CSSProperties } from 'vue'
 import 'konva/lib/shapes/Image'
 import 'konva/lib/shapes/Rect'
 import 'konva/lib/shapes/Text'
@@ -36,6 +37,11 @@ const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
 const size = reactive({ width: 0, height: 0 })
 const loadedImages = shallowReactive(new Map<string, HTMLImageElement>())
 const failedImages = shallowReactive(new Set<string>())
+const editingTextId = ref<string | null>(null)
+const editingTextValue = ref('')
+const textEditorRef = ref<HTMLTextAreaElement | null>(null)
+const isDraggingElement = ref(false)
+const hoveredElementId = ref<string | null>(null)
 const isCanvasDragOver = ref(false)
 let canvasDragDepth = 0
 
@@ -43,6 +49,11 @@ let resizeObserver: ResizeObserver | null = null
 
 const selectedId = computed(() => state.value.selectedElementId)
 const selectedElement = computed(() => selectedId.value ? state.value.elements[selectedId.value] ?? null : null)
+const editingTextElement = computed(() => {
+  const element = editingTextId.value ? state.value.elements[editingTextId.value] ?? null : null
+  return element?.type === 'text' ? element : null
+})
+const hoveredElement = computed(() => hoveredElementId.value ? state.value.elements[hoveredElementId.value] ?? null : null)
 const isEmptyPage = computed(() => currentPageElements.value.length === 0)
 const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
   .filter((element): element is ImageElement => element.type === 'image')
@@ -75,6 +86,44 @@ const backgroundConfig = computed(() => ({
   name: 'page-background',
   listening: true
 }))
+
+const canvasCursor = computed(() => {
+  const movableHoveredElement = hoveredElement.value && !hoveredElement.value.locked && editingTextId.value !== hoveredElement.value.id
+  const movableSelectedElement = selectedElement.value && !selectedElement.value.locked && !editingTextId.value
+
+  if (isDraggingElement.value) return 'grabbing'
+  if (movableHoveredElement || movableSelectedElement) return 'grab'
+  return 'default'
+})
+
+const textEditorStyle = computed<CSSProperties>(() => {
+  const element = editingTextElement.value
+  const container = containerRef.value
+  const stage = stageRef.value?.getNode()
+
+  if (!element || !container || !stage) return {}
+
+  const stageRect = stage.container().getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  const canvasScale = scale.value
+
+  return {
+    left: `${stageRect.left - containerRect.left + container.scrollLeft + element.x * canvasScale}px`,
+    top: `${stageRect.top - containerRect.top + container.scrollTop + element.y * canvasScale}px`,
+    width: `${Math.max(80, element.width * canvasScale)}px`,
+    minHeight: `${Math.max(40, element.height * canvasScale)}px`,
+    color: element.fill,
+    fontFamily: element.fontFamily,
+    fontSize: `${element.fontSize * canvasScale}px`,
+    fontStyle: element.fontStyle === 'italic' ? 'italic' : 'normal',
+    fontWeight: element.fontStyle === 'bold' ? 700 : 400,
+    lineHeight: String(element.lineHeight),
+    opacity: element.opacity,
+    textAlign: element.align,
+    transform: `rotate(${element.rotation}deg)`,
+    transformOrigin: 'top left'
+  }
+})
 
 const transformerConfig = computed(() => {
   const element = selectedElement.value
@@ -109,7 +158,7 @@ function imageConfig(element: ImageElement) {
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    draggable: !element.locked
+    draggable: !element.locked && editingTextId.value !== element.id
   }
 }
 
@@ -126,11 +175,13 @@ function imageFallbackConfig(element: ImageElement) {
     fill: failedImages.has(element.src) ? '#ffd3ca' : '#fff6c8',
     stroke: failedImages.has(element.src) ? '#f23d25' : '#070706',
     dash: [12, 8],
-    draggable: !element.locked
+    draggable: !element.locked && editingTextId.value !== element.id
   }
 }
 
 function textConfig(element: TextElement) {
+  const isEditing = editingTextId.value === element.id
+
   return {
     id: element.id,
     name: 'zine-element',
@@ -148,7 +199,73 @@ function textConfig(element: TextElement) {
     align: element.align,
     lineHeight: element.lineHeight,
     wrap: 'word',
-    draggable: !element.locked
+    visible: !isEditing,
+    listening: !isEditing,
+    draggable: !element.locked && !isEditing
+  }
+}
+
+function setStageCursor(cursor: string) {
+  const stage = stageRef.value?.getNode()
+  if (!stage) return
+  stage.container().style.cursor = cursor
+}
+
+function resetStageCursor() {
+  setStageCursor('')
+}
+
+function getPagePointFromClient(clientX: number, clientY: number) {
+  const stage = stageRef.value?.getNode()
+  if (!stage) return null
+
+  const rect = stage.container().getBoundingClientRect()
+
+  if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+    return null
+  }
+
+  return {
+    x: (clientX - rect.left) / scale.value,
+    y: (clientY - rect.top) / scale.value
+  }
+}
+
+function isPointInsideElement(element: ZineElement, point: { x: number, y: number }) {
+  const radians = -(element.rotation * Math.PI) / 180
+  const dx = point.x - element.x
+  const dy = point.y - element.y
+  const localX = dx * Math.cos(radians) - dy * Math.sin(radians)
+  const localY = dx * Math.sin(radians) + dy * Math.cos(radians)
+
+  return localX >= 0 && localX <= element.width && localY >= 0 && localY <= element.height
+}
+
+function elementAtPagePoint(point: { x: number, y: number }) {
+  return [...currentPageElements.value]
+    .reverse()
+    .find((element) => isPointInsideElement(element, point)) ?? null
+}
+
+function handleCanvasMouseMove(event: MouseEvent) {
+  if (isDraggingElement.value) return
+
+  const point = getPagePointFromClient(event.clientX, event.clientY)
+  const element = point ? elementAtPagePoint(point) : null
+  hoveredElementId.value = element?.id ?? null
+
+  if (element && !element.locked && editingTextId.value !== element.id) {
+    setStageCursor('grab')
+  } else {
+    resetStageCursor()
+  }
+}
+
+function handleCanvasMouseLeave() {
+  hoveredElementId.value = null
+
+  if (!isDraggingElement.value) {
+    resetStageCursor()
   }
 }
 
@@ -173,11 +290,34 @@ function handleStagePointer(event: KonvaEvent) {
   if (clickedTransformer) return
 
   if (event.target === stage || event.target.name() === 'page-background') {
+    hoveredElementId.value = null
+    resetStageCursor()
     if (isEmptyPage.value) {
       openFilePicker()
       return
     }
     selectElement(null)
+  }
+}
+
+function handleStagePointerMove(event: KonvaEvent) {
+  if (isDraggingElement.value) return
+
+  const stage = event.target.getStage()
+  const clickedTransformer = event.target.getParent()?.className === 'Transformer'
+
+  if (event.target === stage || event.target.name() === 'page-background' || clickedTransformer) {
+    resetStageCursor()
+    return
+  }
+
+  const elementId = event.target.id()
+  const element = elementId ? state.value.elements[elementId] ?? null : null
+
+  if (element && !element.locked && editingTextId.value !== element.id) {
+    setStageCursor('grab')
+  } else {
+    resetStageCursor()
   }
 }
 
@@ -215,7 +355,32 @@ function handleCanvasDrop(event: DragEvent) {
 
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
   event.cancelBubble = true
+  if (!element.locked && editingTextId.value !== element.id) {
+    hoveredElementId.value = element.id
+    setStageCursor('grab')
+  }
   selectElement(element.id)
+}
+
+function handleElementPointerEnter(element: ZineElement) {
+  if (!element.locked && editingTextId.value !== element.id) {
+    hoveredElementId.value = element.id
+    setStageCursor('grab')
+  }
+}
+
+function handleElementPointerLeave() {
+  hoveredElementId.value = null
+
+  if (!isDraggingElement.value) {
+    resetStageCursor()
+  }
+}
+
+function handleDragStart(element: ZineElement) {
+  if (element.locked) return
+  isDraggingElement.value = true
+  setStageCursor('grabbing')
 }
 
 function handleDragEnd(element: ZineElement, event: KonvaEvent) {
@@ -224,6 +389,8 @@ function handleDragEnd(element: ZineElement, event: KonvaEvent) {
     x: clampToPage(node.x(), PAGE_W),
     y: clampToPage(node.y(), PAGE_H)
   })
+  isDraggingElement.value = false
+  setStageCursor(element.locked ? 'default' : 'grab')
 }
 
 function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
@@ -260,10 +427,131 @@ function updateTransformer() {
 
     if (!transformerNode || !stage) return
 
-    const selectedNode = selectedId.value ? stage.findOne(`#${selectedId.value}`) : null
+    const selectedNode = selectedId.value && !editingTextId.value ? stage.findOne(`#${selectedId.value}`) : null
     transformerNode.nodes(selectedNode ? [selectedNode] : [])
     transformerNode.getLayer()?.batchDraw()
+
+    if (editingTextId.value) {
+      resetStageCursor()
+    } else if (selectedElement.value && !selectedElement.value.locked) {
+      setStageCursor('grab')
+    } else {
+      resetStageCursor()
+    }
   })
+}
+
+function updateTextEditorHeight() {
+  nextTick(() => {
+    const editor = textEditorRef.value
+    const element = editingTextElement.value
+
+    if (!editor || !element) return
+
+    editor.style.height = 'auto'
+    editor.style.height = `${Math.max(element.height * scale.value, editor.scrollHeight)}px`
+  })
+}
+
+function startEditingText(element: TextElement) {
+  if (element.locked) return
+
+  selectElement(element.id)
+  editingTextId.value = element.id
+  editingTextValue.value = element.text
+  hoveredElementId.value = null
+  resetStageCursor()
+  updateTransformer()
+
+  nextTick(() => {
+    const editor = textEditorRef.value
+    if (!editor) return
+
+    editor.focus()
+    editor.setSelectionRange(editor.value.length, editor.value.length)
+    updateTextEditorHeight()
+  })
+}
+
+function commitTextEdit() {
+  const element = editingTextElement.value
+
+  if (element) {
+    updateElement(element.id, {
+      text: editingTextValue.value
+    })
+  }
+
+  editingTextId.value = null
+  editingTextValue.value = ''
+  hoveredElementId.value = null
+  updateTransformer()
+}
+
+function cancelTextEdit() {
+  editingTextId.value = null
+  editingTextValue.value = ''
+  hoveredElementId.value = null
+  updateTransformer()
+}
+
+function handleTextEditRequest(element: TextElement, event: KonvaEvent) {
+  event.cancelBubble = true
+  startEditingText(element)
+}
+
+function handleTextEditorInput(event: Event) {
+  editingTextValue.value = (event.target as HTMLTextAreaElement).value
+  updateTextEditorHeight()
+}
+
+function handleTextEditorKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    cancelTextEdit()
+    return
+  }
+
+  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault()
+    event.stopPropagation()
+    commitTextEdit()
+  }
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  const element = target as HTMLElement | null
+  if (!element) return false
+
+  return Boolean(element.closest([
+    'a[href]',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    '[contenteditable="true"]',
+    '[role="button"]',
+    '[role="checkbox"]',
+    '[role="combobox"]',
+    '[role="menuitem"]',
+    '[role="option"]',
+    '[role="radio"]',
+    '[role="slider"]',
+    '[role="switch"]',
+    '[role="tab"]',
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(',')))
+}
+
+function handleWindowKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Enter' || isInteractiveTarget(event.target)) return
+
+  const element = selectedElement.value
+  if (element?.type !== 'text' || element.locked) return
+
+  event.preventDefault()
+  startEditingText(element)
 }
 
 function loadCanvasImages() {
@@ -313,12 +601,14 @@ onMounted(() => {
     size.height = rect.height
   })
   resizeObserver.observe(containerRef.value)
+  window.addEventListener('keydown', handleWindowKeydown)
   loadCanvasImages()
   updateTransformer()
 })
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect()
+  window.removeEventListener('keydown', handleWindowKeydown)
 })
 
 watch(
@@ -327,6 +617,7 @@ watch(
     selectedId.value,
     currentPageElements.value.length,
     currentPageElements.value.map((element) => element.id).join(','),
+    editingTextId.value,
     [...activeImageSources.value].join(',')
   ],
   () => {
@@ -341,18 +632,22 @@ watch(
 <template>
   <div
     ref="containerRef"
-    class="zine-canvas-wrap flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8"
+    class="zine-canvas-wrap relative flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8"
     :class="{ 'zine-canvas-dragover': isCanvasDragOver, 'zine-canvas-empty': isEmptyPage }"
+    :style="{ cursor: canvasCursor }"
     @dragenter="handleCanvasDragEnter"
     @dragover="handleCanvasDragOver"
     @dragleave="handleCanvasDragLeave"
     @drop="handleCanvasDrop"
+    @mouseleave="handleCanvasMouseLeave"
+    @mousemove="handleCanvasMouseMove"
   >
     <VStage
       ref="stageRef"
       :config="stageConfig"
       class="shadow-[var(--zine-shadow)]"
       @mousedown="handleStagePointer"
+      @mousemove="handleStagePointerMove"
       @touchstart="handleStagePointer"
     >
       <VLayer :config="layerConfig">
@@ -364,6 +659,9 @@ watch(
             :config="imageConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mouseenter="() => handleElementPointerEnter(element)"
+            @mouseleave="handleElementPointerLeave"
+            @dragstart="() => handleDragStart(element)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -372,6 +670,9 @@ watch(
             :config="imageFallbackConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mouseenter="() => handleElementPointerEnter(element)"
+            @mouseleave="handleElementPointerLeave"
+            @dragstart="() => handleDragStart(element)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -380,14 +681,31 @@ watch(
             :config="textConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+            @mouseenter="() => handleElementPointerEnter(element)"
+            @mouseleave="handleElementPointerLeave"
+            @dragstart="() => handleDragStart(element)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
+            @dblclick="(event: KonvaEvent) => handleTextEditRequest(element, event)"
+            @dbltap="(event: KonvaEvent) => handleTextEditRequest(element, event)"
           />
         </template>
 
         <VTransformer ref="transformerRef" :config="transformerConfig" />
       </VLayer>
     </VStage>
+
+    <textarea
+      v-if="editingTextElement"
+      ref="textEditorRef"
+      aria-label="Editar texto del fanzine"
+      class="zine-inline-text-editor"
+      :style="textEditorStyle"
+      :value="editingTextValue"
+      @blur="commitTextEdit"
+      @input="handleTextEditorInput"
+      @keydown="handleTextEditorKeydown"
+    />
 
     <div v-if="isEmptyPage" class="zine-canvas-empty-hint" :class="{ 'zine-canvas-empty-hint-active': isCanvasDragOver }" aria-hidden="true">
       <UIcon name="i-lucide-image-plus" class="zine-canvas-empty-hint-icon" />

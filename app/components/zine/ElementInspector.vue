@@ -316,16 +316,6 @@ function sendBackward() {
       </UFormField>
 
       <template v-if="selectedElement.type === 'text'">
-        <UFormField label="Texto">
-          <UTextarea
-            :model-value="selectedElement.text"
-            :rows="4"
-            autoresize
-            class="w-full"
-            @update:model-value="(value) => patch({ text: String(value ?? '') })"
-          />
-        </UFormField>
-
         <div class="grid grid-cols-2 gap-3">
           <UFormField label="Fuente">
             <USelect
