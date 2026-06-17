@@ -228,7 +228,7 @@ export function useZineStore() {
     }
   }
 
-  async function addImageElements(files: File[]): Promise<ImageBatchInsertResult> {
+  async function addImageElements(files: File[], startPageId?: PageId): Promise<ImageBatchInsertResult> {
     const result: ImageBatchInsertResult = {
       importedCount: 0,
       skippedFiles: [],
@@ -238,7 +238,8 @@ export function useZineStore() {
       overflowCount: 0
     }
 
-    const startIndex = PAGE_IDS.indexOf(state.value.selectedPageId)
+    const effectiveStartPageId = startPageId && PAGE_IDS.includes(startPageId) ? startPageId : state.value.selectedPageId
+    const startIndex = PAGE_IDS.indexOf(effectiveStartPageId)
     const targetPageIds = PAGE_IDS.slice(Math.max(startIndex, 0))
     let targetPageIndex = 0
     let lastInsertedPageId: PageId | null = null
