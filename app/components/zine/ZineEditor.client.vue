@@ -5,23 +5,25 @@ import ExportPanel from '~/components/zine/ExportPanel.vue'
 import PageCanvas from '~/components/zine/PageCanvas.vue'
 import PageSelector from '~/components/zine/PageSelector.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
-import { PAGE_LABELS, type ImageBatchSkippedFile } from '~/types/zine'
+import { PAGE_LABELS } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
+import { useZineImageImport } from '~/composables/useZineImageImport.client'
+import { useZineDragState } from '~/composables/useZineDragState.client'
 
 const {
   state,
   elementCount,
   selectedElement,
-  addImageElements,
   addTextElement,
   deleteElement,
   selectElement,
   resetZine
 } = useZineStore()
 
-const toast = useToast()
 const { trackZineEvent } = useZineAnalytics()
+const { processImageFiles } = useZineImageImport()
+const { isDragActive, markDragEnter, markDragLeave, resetDrag } = useZineDragState()
 const fileInput = ref<HTMLInputElement | null>(null)
 const mobileToolsOpen = ref(false)
 const isDesktopLayout = ref(import.meta.client ? window.matchMedia('(min-width: 1024px)').matches : false)
@@ -38,8 +40,22 @@ const previewGuides = computed({
   }
 })
 
+function isFileDrag(event: DragEvent): boolean {
+  return Boolean(event.dataTransfer?.types.includes('Files'))
+}
+
 function openFilePicker() {
   fileInput.value?.click()
+}
+
+async function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  input.value = ''
+
+  if (files.length === 0) return
+
+  await processImageFiles(files, { inputMethod: 'file_picker' })
 }
 
 function handleAddTextElement() {
@@ -52,65 +68,35 @@ function handleAddTextElement() {
   })
 }
 
-function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
-  const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
-  const extraCount = files.length - 3
-
-  return extraCount > 0 ? `${names} y ${extraCount} más` : names
+function handleShellDragEnter(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  markDragEnter()
 }
 
-async function handleFileChange(event: Event) {
-  const input = event.target as HTMLInputElement
-  const files = Array.from(input.files ?? [])
-  input.value = ''
+function handleShellDragOver(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  event.preventDefault()
+}
 
-  if (files.length === 0) return
+function handleShellDragLeave(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  markDragLeave()
+}
 
-  const initialPageId = state.value.selectedPageId
-  const result = await addImageElements(files)
-  const failedFiles = result.skippedFiles.filter((file) => file.reason !== 'no-page')
-  const skippedCount = result.skippedFiles.length
+function handleShellDrop(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  event.preventDefault()
+  resetDrag()
+  const files = Array.from(event.dataTransfer?.files ?? [])
+  void processImageFiles(files, { inputMethod: 'drag_drop', dropTarget: 'shell' })
+}
 
-  trackZineEvent('zine_images_uploaded', {
-    page_id: initialPageId,
-    file_count: files.length,
-    imported_count: result.importedCount,
-    skipped_count: skippedCount,
-    failed_count: failedFiles.length,
-    overflow_count: result.overflowCount,
-    large_file_count: result.largeFileCount,
-    status: result.importedCount === files.length ? 'succeeded' : result.importedCount > 0 ? 'partial' : 'failed',
-    element_count: elementCount.value
-  })
+function preventDefaultFileDragOver(event: DragEvent) {
+  if (event.dataTransfer?.types.includes('Files')) event.preventDefault()
+}
 
-  if (failedFiles.length > 0) {
-    toast.add({
-      color: 'error',
-      icon: 'i-lucide-triangle-alert',
-      title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
-      description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? '' : 's'}: ${formatSkippedFiles(failedFiles)}.`
-    })
-  }
-
-  if (result.overflowCount > 0) {
-    toast.add({
-      color: 'warning',
-      icon: 'i-lucide-info',
-      title: 'No caben todas las imágenes',
-      description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? '' : 's'} porque no quedaban páginas disponibles.`
-    })
-  }
-
-  if (result.largeFileCount > 0) {
-    toast.add({
-      color: 'warning',
-      icon: 'i-lucide-info',
-      title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
-      description: result.largeFileCount === 1
-        ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-        : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`
-    })
-  }
+function preventDefaultFileDrop(event: DragEvent) {
+  if (event.dataTransfer?.types.includes('Files')) event.preventDefault()
 }
 
 function confirmReset() {
@@ -159,6 +145,8 @@ onMounted(() => {
   desktopMediaQuery.addEventListener('change', syncDesktopLayout)
   removeDesktopMediaQueryListener = () => desktopMediaQuery?.removeEventListener('change', syncDesktopLayout)
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('dragover', preventDefaultFileDragOver)
+  window.addEventListener('drop', preventDefaultFileDrop)
   trackZineEvent('zine_editor_opened', {
     layout: isDesktopLayout.value ? 'desktop' : 'mobile',
     initial_page_id: state.value.selectedPageId,
@@ -170,11 +158,27 @@ onMounted(() => {
 onBeforeUnmount(() => {
   removeDesktopMediaQueryListener?.()
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('dragover', preventDefaultFileDragOver)
+  window.removeEventListener('drop', preventDefaultFileDrop)
 })
 </script>
 
 <template>
-  <div class="zine-shell min-h-dvh">
+  <div
+    class="zine-shell min-h-dvh"
+    @dragenter="handleShellDragEnter"
+    @dragover="handleShellDragOver"
+    @dragleave="handleShellDragLeave"
+    @drop="handleShellDrop"
+  >
+    <div v-if="isDragActive" class="zine-drop-overlay" aria-hidden="true">
+      <div class="zine-drop-overlay-card">
+        <UIcon name="i-lucide-image-plus" class="zine-drop-overlay-icon" />
+        <p class="zine-drop-overlay-title">Suelta las imágenes para añadirlas</p>
+        <p class="zine-drop-overlay-sub">Se centrarán en el panel actual</p>
+      </div>
+    </div>
+
     <input
       ref="fileInput"
       class="hidden"
