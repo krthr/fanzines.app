@@ -520,13 +520,32 @@ function handleTextEditorKeydown(event: KeyboardEvent) {
   }
 }
 
-function isTypingTarget(target: EventTarget | null) {
+function isInteractiveTarget(target: EventTarget | null) {
   const element = target as HTMLElement | null
-  return element?.matches('input, textarea, select, [contenteditable="true"]') ?? false
+  if (!element) return false
+
+  return Boolean(element.closest([
+    'a[href]',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    '[contenteditable="true"]',
+    '[role="button"]',
+    '[role="checkbox"]',
+    '[role="combobox"]',
+    '[role="menuitem"]',
+    '[role="option"]',
+    '[role="radio"]',
+    '[role="slider"]',
+    '[role="switch"]',
+    '[role="tab"]',
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(',')))
 }
 
 function handleWindowKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Enter' || isTypingTarget(event.target)) return
+  if (event.key !== 'Enter' || isInteractiveTarget(event.target)) return
 
   const element = selectedElement.value
   if (element?.type !== 'text' || element.locked) return
