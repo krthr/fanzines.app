@@ -228,6 +228,7 @@ select {
 }
 
 .zine-canvas-wrap {
+  position: relative;
   touch-action: none;
   background:
     linear-gradient(90deg, rgb(238 232 216 / 6%) 1px, transparent 1px),
@@ -274,6 +275,117 @@ select {
 
 .zine-page-tile-idle {
   color: rgb(7 7 6 / 72%);
+}
+
+.zine-page-tile-dropover {
+  border-style: dashed;
+  border-color: var(--zine-accent-strong);
+  background: var(--zine-accent);
+  color: var(--zine-ink);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgb(242 61 37 / 82%);
+}
+
+.zine-canvas-dragover {
+  outline: 3px dashed var(--zine-accent);
+  outline-offset: -6px;
+  background:
+    linear-gradient(90deg, rgb(231 255 54 / 14%) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(231 255 54 / 12%) 1px, transparent 1px),
+    rgb(7 7 6 / 46%);
+  background-size: 22px 22px;
+}
+
+.zine-canvas-empty-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 2rem;
+  border: 2px dashed rgb(29 28 24 / 26%);
+  background: rgb(255 255 255 / 60%);
+  color: rgb(29 28 24 / 46%);
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.zine-canvas-empty-hint-active {
+  border-color: var(--zine-accent-strong);
+  background: rgb(231 255 54 / 22%);
+  color: rgb(29 28 24 / 78%);
+}
+
+.zine-canvas-empty-hint-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.zine-canvas-empty-hint-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.zine-canvas-empty-hint-sub {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+.zine-canvas-empty .konva-content {
+  cursor: pointer;
+}
+
+.zine-drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgb(7 7 6 / 64%);
+  backdrop-filter: blur(2px);
+}
+
+.zine-drop-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 2.75rem;
+  border: 3px dashed var(--zine-accent);
+  background: rgb(7 7 6 / 86%);
+  color: var(--zine-paper);
+  box-shadow: 10px 10px 0 rgb(242 61 37 / 72%);
+  text-align: center;
+}
+
+.zine-drop-overlay-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--zine-accent);
+}
+
+.zine-drop-overlay-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.zine-drop-overlay-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgb(238 232 216 / 72%);
 }
 
 .zine-empty-state,

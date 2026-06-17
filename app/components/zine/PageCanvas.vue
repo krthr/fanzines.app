@@ -11,6 +11,8 @@ import type { Stage as KonvaStage } from 'konva/lib/Stage'
 import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
 import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useZineImageImport } from '~/composables/useZineImageImport.client'
+import { useZineDragState } from '~/composables/useZineDragState.client'
 import { PAGE_H, PAGE_W, clampToPage } from '~/utils/zineLayout'
 
 type KonvaEvent = {
@@ -25,7 +27,11 @@ const {
   updateElement
 } = useZineStore()
 
+const { processImageFiles } = useZineImageImport()
+const { resetDrag } = useZineDragState()
+
 const containerRef = ref<HTMLElement | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
 const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
 const size = reactive({ width: 0, height: 0 })
@@ -36,6 +42,8 @@ const editingTextValue = ref('')
 const textEditorRef = ref<HTMLTextAreaElement | null>(null)
 const isDraggingElement = ref(false)
 const hoveredElementId = ref<string | null>(null)
+const isCanvasDragOver = ref(false)
+let canvasDragDepth = 0
 
 let resizeObserver: ResizeObserver | null = null
 
@@ -46,6 +54,7 @@ const editingTextElement = computed(() => {
   return element?.type === 'text' ? element : null
 })
 const hoveredElement = computed(() => hoveredElementId.value ? state.value.elements[hoveredElementId.value] ?? null : null)
+const isEmptyPage = computed(() => currentPageElements.value.length === 0)
 const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
   .filter((element): element is ImageElement => element.type === 'image')
   .map((element) => element.src)))
@@ -260,6 +269,20 @@ function handleCanvasMouseLeave() {
   }
 }
 
+function openFilePicker() {
+  fileInput.value?.click()
+}
+
+async function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  input.value = ''
+
+  if (files.length === 0) return
+
+  await processImageFiles(files, { inputMethod: 'file_picker' })
+}
+
 function handleStagePointer(event: KonvaEvent) {
   const stage = event.target.getStage()
   const clickedTransformer = event.target.getParent()?.className === 'Transformer'
@@ -269,6 +292,10 @@ function handleStagePointer(event: KonvaEvent) {
   if (event.target === stage || event.target.name() === 'page-background') {
     hoveredElementId.value = null
     resetStageCursor()
+    if (isEmptyPage.value) {
+      openFilePicker()
+      return
+    }
     selectElement(null)
   }
 }
@@ -292,6 +319,38 @@ function handleStagePointerMove(event: KonvaEvent) {
   } else {
     resetStageCursor()
   }
+}
+
+function isFileDrag(event: DragEvent): boolean {
+  return Boolean(event.dataTransfer?.types.includes('Files'))
+}
+
+function handleCanvasDragEnter(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  canvasDragDepth += 1
+  isCanvasDragOver.value = true
+}
+
+function handleCanvasDragOver(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  event.preventDefault()
+}
+
+function handleCanvasDragLeave(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  canvasDragDepth = Math.max(0, canvasDragDepth - 1)
+  if (canvasDragDepth === 0) isCanvasDragOver.value = false
+}
+
+function handleCanvasDrop(event: DragEvent) {
+  if (!isFileDrag(event)) return
+  event.preventDefault()
+  event.stopPropagation()
+  canvasDragDepth = 0
+  isCanvasDragOver.value = false
+  resetDrag()
+  const files = Array.from(event.dataTransfer?.files ?? [])
+  void processImageFiles(files, { inputMethod: 'drag_drop', dropTarget: 'canvas' })
 }
 
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
@@ -555,7 +614,12 @@ watch(
   <div
     ref="containerRef"
     class="zine-canvas-wrap relative flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8"
+    :class="{ 'zine-canvas-dragover': isCanvasDragOver, 'zine-canvas-empty': isEmptyPage }"
     :style="{ cursor: canvasCursor }"
+    @dragenter="handleCanvasDragEnter"
+    @dragover="handleCanvasDragOver"
+    @dragleave="handleCanvasDragLeave"
+    @drop="handleCanvasDrop"
     @mouseleave="handleCanvasMouseLeave"
     @mousemove="handleCanvasMouseMove"
   >
@@ -623,5 +687,20 @@ watch(
       @input="handleTextEditorInput"
       @keydown="handleTextEditorKeydown"
     />
+
+    <div v-if="isEmptyPage" class="zine-canvas-empty-hint" :class="{ 'zine-canvas-empty-hint-active': isCanvasDragOver }" aria-hidden="true">
+      <UIcon name="i-lucide-image-plus" class="zine-canvas-empty-hint-icon" />
+      <p class="zine-canvas-empty-hint-title">Haz clic o arrastra</p>
+      <p class="zine-canvas-empty-hint-sub">imágenes para añadir al panel</p>
+    </div>
+
+    <input
+      ref="fileInput"
+      class="hidden"
+      type="file"
+      accept="image/*"
+      multiple
+      @change="handleFileChange"
+    >
   </div>
 </template>
