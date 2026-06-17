@@ -1,5 +1,6 @@
 import { computed, watch } from 'vue'
 import {
+  DEFAULT_TEXT_CONTENT,
   FONT_OPTIONS,
   PAGE_IDS,
   type ImageBatchInsertResult,
@@ -320,7 +321,7 @@ export function useZineStore() {
       id: createId(),
       type: 'text',
       pageId: state.value.selectedPageId,
-      text: 'Escribe aquí',
+      text: DEFAULT_TEXT_CONTENT,
       x: PAGE_W * 0.15,
       y: PAGE_H * 0.16,
       width: PAGE_W * 0.7,
@@ -336,6 +337,7 @@ export function useZineStore() {
     }
 
     insertElement(element)
+    return element.id
   }
 
   function updateElement(id: string, patch: Partial<ZineElement>) {

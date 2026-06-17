@@ -20,6 +20,10 @@ type KonvaEvent = {
   cancelBubble: boolean
 }
 
+type TextEditOptions = {
+  selectAll?: boolean
+}
+
 const {
   state,
   currentPageElements,
@@ -473,6 +477,19 @@ function startEditingText(element: TextElement) {
   })
 }
 
+async function startTextEditing(id: string, options: TextEditOptions = {}) {
+  const element = state.value.elements[id]
+
+  if (element?.type !== 'text') return
+
+  startEditingText(element)
+  await nextTick()
+
+  if (options.selectAll && editingTextId.value === id) {
+    textEditorRef.value?.select()
+  }
+}
+
 function commitTextEdit() {
   const element = editingTextElement.value
 
@@ -627,6 +644,10 @@ watch(
   },
   { flush: 'post' }
 )
+
+defineExpose({
+  startTextEditing
+})
 </script>
 
 <template>
