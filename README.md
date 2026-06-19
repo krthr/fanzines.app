@@ -127,8 +127,10 @@ fanzines/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
 │   └── images/                     # Fotos y guías (webp)
+├── server/
+│   └── middleware/redirect-www.ts  # 301 www.fanzines.app → fanzines.app
 ├── nuxt.config.ts                  # Módulos, SEO, fuentes, iconos, routeRules
-├── wrangler.jsonc                  # Configuración de Cloudflare Workers
+├── wrangler.jsonc                  # Configuración de Cloudflare Workers (dominios)
 ├── .nvmrc                          # Node 26
 └── package.json
 ```
@@ -165,7 +167,7 @@ Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está defi
 
 ## Despliegue
 
-El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominio personalizado `beta.fanzines.app`, flag `nodejs_compat`, observabilidad activada).
+El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominio personalizado `fanzines.app` con `www.fanzines.app` redirigiendo al apex vía [`server/middleware/redirect-www.ts`](server/middleware/redirect-www.ts), flag `nodejs_compat`, observabilidad activada).
 
 ```bash
 npm run build

@@ -16,7 +16,11 @@
   },
   "routes": [
     {
-      "pattern": "beta.fanzines.app",
+      "pattern": "fanzines.app",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.fanzines.app",
       "custom_domain": true
     }
   ],
