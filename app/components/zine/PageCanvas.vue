@@ -45,7 +45,6 @@ const editingTextId = ref<string | null>(null)
 const editingTextValue = ref('')
 const textEditorRef = ref<HTMLTextAreaElement | null>(null)
 const isDraggingElement = ref(false)
-const hoveredElementId = ref<string | null>(null)
 const isCanvasDragOver = ref(false)
 let canvasDragDepth = 0
 
@@ -57,7 +56,6 @@ const editingTextElement = computed(() => {
   const element = editingTextId.value ? state.value.elements[editingTextId.value] ?? null : null
   return element?.type === 'text' ? element : null
 })
-const hoveredElement = computed(() => hoveredElementId.value ? state.value.elements[hoveredElementId.value] ?? null : null)
 const isEmptyPage = computed(() => currentPageElements.value.length === 0)
 const activeImageSources = computed(() => new Set(Object.values(state.value.elements)
   .filter((element): element is ImageElement => element.type === 'image')
@@ -90,15 +88,6 @@ const backgroundConfig = computed(() => ({
   name: 'page-background',
   listening: true
 }))
-
-const canvasCursor = computed(() => {
-  const movableHoveredElement = hoveredElement.value && !hoveredElement.value.locked && editingTextId.value !== hoveredElement.value.id
-  const movableSelectedElement = selectedElement.value && !selectedElement.value.locked && !editingTextId.value
-
-  if (isDraggingElement.value) return 'grabbing'
-  if (movableHoveredElement || movableSelectedElement) return 'grab'
-  return 'default'
-})
 
 const textEditorStyle = computed<CSSProperties>(() => {
   const element = editingTextElement.value
@@ -209,65 +198,17 @@ function textConfig(element: TextElement) {
   }
 }
 
-function setStageCursor(cursor: string) {
-  const stage = stageRef.value?.getNode()
+function setStageCursor(cursor: string, event?: KonvaEvent) {
+  const stage = event?.target.getStage() ?? stageRef.value?.getNode()
   if (!stage) return
   stage.container().style.cursor = cursor
 }
 
-function resetStageCursor() {
-  setStageCursor('')
-}
-
-function getPagePointFromClient(clientX: number, clientY: number) {
-  const stage = stageRef.value?.getNode()
-  if (!stage) return null
-
-  const rect = stage.container().getBoundingClientRect()
-
-  if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
-    return null
-  }
-
-  return {
-    x: (clientX - rect.left) / scale.value,
-    y: (clientY - rect.top) / scale.value
-  }
-}
-
-function isPointInsideElement(element: ZineElement, point: { x: number, y: number }) {
-  const radians = -(element.rotation * Math.PI) / 180
-  const dx = point.x - element.x
-  const dy = point.y - element.y
-  const localX = dx * Math.cos(radians) - dy * Math.sin(radians)
-  const localY = dx * Math.sin(radians) + dy * Math.cos(radians)
-
-  return localX >= 0 && localX <= element.width && localY >= 0 && localY <= element.height
-}
-
-function elementAtPagePoint(point: { x: number, y: number }) {
-  return [...currentPageElements.value]
-    .reverse()
-    .find((element) => isPointInsideElement(element, point)) ?? null
-}
-
-function handleCanvasMouseMove(event: MouseEvent) {
-  if (isDraggingElement.value) return
-
-  const point = getPagePointFromClient(event.clientX, event.clientY)
-  const element = point ? elementAtPagePoint(point) : null
-  hoveredElementId.value = element?.id ?? null
-
-  if (element && !element.locked && editingTextId.value !== element.id) {
-    setStageCursor('grab')
-  } else {
-    resetStageCursor()
-  }
+function resetStageCursor(event?: KonvaEvent) {
+  setStageCursor('', event)
 }
 
 function handleCanvasMouseLeave() {
-  hoveredElementId.value = null
-
   if (!isDraggingElement.value) {
     resetStageCursor()
   }
@@ -294,34 +235,12 @@ function handleStagePointer(event: KonvaEvent) {
   if (clickedTransformer) return
 
   if (event.target === stage || event.target.name() === 'page-background') {
-    hoveredElementId.value = null
-    resetStageCursor()
+    resetStageCursor(event)
     if (isEmptyPage.value) {
       openFilePicker()
       return
     }
     selectElement(null)
-  }
-}
-
-function handleStagePointerMove(event: KonvaEvent) {
-  if (isDraggingElement.value) return
-
-  const stage = event.target.getStage()
-  const clickedTransformer = event.target.getParent()?.className === 'Transformer'
-
-  if (event.target === stage || event.target.name() === 'page-background' || clickedTransformer) {
-    resetStageCursor()
-    return
-  }
-
-  const elementId = event.target.id()
-  const element = elementId ? state.value.elements[elementId] ?? null : null
-
-  if (element && !element.locked && editingTextId.value !== element.id) {
-    setStageCursor('grab')
-  } else {
-    resetStageCursor()
   }
 }
 
@@ -360,31 +279,27 @@ function handleCanvasDrop(event: DragEvent) {
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
   event.cancelBubble = true
   if (!element.locked && editingTextId.value !== element.id) {
-    hoveredElementId.value = element.id
-    setStageCursor('grab')
+    setStageCursor('grab', event)
   }
   selectElement(element.id)
 }
 
-function handleElementPointerEnter(element: ZineElement) {
+function handleElementPointerEnter(element: ZineElement, event: KonvaEvent) {
   if (!element.locked && editingTextId.value !== element.id) {
-    hoveredElementId.value = element.id
-    setStageCursor('grab')
+    setStageCursor('grab', event)
   }
 }
 
-function handleElementPointerLeave() {
-  hoveredElementId.value = null
-
+function handleElementPointerLeave(event: KonvaEvent) {
   if (!isDraggingElement.value) {
-    resetStageCursor()
+    resetStageCursor(event)
   }
 }
 
-function handleDragStart(element: ZineElement) {
+function handleDragStart(element: ZineElement, event: KonvaEvent) {
   if (element.locked) return
   isDraggingElement.value = true
-  setStageCursor('grabbing')
+  setStageCursor('grabbing', event)
 }
 
 function handleDragEnd(element: ZineElement, event: KonvaEvent) {
@@ -394,7 +309,7 @@ function handleDragEnd(element: ZineElement, event: KonvaEvent) {
     y: clampToPage(node.y(), PAGE_H)
   })
   isDraggingElement.value = false
-  setStageCursor(element.locked ? 'default' : 'grab')
+  setStageCursor(element.locked ? 'default' : 'grab', event)
 }
 
 function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
@@ -463,7 +378,6 @@ function startEditingText(element: TextElement) {
   selectElement(element.id)
   editingTextId.value = element.id
   editingTextValue.value = element.text
-  hoveredElementId.value = null
   resetStageCursor()
   updateTransformer()
 
@@ -501,14 +415,12 @@ function commitTextEdit() {
 
   editingTextId.value = null
   editingTextValue.value = ''
-  hoveredElementId.value = null
   updateTransformer()
 }
 
 function cancelTextEdit() {
   editingTextId.value = null
   editingTextValue.value = ''
-  hoveredElementId.value = null
   updateTransformer()
 }
 
@@ -655,20 +567,17 @@ defineExpose({
     ref="containerRef"
     class="zine-canvas-wrap relative flex h-full min-h-[420px] items-center justify-center overflow-auto p-4 lg:p-8"
     :class="{ 'zine-canvas-dragover': isCanvasDragOver, 'zine-canvas-empty': isEmptyPage }"
-    :style="{ cursor: canvasCursor }"
     @dragenter="handleCanvasDragEnter"
     @dragover="handleCanvasDragOver"
     @dragleave="handleCanvasDragLeave"
     @drop="handleCanvasDrop"
     @mouseleave="handleCanvasMouseLeave"
-    @mousemove="handleCanvasMouseMove"
   >
     <VStage
       ref="stageRef"
       :config="stageConfig"
       class="shadow-[var(--zine-shadow)]"
       @mousedown="handleStagePointer"
-      @mousemove="handleStagePointerMove"
       @touchstart="handleStagePointer"
     >
       <VLayer :config="layerConfig">
@@ -680,9 +589,9 @@ defineExpose({
             :config="imageConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @mouseenter="() => handleElementPointerEnter(element)"
-            @mouseleave="handleElementPointerLeave"
-            @dragstart="() => handleDragStart(element)"
+            @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
+            @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
+            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -691,9 +600,9 @@ defineExpose({
             :config="imageFallbackConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @mouseenter="() => handleElementPointerEnter(element)"
-            @mouseleave="handleElementPointerLeave"
-            @dragstart="() => handleDragStart(element)"
+            @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
+            @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
+            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -702,9 +611,9 @@ defineExpose({
             :config="textConfig(element)"
             @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-            @mouseenter="() => handleElementPointerEnter(element)"
-            @mouseleave="handleElementPointerLeave"
-            @dragstart="() => handleDragStart(element)"
+            @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
+            @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
+            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
             @dblclick="(event: KonvaEvent) => handleTextEditRequest(element, event)"
