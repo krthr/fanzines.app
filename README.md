@@ -29,7 +29,7 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 ## Características
 
 - **Editor de 8 paneles con imposición A4.** Portada, contraportada y 6 páginas interiores, colocadas automáticamente en la rejilla de impresión (4 columnas × 2 filas) con las rotaciones correctas para el plegado.
-- **Texto e imágenes.** Sube fotos (una a una o por lotes) y escribe directamente sobre el lienzo. Cada elemento se puede **mover, girar, escalar, ajustar opacidad, bloquear, reordenar (z-order) y alinear** dentro del panel.
+- **Texto e imágenes.** Sube fotos (una a una o por lotes) **arrastrándolas al lienzo, a una miniatura de página o a la ventana**, o desde el botón de carga, y escribe directamente sobre el lienzo. Cada elemento se puede **mover, girar, escalar, ajustar opacidad, bloquear, reordenar (z-order) y alinear** dentro del panel.
 - **Edición de texto en línea.** Haz clic en un cuadro de texto y escribe sobre el lienzo.
 - **Carga por lotes con auto-optimización.** Al importar varias imágenes, se reparten entre las páginas disponibles y se reducen automáticamente si superan los 2400 px en el lado mayor.
 - **Previsualización del pliego.** Revisa la hoja A4 completa con los 8 paneles antes de exportar.
