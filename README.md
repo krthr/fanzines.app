@@ -12,6 +12,7 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 
 - **Web:** [fanzines.app](https://fanzines.app)
 - **Editor:** [fanzines.app/editor](https://fanzines.app/editor)
+- **Autor:** [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)
 
 ## Capturas
 
@@ -191,4 +192,4 @@ Consulta la [documentación de despliegue de Nuxt](https://nuxt.com/docs/getting
 
 ## Licencia
 
-[MIT](./LICENSE) © 2026 [Wilson Tovar](https://github.com/krthr)
+[MIT](./LICENSE) © 2026 [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)

@@ -271,7 +271,13 @@ onBeforeUnmount(() => {
 
     <footer>
       <span>Fanzines</span>
-      <span>fanzines.app</span>
+      <div class="footer-credit" aria-label="Autoría">
+        <span>Por Wilson Tovar</span>
+        <a href="https://krthr.co" target="_blank" rel="author me noopener noreferrer">krthr.co</a>
+        <a href="https://www.instagram.com/wilson__tovar/" target="_blank" rel="me noopener noreferrer">
+          Instagram
+        </a>
+      </div>
     </footer>
   </main>
 </template>
@@ -760,6 +766,7 @@ footer {
 
 footer {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 30px 0 40px;
@@ -768,6 +775,30 @@ footer {
   font-size: 0.92rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+footer a {
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+footer a:hover {
+  background: var(--acid);
+  color: var(--ink);
+}
+
+footer a:focus-visible {
+  outline: 3px solid var(--acid);
+  outline-offset: 4px;
+}
+
+.footer-credit {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 @media (min-width: 1180px) {
@@ -965,6 +996,12 @@ footer {
 
   footer {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-credit {
+    justify-content: flex-start;
+    gap: 12px;
   }
 }
 </style>
