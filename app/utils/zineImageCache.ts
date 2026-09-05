@@ -27,14 +27,6 @@ export function forgetCachedHtmlImage(src: string) {
   imageCache.delete(src)
 }
 
-export function pruneCachedHtmlImages(activeSources: Set<string>) {
-  for (const src of imageCache.keys()) {
-    if (!activeSources.has(src)) {
-      imageCache.delete(src)
-    }
-  }
-}
-
 export function clearCachedHtmlImages() {
   imageCache.clear()
 }

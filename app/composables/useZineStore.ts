@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import {
   DEFAULT_TEXT_CONTENT,
   FONT_OPTIONS,
@@ -6,13 +6,12 @@ import {
   type ImageBatchInsertResult,
   type ImageBatchSkippedFile,
   type ImageElement,
-  type ImageInsertResult,
   type PageId,
   type TextElement,
   type ZineElement,
   type ZineState
 } from '~/types/zine'
-import { clearCachedHtmlImages, forgetCachedHtmlImage, pruneCachedHtmlImages } from '~/utils/zineImageCache'
+import { clearCachedHtmlImages, forgetCachedHtmlImage } from '~/utils/zineImageCache'
 import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
 
 const MAX_WARN_SIZE = 8 * 1024 * 1024
@@ -126,24 +125,11 @@ async function prepareImageFile(file: File) {
   }
 }
 
-function getImageWarning(file: File) {
-  return file.size > MAX_WARN_SIZE
-    ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-    : undefined
-}
-
-function createSkippedFile(file: File, reason: ImageBatchSkippedFile['reason'], message: string): ImageBatchSkippedFile {
+function createSkippedFile(file: File, reason: ImageBatchSkippedFile['reason']): ImageBatchSkippedFile {
   return {
     fileName: file.name || 'Archivo sin nombre',
-    reason,
-    message
+    reason
   }
-}
-
-function activeImageSources(state: ZineState) {
-  return new Set(Object.values(state.elements)
-    .filter((element): element is ImageElement => element.type === 'image')
-    .map((element) => element.src))
 }
 
 function isEmptyTextElement(element: ZineElement | undefined): element is TextElement {
@@ -152,14 +138,6 @@ function isEmptyTextElement(element: ZineElement | undefined): element is TextEl
 
 export function useZineStore() {
   const state = useState<ZineState>('mini-zine-a4-state', createInitialZineState)
-  const cachePruneWatchRegistered = useState('mini-zine-a4-cache-prune-watch-registered', () => false)
-
-  if (import.meta.client && !cachePruneWatchRegistered.value) {
-    cachePruneWatchRegistered.value = true
-    watch(state, (value) => {
-      pruneCachedHtmlImages(activeImageSources(value))
-    }, { deep: true, flush: 'post' })
-  }
 
   const selectedElement = computed(() => {
     const id = state.value.selectedElementId
@@ -168,7 +146,7 @@ export function useZineStore() {
 
   const currentPageElements = computed(() => {
     const ids = state.value.pageElementIds[state.value.selectedPageId] ?? []
-    return ids.map((id) => state.value.elements[id]).filter(Boolean)
+    return ids.map((id) => state.value.elements[id]).filter((element): element is ZineElement => Boolean(element))
   })
 
   const elementCount = computed(() => Object.keys(state.value.elements).length)
@@ -203,13 +181,13 @@ export function useZineStore() {
     state.value.selectedElementId = element.id
   }
 
-  async function addImageElement(file: File, pageId: PageId = state.value.selectedPageId): Promise<ImageInsertResult> {
+  async function addImageElement(file: File, pageId: PageId = state.value.selectedPageId): Promise<boolean> {
     if (!import.meta.client) {
-      return { ok: false, error: 'La carga de imágenes solo está disponible en el navegador.' }
+      return false
     }
 
     if (!file.type.startsWith('image/')) {
-      return { ok: false, error: 'El archivo seleccionado no parece ser una imagen compatible.' }
+      return false
     }
 
     try {
@@ -239,12 +217,9 @@ export function useZineStore() {
 
       insertElement(element)
 
-      return {
-        ok: true,
-        warning: getImageWarning(file)
-      }
+      return true
     } catch {
-      return { ok: false, error: 'No se pudo cargar la imagen seleccionada.' }
+      return false
     }
   }
 
@@ -252,8 +227,6 @@ export function useZineStore() {
     const result: ImageBatchInsertResult = {
       importedCount: 0,
       skippedFiles: [],
-      errors: [],
-      warnings: [],
       largeFileCount: 0,
       overflowCount: 0
     }
@@ -269,29 +242,20 @@ export function useZineStore() {
 
       if (!pageId) {
         result.overflowCount += 1
-        result.skippedFiles.push(createSkippedFile(
-          file,
-          'no-page',
-          'No quedan páginas disponibles para esta imagen.'
-        ))
+        result.skippedFiles.push(createSkippedFile(file, 'no-page'))
         continue
       }
 
-      const insertResult = await addImageElement(file, pageId)
+      const inserted = await addImageElement(file, pageId)
 
-      if (!insertResult.ok) {
+      if (!inserted) {
         const reason: ImageBatchSkippedFile['reason'] = !import.meta.client
           ? 'browser-only'
           : file.type.startsWith('image/')
             ? 'load-error'
             : 'not-image'
 
-        result.skippedFiles.push(createSkippedFile(
-          file,
-          reason,
-          insertResult.error ?? 'No se pudo cargar este archivo.'
-        ))
-        result.errors.push(insertResult.error ?? 'No se pudo cargar un archivo.')
+        result.skippedFiles.push(createSkippedFile(file, reason))
         continue
       }
 
@@ -299,14 +263,9 @@ export function useZineStore() {
       targetPageIndex += 1
       lastInsertedPageId = pageId
 
-      if (insertResult.warning) {
+      if (file.size > MAX_WARN_SIZE) {
         result.largeFileCount += 1
-        result.warnings.push(insertResult.warning)
       }
-    }
-
-    if (result.overflowCount > 0) {
-      result.warnings.push('Algunas imágenes se omitieron porque no quedaban páginas disponibles.')
     }
 
     if (lastInsertedPageId) {

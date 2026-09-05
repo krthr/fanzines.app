@@ -57,7 +57,6 @@ export type BaseElement = {
   height: number
   rotation: number
   opacity: number
-  locked?: boolean
 }
 
 export type ImageElement = BaseElement & {
@@ -91,23 +90,14 @@ export type ZineState = {
   exportSafeMargins: boolean
 }
 
-export type ImageInsertResult = {
-  ok: boolean
-  error?: string
-  warning?: string
-}
-
 export type ImageBatchSkippedFile = {
   fileName: string
   reason: 'browser-only' | 'not-image' | 'load-error' | 'no-page'
-  message: string
 }
 
 export type ImageBatchInsertResult = {
   importedCount: number
   skippedFiles: ImageBatchSkippedFile[]
-  errors: string[]
-  warnings: string[]
   largeFileCount: number
   overflowCount: number
 }

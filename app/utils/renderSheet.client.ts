@@ -16,11 +16,9 @@ import {
 } from '~/utils/zineLayout'
 import { renderElementsIntoGroup } from '~/utils/renderZine.client'
 
-type RenderSheetDataUrlOptions = {
+type RenderSheetOptions = {
   pxPerMm: number
   pixelRatio?: number
-  mimeType?: string
-  quality?: number
 }
 
 function createOffscreenContainer(width: number, height: number) {
@@ -81,7 +79,7 @@ async function renderSheetIntoRoot(root: Group, state: ZineState) {
   }
 }
 
-export async function renderSheetCanvas(state: ZineState, options: RenderSheetDataUrlOptions) {
+export async function renderSheetCanvas(state: ZineState, options: RenderSheetOptions) {
   if (!import.meta.client) return null
 
   const width = A4_W_MM * options.pxPerMm
@@ -110,16 +108,11 @@ export async function renderSheetCanvas(state: ZineState, options: RenderSheetDa
   }
 }
 
-export async function renderSheetBlob(state: ZineState, options: RenderSheetDataUrlOptions) {
+export async function renderSheetBlob(state: ZineState, options: RenderSheetOptions) {
   const canvas = await renderSheetCanvas(state, options)
   if (!canvas) return null
 
   return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, options.mimeType ?? 'image/png', options.quality)
+    canvas.toBlob(resolve, 'image/png')
   })
-}
-
-export async function renderSheetDataUrl(state: ZineState, options: RenderSheetDataUrlOptions) {
-  const canvas = await renderSheetCanvas(state, options)
-  return canvas?.toDataURL(options.mimeType ?? 'image/png', options.quality) ?? ''
 }
