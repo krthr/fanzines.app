@@ -34,13 +34,6 @@ let removeDesktopMediaQueryListener: (() => void) | null = null
 
 const activePageLabel = computed(() => PAGE_LABELS[state.value.selectedPageId])
 
-const previewGuides = computed({
-  get: () => state.value.previewGuides,
-  set: (value: boolean) => {
-    state.value.previewGuides = value
-  }
-})
-
 function isFileDrag(event: DragEvent): boolean {
   return Boolean(event.dataTransfer?.types.includes('Files'))
 }
@@ -225,7 +218,7 @@ onBeforeUnmount(() => {
           @click="handleAddTextElement"
         />
         <USwitch
-          v-model="previewGuides"
+          v-model="state.previewGuides"
           label="Guías"
           size="sm"
           class="zine-contrast-switch hidden md:flex"
@@ -279,7 +272,7 @@ onBeforeUnmount(() => {
                 Vista del pliego
               </h2>
               <USwitch
-                v-model="previewGuides"
+                v-model="state.previewGuides"
                 size="sm"
                 aria-label="Mostrar guías"
                 class="zine-contrast-switch"
@@ -312,7 +305,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="min-h-0 flex-1">
-          <PageCanvas ref="pageCanvasRef" />
+          <PageCanvas ref="pageCanvasRef" @request-upload="openFilePicker" />
         </div>
 
         <div class="zine-mobile-panel space-y-3 p-3 lg:hidden">

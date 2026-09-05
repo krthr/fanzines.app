@@ -24,6 +24,8 @@ type TextEditOptions = {
   selectAll?: boolean
 }
 
+const emit = defineEmits<{ 'request-upload': [] }>()
+
 const {
   state,
   currentPageElements,
@@ -35,7 +37,6 @@ const { processImageFiles } = useZineImageImport()
 const { resetDrag } = useZineDragState()
 
 const containerRef = ref<HTMLElement | null>(null)
-const fileInput = ref<HTMLInputElement | null>(null)
 const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
 const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
 const size = reactive({ width: 0, height: 0 })
@@ -151,7 +152,7 @@ function imageConfig(element: ImageElement) {
     height: element.height,
     rotation: element.rotation,
     opacity: element.opacity,
-    draggable: !element.locked && editingTextId.value !== element.id
+    draggable: editingTextId.value !== element.id
   }
 }
 
@@ -168,7 +169,7 @@ function imageFallbackConfig(element: ImageElement) {
     fill: failedImages.has(element.src) ? '#ffd3ca' : '#fff6c8',
     stroke: failedImages.has(element.src) ? '#f23d25' : '#070706',
     dash: [12, 8],
-    draggable: !element.locked && editingTextId.value !== element.id
+    draggable: editingTextId.value !== element.id
   }
 }
 
@@ -194,7 +195,7 @@ function textConfig(element: TextElement) {
     wrap: 'word',
     visible: !isEditing,
     listening: !isEditing,
-    draggable: !element.locked && !isEditing
+    draggable: !isEditing
   }
 }
 
@@ -214,20 +215,6 @@ function handleCanvasMouseLeave() {
   }
 }
 
-function openFilePicker() {
-  fileInput.value?.click()
-}
-
-async function handleFileChange(event: Event) {
-  const input = event.target as HTMLInputElement
-  const files = Array.from(input.files ?? [])
-  input.value = ''
-
-  if (files.length === 0) return
-
-  await processImageFiles(files, { inputMethod: 'file_picker' })
-}
-
 function handleStagePointer(event: KonvaEvent) {
   const stage = event.target.getStage()
   const clickedTransformer = event.target.getParent()?.className === 'Transformer'
@@ -237,7 +224,7 @@ function handleStagePointer(event: KonvaEvent) {
   if (event.target === stage || event.target.name() === 'page-background') {
     resetStageCursor(event)
     if (isEmptyPage.value) {
-      openFilePicker()
+      emit('request-upload')
       return
     }
     selectElement(null)
@@ -278,14 +265,14 @@ function handleCanvasDrop(event: DragEvent) {
 
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
   event.cancelBubble = true
-  if (!element.locked && editingTextId.value !== element.id) {
+  if (editingTextId.value !== element.id) {
     setStageCursor('grab', event)
   }
   selectElement(element.id)
 }
 
 function handleElementPointerEnter(element: ZineElement, event: KonvaEvent) {
-  if (!element.locked && editingTextId.value !== element.id) {
+  if (editingTextId.value !== element.id) {
     setStageCursor('grab', event)
   }
 }
@@ -296,8 +283,7 @@ function handleElementPointerLeave(event: KonvaEvent) {
   }
 }
 
-function handleDragStart(element: ZineElement, event: KonvaEvent) {
-  if (element.locked) return
+function handleDragStart(event: KonvaEvent) {
   isDraggingElement.value = true
   setStageCursor('grabbing', event)
 }
@@ -309,7 +295,7 @@ function handleDragEnd(element: ZineElement, event: KonvaEvent) {
     y: clampToPage(node.y(), PAGE_H)
   })
   isDraggingElement.value = false
-  setStageCursor(element.locked ? 'default' : 'grab', event)
+  setStageCursor('grab', event)
 }
 
 function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
@@ -352,7 +338,7 @@ function updateTransformer() {
 
     if (editingTextId.value) {
       resetStageCursor()
-    } else if (selectedElement.value && !selectedElement.value.locked) {
+    } else if (selectedElement.value) {
       setStageCursor('grab')
     } else {
       resetStageCursor()
@@ -373,8 +359,6 @@ function updateTextEditorHeight() {
 }
 
 function startEditingText(element: TextElement) {
-  if (element.locked) return
-
   selectElement(element.id)
   editingTextId.value = element.id
   editingTextValue.value = element.text
@@ -477,7 +461,7 @@ function handleWindowKeydown(event: KeyboardEvent) {
   if (event.key !== 'Enter' || isInteractiveTarget(event.target)) return
 
   const element = selectedElement.value
-  if (element?.type !== 'text' || element.locked) return
+  if (element?.type !== 'text') return
 
   event.preventDefault()
   startEditingText(element)
@@ -525,6 +509,7 @@ onMounted(() => {
   if (!containerRef.value) return
 
   resizeObserver = new ResizeObserver(([entry]) => {
+    if (!entry) return
     const rect = entry.contentRect
     size.width = rect.width
     size.height = rect.height
@@ -591,7 +576,7 @@ defineExpose({
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
             @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
             @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
+            @dragstart="handleDragStart"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -602,7 +587,7 @@ defineExpose({
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
             @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
             @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
+            @dragstart="handleDragStart"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
           />
@@ -613,7 +598,7 @@ defineExpose({
             @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
             @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
             @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-            @dragstart="(event: KonvaEvent) => handleDragStart(element, event)"
+            @dragstart="handleDragStart"
             @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
             @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
             @dblclick="(event: KonvaEvent) => handleTextEditRequest(element, event)"
@@ -642,14 +627,5 @@ defineExpose({
       <p class="zine-canvas-empty-hint-title">Haz clic o arrastra</p>
       <p class="zine-canvas-empty-hint-sub">imágenes para añadir al panel</p>
     </div>
-
-    <input
-      ref="fileInput"
-      class="hidden"
-      type="file"
-      accept="image/*"
-      multiple
-      @change="handleFileChange"
-    >
   </div>
 </template>

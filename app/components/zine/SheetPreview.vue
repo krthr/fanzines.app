@@ -46,8 +46,7 @@ async function renderPreview() {
   try {
     const blob = await renderSheetBlob(state.value, {
       pxPerMm: PREVIEW_PX_PER_MM,
-      pixelRatio: 1,
-      mimeType: 'image/png'
+      pixelRatio: 1
     })
 
     if (!blob) throw new Error('No se pudo generar la previsualización.')

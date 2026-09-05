@@ -389,42 +389,6 @@ function sendBackward() {
             />
           </div>
         </UFormField>
-
-        <div class="space-y-3">
-          <UFormField label="Alinear horizontal">
-            <div class="grid grid-cols-3 gap-2">
-              <UButton
-                v-for="item in positionHorizontalAlignItems"
-                :key="item.value"
-                :icon="item.icon"
-                :label="item.label"
-                :color="isElementHorizontallyAligned(item.value) ? 'primary' : 'neutral'"
-                :variant="isElementHorizontallyAligned(item.value) ? 'solid' : 'outline'"
-                size="sm"
-                block
-                :disabled="!canAlignElementHorizontal()"
-                @click="alignElementHorizontal(item.value)"
-              />
-            </div>
-          </UFormField>
-
-          <UFormField label="Alinear vertical">
-            <div class="grid grid-cols-3 gap-2">
-              <UButton
-                v-for="item in positionVerticalAlignItems"
-                :key="item.value"
-                :icon="item.icon"
-                :label="item.label"
-                :color="isElementVerticallyAligned(item.value) ? 'primary' : 'neutral'"
-                :variant="isElementVerticallyAligned(item.value) ? 'solid' : 'outline'"
-                size="sm"
-                block
-                :disabled="!canAlignElementVertical()"
-                @click="alignElementVertical(item.value)"
-              />
-            </div>
-          </UFormField>
-        </div>
       </template>
 
       <template v-else>
@@ -436,8 +400,10 @@ function sendBackward() {
             {{ selectedElement.naturalWidth }} x {{ selectedElement.naturalHeight }} px
           </p>
         </div>
+      </template>
 
-        <div class="space-y-3">
+      <div class="space-y-3">
+        <template v-if="selectedElement.type === 'image'">
           <UButton
             block
             icon="i-lucide-expand"
@@ -457,42 +423,42 @@ function sendBackward() {
             size="sm"
             @click="coverImagePage"
           />
+        </template>
 
-          <UFormField label="Alinear horizontal">
-            <div class="grid grid-cols-3 gap-2">
-              <UButton
-                v-for="item in positionHorizontalAlignItems"
-                :key="item.value"
-                :icon="item.icon"
-                :label="item.label"
-                :color="isElementHorizontallyAligned(item.value) ? 'primary' : 'neutral'"
-                :variant="isElementHorizontallyAligned(item.value) ? 'solid' : 'outline'"
-                size="sm"
-                block
-                :disabled="!canAlignElementHorizontal()"
-                @click="alignElementHorizontal(item.value)"
-              />
-            </div>
-          </UFormField>
+        <UFormField label="Alinear horizontal">
+          <div class="grid grid-cols-3 gap-2">
+            <UButton
+              v-for="item in positionHorizontalAlignItems"
+              :key="item.value"
+              :icon="item.icon"
+              :label="item.label"
+              :color="isElementHorizontallyAligned(item.value) ? 'primary' : 'neutral'"
+              :variant="isElementHorizontallyAligned(item.value) ? 'solid' : 'outline'"
+              size="sm"
+              block
+              :disabled="!canAlignElementHorizontal()"
+              @click="alignElementHorizontal(item.value)"
+            />
+          </div>
+        </UFormField>
 
-          <UFormField label="Alinear vertical">
-            <div class="grid grid-cols-3 gap-2">
-              <UButton
-                v-for="item in positionVerticalAlignItems"
-                :key="item.value"
-                :icon="item.icon"
-                :label="item.label"
-                :color="isElementVerticallyAligned(item.value) ? 'primary' : 'neutral'"
-                :variant="isElementVerticallyAligned(item.value) ? 'solid' : 'outline'"
-                size="sm"
-                block
-                :disabled="!canAlignElementVertical()"
-                @click="alignElementVertical(item.value)"
-              />
-            </div>
-          </UFormField>
-        </div>
-      </template>
+        <UFormField label="Alinear vertical">
+          <div class="grid grid-cols-3 gap-2">
+            <UButton
+              v-for="item in positionVerticalAlignItems"
+              :key="item.value"
+              :icon="item.icon"
+              :label="item.label"
+              :color="isElementVerticallyAligned(item.value) ? 'primary' : 'neutral'"
+              :variant="isElementVerticallyAligned(item.value) ? 'solid' : 'outline'"
+              size="sm"
+              block
+              :disabled="!canAlignElementVertical()"
+              @click="alignElementVertical(item.value)"
+            />
+          </div>
+        </UFormField>
+      </div>
 
       <div class="grid grid-cols-2 gap-2">
         <UButton

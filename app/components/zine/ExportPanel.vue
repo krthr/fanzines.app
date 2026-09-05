@@ -14,20 +14,6 @@ const elementCountLabel = computed(() => (
     : `${elementCount.value} elementos en el fanzine.`
 ))
 
-const exportGuides = computed({
-  get: () => state.value.exportGuides,
-  set: (value: boolean) => {
-    state.value.exportGuides = value
-  }
-})
-
-const exportSafeMargins = computed({
-  get: () => state.value.exportSafeMargins !== false,
-  set: (value: boolean) => {
-    state.value.exportSafeMargins = value
-  }
-})
-
 async function handleExport() {
   errorMessage.value = ''
   isExporting.value = true
@@ -82,7 +68,7 @@ async function handleExport() {
     </div>
 
     <USwitch
-      v-model="exportGuides"
+      v-model="state.exportGuides"
       label="Incluir guías"
       size="md"
       color="primary"
@@ -90,7 +76,7 @@ async function handleExport() {
     />
 
     <USwitch
-      v-model="exportSafeMargins"
+      v-model="state.exportSafeMargins"
       label="Margen seguro 5 mm"
       size="md"
       color="primary"
