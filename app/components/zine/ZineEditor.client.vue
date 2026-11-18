@@ -150,7 +150,12 @@ function backToDesign() {
 }
 
 async function downloadPdf(inputMethod: ExportInputMethod) {
-  if (await exportPdf(inputMethod)) {
+  const exported = await exportPdf(inputMethod)
+
+  // The export takes a moment. If the person left review meanwhile, the file still
+  // downloads but the dialog stays out of their way; a download started from the
+  // dialog leaves it as it is, open or closed.
+  if (exported && inputMethod === 'review' && mode.value === 'review') {
     isPdfReadyOpen.value = true
   }
 }
@@ -200,10 +205,12 @@ function confirmReset() {
 
 function handleKeydown(event: KeyboardEvent) {
   const target = event.target as HTMLElement | null
-  const isTyping = target?.matches('input, textarea, select, [contenteditable="true"]')
+  // Radios and sliders are inputs, but nobody types in them.
+  const isTyping = target?.matches('textarea, select, [contenteditable="true"], input:not([type="radio"], [type="range"])')
 
-  // The canvas is not on screen in review, so its shortcuts are off too.
-  if (isTyping || mode.value !== 'design') return
+  // The canvas is not on screen in review and is covered by the drawer on mobile, so
+  // its shortcuts are off there: Esc closes the drawer without dropping the selection.
+  if (isTyping || mode.value !== 'design' || mobileToolsOpen.value) return
 
   if (event.key === 'Escape') {
     selectElement(null)

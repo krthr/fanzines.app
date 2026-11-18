@@ -35,6 +35,11 @@ function choosePage(pageId: PageId) {
 
   selectTrackedPage(pageId, { compact: false, input_method: 'page_selector' })
 }
+
+// The sheet selects the page itself; in review, a selected page is opened for editing.
+function leaveReview() {
+  if (mode.value === 'review') mode.value = 'design'
+}
 </script>
 
 <template>
@@ -115,7 +120,7 @@ function choosePage(pageId: PageId) {
     </div>
 
     <div v-else class="sheet">
-      <SheetPreview />
+      <SheetPreview @select="leaveReview" />
     </div>
   </aside>
 </template>

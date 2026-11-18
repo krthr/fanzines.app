@@ -68,7 +68,7 @@ Anton, Outfit and Special Elite are loaded through `@nuxt/fonts`. The fonts a zi
 
 - Display type is uppercase Anton. In markup it is written in sentence case and uppercased in CSS.
 - Interface text does not go below `12px` (the labels in the mobile bars). The only smaller text is the annotation on the sheet: the "corte" tag and the panel labels.
-- Measurements shown to people are real: millimetres for positions and sizes, points for type size. The store's page units never appear in the interface.
+- Measurements are shown in millimetres (positions and sizes) and points (type size), never in the store's page units. They are the page's nominal size, 74.25 × 105 mm per panel: with "Margen seguro de 5 mm" on, the PDF scales the sheet to about 95%, so everything prints that much smaller.
 
 ## 4. Spacing & Layout
 
@@ -134,7 +134,7 @@ A panel is 74.25 × 105 mm. On the canvas a single page ("Página") is 440 × 62
 - **Shortcut hints**: typewriter keys under the canvas, only for shortcuts that exist in the current state.
 - **Review**: the sheet large, with its fold and cut guides when the PDF will carry them; on the right, the page count, and the two PDF switches. The export error appears in the same panel.
 - **PDF listo**: a dialog after a successful export, with the fold guide, the print-at-100% callout, "Descargar otra vez" and "Volver al editor".
-- **Drop overlay**: covers the canvas while files are dragged over the editor, states the one-image-per-page rule, and the miniatures that will receive a photo light up in acid.
+- **Drop overlay**: covers the canvas while files are dragged over the editor, states the one-image-per-page rule, and the miniatures that will receive a photo light up in acid. If none of the files is an image it says so and promises nothing.
 - **Toast**: cream paper, 2px dark border, 6px orange shadow, bottom right. Every toast looks the same whatever its severity.
 - **Mobile**: a context bar with the selection's actions (or "+ Texto" and "+ Foto"), "Ajustes" opening the inspector in a drawer, and a strip of page miniatures.
 

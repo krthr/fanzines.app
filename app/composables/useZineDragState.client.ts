@@ -2,7 +2,8 @@ import { ref } from 'vue'
 import type { PageId } from '~/types/zine'
 
 const isDragActive = ref(false)
-// How many files are being dragged, when the browser exposes it before the drop.
+// How many images are being dragged, when the browser says so before the drop:
+// null when it does not, 0 when it reports files and none of them is an image.
 const dragFileCount = ref<number | null>(null)
 // The thumbnail under the pointer: a drop there starts the batch at that page.
 const dragStartPageId = ref<PageId | null>(null)
@@ -11,10 +12,10 @@ let dragDepth = 0
 function countDraggedFiles(event: DragEvent): number | null {
   const items = Array.from(event.dataTransfer?.items ?? [])
   const files = items.filter((item) => item.kind === 'file')
-  const images = files.filter((item) => item.type === '' || item.type.startsWith('image/'))
-  const count = images.length || files.length
+  if (files.length === 0) return null
 
-  return count > 0 ? count : null
+  // A file with no reported type may still be an image; the import decides.
+  return files.filter((item) => item.type === '' || item.type.startsWith('image/')).length
 }
 
 export function useZineDragState() {

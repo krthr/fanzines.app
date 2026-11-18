@@ -78,6 +78,31 @@ export function ptToUnits(pt: number) {
   return pt / PT_PER_UNIT
 }
 
+export type ElementBox = {
+  x: number
+  y: number
+  width: number
+  height: number
+  rotation: number
+}
+
+// What an element covers on the page. Konva rotates the editor's elements around
+// their top-left corner, so a rotated element's visible bounds are not its x/y box.
+export function getRotatedBounds(box: ElementBox) {
+  const radians = box.rotation * Math.PI / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const xs = [0, box.width * cos, box.width * cos - box.height * sin, -box.height * sin]
+  const ys = [0, box.width * sin, box.width * sin + box.height * cos, box.height * cos]
+
+  return {
+    left: box.x + Math.min(...xs),
+    right: box.x + Math.max(...xs),
+    top: box.y + Math.min(...ys),
+    bottom: box.y + Math.max(...ys)
+  }
+}
+
 export function formatMmSize(widthUnits: number, heightUnits: number) {
   return `${Math.round(unitsToMm(widthUnits))} × ${Math.round(unitsToMm(heightUnits))} mm`
 }

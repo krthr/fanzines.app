@@ -32,13 +32,16 @@ const PLACE_NAMES: Record<PageId, string> = {
   'back-cover': 'la contraportada'
 }
 
-// null when the browser does not say how many files are being dragged.
+// null when the browser does not say how many files are being dragged;
+// 0 when it does and none of them is an image.
 const count = computed(() => dragFileCount.value)
+const hasNoImages = computed(() => count.value === 0)
 const targets = computed(() => dropTargetPageIds.value)
 const start = computed(() => PLACE_NAMES[dropStartPageId.value])
 const available = computed(() => PAGE_IDS.length - PAGE_IDS.indexOf(dropStartPageId.value))
 
 const title = computed(() => {
+  if (hasNoImages.value) return 'Solo se pueden añadir imágenes'
   if (count.value === null) return 'Suelta tus fotos'
   return count.value === 1 ? 'Suelta la foto' : `Suelta las ${count.value} fotos`
 })
@@ -80,7 +83,7 @@ const diagramCount = computed(() => count.value === null ? 3 : Math.max(1, targe
       {{ title }}
     </p>
 
-    <div class="drop-card">
+    <div v-if="!hasNoImages" class="drop-card">
       <div class="drop-diagram">
         <span v-for="index in diagramCount" :key="index" class="drop-mini" />
       </div>
@@ -92,7 +95,7 @@ const diagramCount = computed(() => count.value === null ? 3 : Math.max(1, targe
       </p>
     </div>
 
-    <p class="drop-hint">
+    <p v-if="!hasNoImages" class="drop-hint">
       {{ hint }}
     </p>
   </div>

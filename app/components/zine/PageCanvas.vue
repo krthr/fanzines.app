@@ -31,7 +31,8 @@ import {
   SAFE_MARGIN,
   clampToPage,
   formatMmSize,
-  getPageSide
+  getPageSide,
+  getRotatedBounds
 } from '~/utils/zineLayout'
 import ZinePageRender from '~/components/zine/ZinePageRender.vue'
 
@@ -221,19 +222,13 @@ const selectionBox = computed(() => {
   if (!element || element.pageId !== activePageId.value) return null
 
   const box = liveBox.value ?? element
-  const radians = box.rotation * Math.PI / 180
-  const cos = Math.cos(radians)
-  const sin = Math.sin(radians)
-  const corners = [[0, 0], [box.width, 0], [box.width, box.height], [0, box.height]]
-    .map(([px, py]) => [box.x + px! * cos - py! * sin, box.y + px! * sin + py! * cos])
-  const xs = corners.map((corner) => corner[0]!)
-  const ys = corners.map((corner) => corner[1]!)
+  const bounds = getRotatedBounds(box)
 
   return {
-    left: Math.min(...xs) * scale.value,
-    right: Math.max(...xs) * scale.value,
-    top: Math.min(...ys) * scale.value,
-    bottom: Math.max(...ys) * scale.value,
+    left: bounds.left * scale.value,
+    right: bounds.right * scale.value,
+    top: bounds.top * scale.value,
+    bottom: bounds.bottom * scale.value,
     label: formatMmSize(box.width, box.height)
   }
 })

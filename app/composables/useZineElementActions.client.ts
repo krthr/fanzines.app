@@ -1,5 +1,5 @@
 import type { ImageElement, ZineElement } from '~/types/zine'
-import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
+import { PAGE_H, PAGE_W, getRotatedBounds } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
@@ -11,16 +11,26 @@ const ALIGNMENT_EPSILON = 1
 const HORIZONTAL_ALIGNMENTS: HorizontalAlignment[] = ['left', 'center', 'right']
 const VERTICAL_ALIGNMENTS: VerticalAlignment[] = ['top', 'middle', 'bottom']
 
+// Alignment places what is visible: the element's bounds as rotated. The result is
+// the x (or y) of its origin, which sits `offset` away from the visible edge.
 function elementX(element: ZineElement, alignment: HorizontalAlignment) {
-  if (alignment === 'left') return 0
-  if (alignment === 'center') return (PAGE_W - element.width) / 2
-  return PAGE_W - element.width
+  const bounds = getRotatedBounds(element)
+  const width = bounds.right - bounds.left
+  const offset = element.x - bounds.left
+
+  if (alignment === 'left') return offset
+  if (alignment === 'center') return (PAGE_W - width) / 2 + offset
+  return PAGE_W - width + offset
 }
 
 function elementY(element: ZineElement, alignment: VerticalAlignment) {
-  if (alignment === 'top') return 0
-  if (alignment === 'middle') return (PAGE_H - element.height) / 2
-  return PAGE_H - element.height
+  const bounds = getRotatedBounds(element)
+  const height = bounds.bottom - bounds.top
+  const offset = element.y - bounds.top
+
+  if (alignment === 'top') return offset
+  if (alignment === 'middle') return (PAGE_H - height) / 2 + offset
+  return PAGE_H - height + offset
 }
 
 function isAligned(value: number, target: number) {

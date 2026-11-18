@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import type { CSSProperties } from 'vue'
 import type { ZineElement } from '~/types/zine'
 import { FONT_OPTIONS, TEXT_COLOR_OPTIONS } from '~/types/zine'
@@ -80,6 +80,9 @@ const {
   sendBackward,
   removeSelected
 } = useZineElementActions()
+
+// Names the radio groups, so each one is a single Tab stop with arrow keys.
+const groupId = useId()
 
 // "Medidas exactas" starts closed.
 const measuresOpen = ref(false)
@@ -220,20 +223,23 @@ function isColorSelected(color: string, fill: string) {
       </header>
 
       <div class="fonts" role="radiogroup" aria-label="Fuente">
-        <button
+        <label
           v-for="font in FONT_OPTIONS"
           :key="font"
-          type="button"
-          role="radio"
           class="font"
           :class="{ 'is-active': selectedElement.fontFamily === font }"
-          :aria-checked="selectedElement.fontFamily === font"
           :style="{ fontFamily: font }"
-          @click="patch({ fontFamily: font })"
         >
+          <input
+            type="radio"
+            class="sr-only"
+            :name="`${groupId}-font`"
+            :checked="selectedElement.fontFamily === font"
+            @change="patch({ fontFamily: font })"
+          >
           {{ font }}
           <UIcon v-if="selectedElement.fontFamily === font" name="i-lucide-check" aria-hidden="true" />
-        </button>
+        </label>
       </div>
 
       <div class="pair">
@@ -271,40 +277,46 @@ function isColorSelected(color: string, fill: string) {
       <div class="row">
         <span class="row-label">Alineación</span>
         <div class="switch" role="radiogroup" aria-label="Alineación del texto">
-          <button
+          <label
             v-for="item in textAlignItems"
             :key="item.value"
-            type="button"
-            role="radio"
             class="switch-item"
             :class="{ 'is-active': selectedElement.align === item.value }"
-            :aria-checked="selectedElement.align === item.value"
-            :aria-label="item.label"
             :title="item.label"
-            @click="patch({ align: item.value })"
           >
+            <input
+              type="radio"
+              class="sr-only"
+              :name="`${groupId}-align`"
+              :aria-label="item.label"
+              :checked="selectedElement.align === item.value"
+              @change="patch({ align: item.value })"
+            >
             <UIcon :name="item.icon" aria-hidden="true" />
-          </button>
+          </label>
         </div>
       </div>
 
       <div class="row is-colors">
         <span class="row-label">Color</span>
         <div class="swatches" role="radiogroup" aria-label="Color del texto">
-          <button
+          <label
             v-for="color in TEXT_COLOR_OPTIONS"
             :key="color"
-            type="button"
-            role="radio"
             class="swatch"
             :class="{ 'is-active': isColorSelected(color, selectedElement.fill) }"
-            :aria-checked="isColorSelected(color, selectedElement.fill)"
-            :aria-label="colorLabels[color]"
             :title="colorLabels[color]"
-            @click="patch({ fill: color })"
           >
+            <input
+              type="radio"
+              class="sr-only"
+              :name="`${groupId}-color`"
+              :aria-label="colorLabels[color]"
+              :checked="isColorSelected(color, selectedElement.fill)"
+              @change="patch({ fill: color })"
+            >
             <span :style="{ background: color }" />
-          </button>
+          </label>
         </div>
       </div>
     </template>
@@ -630,7 +642,17 @@ function isColorSelected(color: string, fill: string) {
   gap: 6px;
 }
 
+/* The font, alignment and colour options are labels around hidden radio inputs:
+   the label shows the focus ring its input cannot. */
+.font:has(:focus-visible),
+.switch-item:has(:focus-visible),
+.swatch:has(:focus-visible) {
+  outline: 2px solid var(--ed-focus);
+  outline-offset: 2px;
+}
+
 .font {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -642,6 +664,7 @@ function isColorSelected(color: string, fill: string) {
   font-size: 16px;
   line-height: 1;
   text-align: left;
+  cursor: pointer;
   transition: border-color 180ms ease;
 }
 
@@ -702,11 +725,13 @@ function isColorSelected(color: string, fill: string) {
 }
 
 .switch-item {
+  position: relative;
   display: grid;
   place-items: center;
   border: 0;
   background: transparent;
   color: var(--ink-dark);
+  cursor: pointer;
   transition:
     background 180ms ease,
     color 180ms ease;
@@ -736,11 +761,14 @@ function isColorSelected(color: string, fill: string) {
 }
 
 .swatch {
+  position: relative;
+  display: block;
   width: 34px;
   height: 34px;
   padding: 0;
   border: 2px solid transparent;
   background: transparent;
+  cursor: pointer;
 }
 
 .swatch span {
