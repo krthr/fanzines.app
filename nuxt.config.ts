@@ -57,8 +57,7 @@ export default defineNuxtConfig({
   ogImage: {
     enabled: false
   },
-  // Bundled by @nuxtjs/seo v6 and on by default; not used here.
-  aiReady: false,
+  // Bundled by @nuxtjs/seo v6. Needs old build assets kept between deploys, which Cloudflare builds don't do.
   skewProtection: false,
   routeRules: {
     '/': { prerender: true },
