@@ -61,6 +61,13 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
   },
+  nitro: {
+    prerender: {
+      // Emit editor.html (not editor/index.html) so Cloudflare assets serve /editor
+      // without a 307 to /editor/, matching the canonical and sitemap URLs.
+      autoSubfolderIndex: false
+    }
+  },
   scripts: {
     registry: {
       posthog: {
