@@ -57,6 +57,12 @@ export default defineNuxtConfig({
   ogImage: {
     enabled: false
   },
+  // Bundled by @nuxtjs/seo v6. Needs old build assets kept between deploys, which Cloudflare builds don't do.
+  skewProtection: false,
+  nitro: {
+    // Set explicitly: AI Ready reads it to set up its Cloudflare build (wasm) before Nitro auto-detects Workers Builds.
+    preset: 'cloudflare_module'
+  },
   routeRules: {
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
