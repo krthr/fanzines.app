@@ -57,12 +57,26 @@ export default defineNuxtConfig({
   ogImage: {
     enabled: false
   },
+  // Serves llms.txt, llms-full.txt, sitemap.md and a .md twin of each page.
+  aiReady: {
+    enabled: true
+  },
+  // On by default in Nuxt SEO v6; it registers a service worker and wraps the Worker entry.
+  skewProtection: false,
   routeRules: {
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
   },
   nitro: {
+    experimental: {
+      // Required for the Cloudflare build. AI Ready converts HTML to Markdown with mdream,
+      // whose workerd build imports a .wasm file; without this, Rollup fails to parse it.
+      wasm: true
+    },
     prerender: {
+      // AI Ready only indexes pages at build time (llms-full.txt, sitemap.md, .md twins)
+      // when routes are listed here; it ignores `prerender: true` in routeRules.
+      routes: ['/', '/editor'],
       // Emit editor.html (not editor/index.html) so Cloudflare assets serve /editor
       // without a 307 to /editor/, matching the canonical and sitemap URLs.
       autoSubfolderIndex: false
