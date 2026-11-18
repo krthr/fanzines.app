@@ -59,6 +59,13 @@ export default defineNuxtConfig({
   },
   // Bundled by @nuxtjs/seo v6. Needs old build assets kept between deploys, which Cloudflare builds don't do.
   skewProtection: false,
+  nitro: {
+    experimental: {
+      // AI Ready bundles mdream's .wasm on Cloudflare. It only turns this on when the preset is set
+      // explicitly, and Workers Builds auto-detects it, so the build fails without this.
+      wasm: true
+    }
+  },
   routeRules: {
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
