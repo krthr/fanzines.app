@@ -168,6 +168,8 @@ Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está defi
 
 El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominios personalizados `fanzines.app` y `www.fanzines.app`, flag `nodejs_compat`, observabilidad activada).
 
+El Worker de producción es `fanzines-app` y lo despliega **Workers Builds** en cada push a `main` (las demás ramas suben versiones de preview). El `name` de `wrangler.jsonc` tiene que coincidir con ese nombre: si no, un `wrangler deploy` manual crearía otro Worker y le movería los dominios.
+
 La URL canónica es `https://fanzines.app`. Las redirecciones se configuran en la zona de Cloudflare, no en el código, porque las páginas prerenderizadas y los archivos estáticos se sirven antes de que se ejecute el Worker:
 
 - **Redirect Rule** (Rules → Redirect Rules): `www.fanzines.app` y `http://fanzines.app` → `https://fanzines.app` + ruta, 301, conservando la query string, en un solo salto.
