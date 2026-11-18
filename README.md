@@ -128,8 +128,6 @@ fanzines/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
 │   └── images/                     # Fotos y guías (webp)
-├── server/
-│   └── middleware/redirect-www.ts  # 301 www.fanzines.app → fanzines.app
 ├── nuxt.config.ts                  # Módulos, SEO, fuentes, iconos, routeRules
 ├── wrangler.jsonc                  # Configuración de Cloudflare Workers (dominios)
 ├── .nvmrc                          # Node 26
@@ -168,7 +166,14 @@ Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está defi
 
 ## Despliegue
 
-El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominio personalizado `fanzines.app` con `www.fanzines.app` redirigiendo al apex vía [`server/middleware/redirect-www.ts`](server/middleware/redirect-www.ts), flag `nodejs_compat`, observabilidad activada).
+El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominios personalizados `fanzines.app` y `www.fanzines.app`, flag `nodejs_compat`, observabilidad activada).
+
+El Worker de producción es `fanzines-app` y lo despliega **Workers Builds** en cada push a `main` (las demás ramas suben versiones de preview). El `name` de `wrangler.jsonc` tiene que coincidir con ese nombre: si no, un `wrangler deploy` manual crearía otro Worker y le movería los dominios.
+
+La URL canónica es `https://fanzines.app`. Las redirecciones se configuran en la zona de Cloudflare, no en el código, porque las páginas prerenderizadas y los archivos estáticos se sirven antes de que se ejecute el Worker:
+
+- **Redirect Rule** (Rules → Redirect Rules): `www.fanzines.app` y `http://fanzines.app` → `https://fanzines.app` + ruta, 301, conservando la query string, en un solo salto.
+- **Always Use HTTPS** y **HSTS** (SSL/TLS → Edge Certificates).
 
 ```bash
 npm run build

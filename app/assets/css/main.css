@@ -142,6 +142,11 @@ select {
   transform: rotate(-6deg);
 }
 
+.zine-editor-mark:focus-visible {
+  outline: 2px solid var(--zine-accent);
+  outline-offset: 2px;
+}
+
 .zine-editor-mark-icon {
   width: 26px;
   height: 26px;

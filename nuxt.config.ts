@@ -64,7 +64,10 @@ export default defineNuxtConfig({
     preset: 'cloudflare_module',
     // AI Ready only builds llms-full.txt when it sees routes here; it doesn't read `prerender` route rules.
     prerender: {
-      routes: ['/', '/editor']
+      routes: ['/', '/editor'],
+      // Emit editor.html (not editor/index.html) so Cloudflare assets serve /editor
+      // without a 307 to /editor/, matching the canonical and sitemap URLs.
+      autoSubfolderIndex: false
     }
   },
   routeRules: {
