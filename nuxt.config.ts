@@ -37,7 +37,8 @@ export default defineNuxtConfig({
     sitemap: ['https://fanzines.app/sitemap.xml']
   },
   image: {
-    provider: 'ipxStatic',
+    // ipxStatic registers no /_ipx handler under `nuxt dev`, so every image 404s there.
+    provider: process.env.NODE_ENV === 'development' ? 'ipx' : 'ipxStatic',
     format: ['webp'],
     screens: {
       xs: 320,

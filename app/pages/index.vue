@@ -69,10 +69,30 @@ const steps = [
 ]
 
 const features = [
-  { icon: 'i-lucide-layout-grid', text: 'Guías de corte y doblez en cada panel' },
+  { icon: 'i-lucide-layout-grid', text: 'Guías de corte y doblez' },
   { icon: 'i-lucide-image', text: 'Fotos, textos y collage libre' },
-  { icon: 'i-lucide-file-down', text: 'PDF listo para cualquier impresora' },
+  { icon: 'i-lucide-file-down', text: 'PDF listo para imprimir' },
   { icon: 'i-lucide-user-x', text: 'Sin cuentas ni instalaciones' }
+]
+
+const faqs = [
+  {
+    question: '¿Qué necesito?',
+    answer: 'Una impresora A4 (la de casa o la de la copistería), unas tijeras y una hoja. Nada más.'
+  },
+  {
+    question: '¿Tengo que crear una cuenta?',
+    answer: 'No. Abres el editor y empiezas a diseñar.'
+  },
+  {
+    question: '¿Se puede imprimir en blanco y negro?',
+    answer: 'Sí. El PDF se imprime igual en color o en blanco y negro, como los fanzines de toda la vida.'
+  },
+  {
+    question: '¿Cómo se dobla?',
+    answer:
+      'El PDF trae guías de corte y doblez. Doblas a lo largo, cortas la línea central y cierras como un libro.'
+  }
 ]
 
 let animationContext: { revert: () => void } | null = null
@@ -212,7 +232,7 @@ onBeforeUnmount(() => {
               decoding="async"
             />
           </div>
-          <p class="sticker">8 páginas / PDF / A4</p>
+          <p class="sticker hero-sticker">hecho con una sola hoja</p>
         </div>
       </section>
 
@@ -263,46 +283,85 @@ onBeforeUnmount(() => {
       </section>
 
       <section id="editor" class="feature band" aria-labelledby="feature-title">
-        <figure class="feature-photo reveal">
+        <div class="feature-header reveal">
+          <div class="feature-heading">
+            <p class="eyebrow">El editor</p>
+            <h2 id="feature-title" class="display feature-title">
+              <span>Diseña en pantalla. </span>
+              <span>Termina con papel </span>
+              <span>y tijeras.</span>
+            </h2>
+          </div>
+          <p class="feature-intro">
+            Las ocho páginas a la vista, medidas en milímetros y una revisión del pliego antes de
+            descargar.
+          </p>
+        </div>
+
+        <figure class="editor-shot reveal">
           <NuxtImg
-            src="/images/making-table.webp"
-            alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
-            width="440"
-            height="560"
-            sizes="360px sm:440px"
-            densities="x1"
+            src="/images/editor-shot.webp"
+            alt="Editor de Fanzines: las ocho páginas en miniatura a la izquierda, la portada en el lienzo y los paneles de imagen y capas a la derecha"
+            width="1200"
+            height="750"
+            sizes="340px sm:480px md:720px lg:980px xl:1200px"
+            densities="x1 x2"
             loading="lazy"
             decoding="async"
           />
         </figure>
-        <div class="feature-copy reveal">
-          <p class="eyebrow">El editor</p>
-          <h2 id="feature-title" class="display feature-title">
-            <span>Diseña en pantalla. </span>
-            <span>Termina con papel </span>
-            <span>y tijeras.</span>
+
+        <ul class="feature-list reveal">
+          <li v-for="feature in features" :key="feature.text" class="feature-item">
+            <UIcon class="feature-icon" :name="feature.icon" aria-hidden="true" />
+            {{ feature.text }}
+          </li>
+        </ul>
+      </section>
+
+      <section id="preguntas" class="faq band" aria-labelledby="faq-title">
+        <div class="faq-heading reveal">
+          <h2 id="faq-title" class="display faq-title">
+            <span>Antes de </span>
+            <span>empezar.</span>
           </h2>
-          <ul class="feature-list">
-            <li v-for="feature in features" :key="feature.text" class="feature-item">
-              <UIcon class="feature-icon" :name="feature.icon" aria-hidden="true" />
-              {{ feature.text }}
-            </li>
-          </ul>
+          <p class="sticker faq-sticker">4 dudas, 4 respuestas</p>
         </div>
+
+        <dl class="faq-list">
+          <div v-for="faq in faqs" :key="faq.question" class="faq-item reveal">
+            <dt class="faq-question">{{ faq.question }}</dt>
+            <dd class="faq-answer">{{ faq.answer }}</dd>
+          </div>
+        </dl>
       </section>
 
       <section class="final-cta band" aria-labelledby="cta-title">
-        <h2 id="cta-title" class="display cta-title reveal">
-          <span>Empieza con una portada </span>
-          <span>y una imagen.</span>
-        </h2>
-        <div class="cta-row reveal">
-          <NuxtLink class="button button-dark" to="/editor">
-            Crear fanzine gratis
-            <UIcon class="button-icon" name="i-lucide-arrow-right" aria-hidden="true" />
-          </NuxtLink>
-          <p class="cta-note">Tarda menos que ir a la copistería.</p>
+        <div class="cta-copy">
+          <h2 id="cta-title" class="display cta-title reveal">
+            <span>Empieza con una portada </span>
+            <span>y una imagen.</span>
+          </h2>
+          <div class="cta-row reveal">
+            <NuxtLink class="button button-dark" to="/editor">
+              Crear fanzine gratis
+              <UIcon class="button-icon" name="i-lucide-arrow-right" aria-hidden="true" />
+            </NuxtLink>
+            <p class="cta-note">Tarda menos que ir a la copistería.</p>
+          </div>
         </div>
+        <figure class="cta-photo reveal">
+          <NuxtImg
+            src="/images/making-table.webp"
+            alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+            width="250"
+            height="320"
+            sizes="250px"
+            densities="x1 x2"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
       </section>
     </main>
 
@@ -471,12 +530,24 @@ onBeforeUnmount(() => {
 .button-primary {
   padding: 18px 28px;
   background: var(--orange);
+  box-shadow: 4px 4px 0 var(--orange-deep);
   color: var(--ink-dark);
   font-size: 17px;
 }
 
+.button-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--orange-deep);
+}
+
+.button-primary:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--orange-deep);
+}
+
 .button-dark {
-  padding: 20px 32px;
+  padding: 19px 31px;
+  border: 1px solid var(--ink);
   background: var(--ink-dark);
   color: var(--ink);
   font-size: 18px;
@@ -585,7 +656,7 @@ onBeforeUnmount(() => {
 }
 
 .photo:hover img,
-.feature-photo:hover img {
+.cta-photo:hover img {
   transform: scale(1.04);
 }
 
@@ -610,16 +681,20 @@ onBeforeUnmount(() => {
 }
 
 .sticker {
-  top: 73.333%;
-  left: 1.786%;
   margin: 0;
-  padding: 1.786cqi 2.857cqi;
   background: var(--acid);
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 50%);
   color: var(--ink-dark);
   font-family: var(--font-type);
-  font-size: max(13px, 3.571cqi);
   line-height: 1.2;
   white-space: nowrap;
+}
+
+.hero-sticker {
+  top: 73.333%;
+  left: 1.786%;
+  padding: 1.786cqi 2.857cqi;
+  font-size: max(13px, 3.571cqi);
   transform: rotate(4deg);
 }
 
@@ -641,7 +716,8 @@ onBeforeUnmount(() => {
   gap: 32px;
 }
 
-.how-title {
+.how-title,
+.faq-title {
   font-size: clamp(2.75rem, 13vw, 5rem);
   line-height: 0.95;
 }
@@ -781,35 +857,23 @@ onBeforeUnmount(() => {
 
 .feature {
   display: flex;
-  align-items: center;
-  gap: clamp(48px, 6.667vw, 96px);
+  flex-direction: column;
+  gap: 56px;
   padding-block: var(--section-y);
 }
 
-.feature-photo {
-  flex: none;
-  width: min(440px, 100%);
-  aspect-ratio: 440 / 560;
-  margin: 0;
-  overflow: hidden;
-  border: 10px solid var(--ink);
-  background: var(--ink);
-  transform: rotate(2deg);
-}
-
-.feature-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 700ms ease;
-}
-
-.feature-copy {
+.feature-header {
   display: flex;
-  flex: 1 1 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.feature-heading {
+  display: flex;
+  flex: 0 1 700px;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
   min-width: 0;
 }
 
@@ -818,7 +882,7 @@ onBeforeUnmount(() => {
   color: var(--acid);
   font-family: var(--font-type);
   font-size: 18px;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .feature-title {
@@ -826,12 +890,34 @@ onBeforeUnmount(() => {
   line-height: 1;
 }
 
+.feature-intro {
+  flex: 0 1 400px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.editor-shot {
+  margin: 0;
+  border: 2px solid var(--ink);
+  background: var(--bg);
+  box-shadow: 14px 14px 0 var(--orange);
+}
+
+.editor-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .feature-list {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 32px;
   margin: 0;
-  padding: 0;
+  padding: 8px 0 0;
   list-style: none;
 }
 
@@ -840,7 +926,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 14px;
   font-size: 19px;
-  line-height: 1.3;
+  line-height: 1.26;
 }
 
 .feature-icon {
@@ -850,20 +936,89 @@ onBeforeUnmount(() => {
   color: var(--orange);
 }
 
+/* FAQ */
+
+.faq {
+  display: flex;
+  align-items: flex-start;
+  gap: 96px;
+  padding-block: var(--section-y);
+  background: var(--ink);
+  color: var(--ink-dark);
+}
+
+.faq-heading {
+  display: flex;
+  flex: 0 1 400px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.faq-title {
+  line-height: 0.95;
+}
+
+.faq-sticker {
+  padding: 10px 16px;
+  font-size: 18px;
+  transform: rotate(2deg);
+}
+
+.faq-list {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.faq-item {
+  padding-block: 28px;
+}
+
+.faq-item:first-child {
+  padding-top: 0;
+}
+
+.faq-item:not(:last-child) {
+  border-bottom: 1px solid rgb(11 10 9 / 20%);
+}
+
+.faq-question {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.26;
+}
+
+.faq-answer {
+  margin: 10px 0 0;
+  color: var(--text-dark);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
 /* Final CTA */
 
 .final-cta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
   padding-block: var(--section-y);
   background: var(--orange);
   color: var(--ink-dark);
 }
 
+.cta-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  min-width: 0;
+}
+
 .cta-title {
-  font-size: clamp(2.5rem, 8.6vw, 6rem);
+  font-size: clamp(2.5rem, 6.1vw, 5.5rem);
   line-height: 0.95;
 }
 
@@ -878,7 +1033,27 @@ onBeforeUnmount(() => {
   margin: 0;
   font-family: var(--font-type);
   font-size: 18px;
-  line-height: 1.3;
+  line-height: 1;
+}
+
+.cta-photo {
+  flex: none;
+  width: 250px;
+  aspect-ratio: 250 / 320;
+  margin: 8px 0;
+  overflow: hidden;
+  border: 8px solid var(--ink);
+  background: var(--ink);
+  box-shadow: 10px 10px 0 var(--ink-dark);
+  transform: rotate(-4deg);
+}
+
+.cta-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms ease;
 }
 
 /* Footer */
@@ -925,7 +1100,7 @@ onBeforeUnmount(() => {
 
   .hero,
   .how-body,
-  .feature {
+  .faq {
     flex-direction: column;
     align-items: stretch;
   }
@@ -947,13 +1122,15 @@ onBeforeUnmount(() => {
     width: min(560px, 100%);
   }
 
-  .how-header {
+  .how-header,
+  .feature-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 24px;
   }
 
-  .how-intro {
+  .how-intro,
+  .feature-intro {
     flex-basis: auto;
     max-width: 520px;
   }
@@ -967,12 +1144,36 @@ onBeforeUnmount(() => {
     flex-basis: auto;
   }
 
-  .feature {
-    gap: 56px;
+  .feature-heading,
+  .faq-heading {
+    flex-basis: auto;
   }
 
   .feature-title {
     font-size: clamp(2.25rem, 10vw, 4rem);
+  }
+
+  .feature-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .faq {
+    gap: 48px;
+  }
+
+  .final-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 56px;
+  }
+
+  .cta-title {
+    font-size: clamp(2.5rem, 8.6vw, 5.5rem);
+  }
+
+  .cta-photo {
+    margin-inline: 12px;
   }
 
   .cta-title span {
@@ -999,7 +1200,8 @@ onBeforeUnmount(() => {
   }
 
   .hero-lede,
-  .how-intro {
+  .how-intro,
+  .feature-intro {
     font-size: 18px;
   }
 
@@ -1030,12 +1232,37 @@ onBeforeUnmount(() => {
     font-size: 16px;
   }
 
-  .feature-photo {
-    border-width: 8px;
+  .feature {
+    gap: 40px;
+  }
+
+  .editor-shot {
+    box-shadow: 8px 8px 0 var(--orange);
+  }
+
+  .feature-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .feature-item {
     font-size: 17px;
+  }
+
+  .faq-item {
+    padding-block: 24px;
+  }
+
+  .faq-question {
+    font-size: 22px;
+  }
+
+  .faq-answer {
+    font-size: 16px;
+  }
+
+  .cta-copy {
+    align-items: stretch;
+    width: 100%;
   }
 
   .cta-row {
