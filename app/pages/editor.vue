@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EditorBrand from '~/components/zine/EditorBrand.vue'
 import ZineEditor from '~/components/zine/ZineEditor.client.vue'
 
 const siteUrl = 'https://fanzines.app'
@@ -38,9 +39,20 @@ useHead({
     <ClientOnly>
       <ZineEditor />
       <template #fallback>
-        <section class="editor-loading" aria-label="Cargando editor">
-          Cargando editor.
-        </section>
+        <div>
+          <header class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4">
+            <EditorBrand subtitle="Pliego A4" />
+          </header>
+          <section class="editor-loading px-3 py-5 lg:px-4">
+            <p>
+              {{ pageDescription }} Es gratis y no necesitas cuenta.
+            </p>
+            <p class="editor-loading-meta">
+              <span>Cargando editor…</span>
+              <NuxtLink to="/">Ver cómo funciona Fanzines</NuxtLink>
+            </p>
+          </section>
+        </div>
       </template>
     </ClientOnly>
   </main>
@@ -62,10 +74,31 @@ useHead({
 }
 
 .editor-loading {
-  min-height: 60dvh;
-  padding: 24px;
-  color: rgb(238 232 216 / 72%);
+  max-width: 40rem;
+  color: rgb(238 232 216 / 82%);
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.editor-loading-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 12px;
+  color: rgb(238 232 216 / 60%);
+  font-size: 0.85rem;
+}
+
+.editor-loading-meta a {
+  color: var(--zine-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.editor-loading-meta a:focus-visible {
+  outline: 2px solid var(--zine-accent);
+  outline-offset: 2px;
 }
 
 </style>
