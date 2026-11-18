@@ -61,7 +61,11 @@ export default defineNuxtConfig({
   skewProtection: false,
   nitro: {
     // Set explicitly: AI Ready reads it to set up its Cloudflare build (wasm) before Nitro auto-detects Workers Builds.
-    preset: 'cloudflare_module'
+    preset: 'cloudflare_module',
+    // AI Ready only builds llms-full.txt when it sees routes here; it doesn't read `prerender` route rules.
+    prerender: {
+      routes: ['/', '/editor']
+    }
   },
   routeRules: {
     '/': { prerender: true },
