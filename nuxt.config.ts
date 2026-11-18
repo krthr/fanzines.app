@@ -57,6 +57,9 @@ export default defineNuxtConfig({
   ogImage: {
     enabled: false
   },
+  // Bundled by @nuxtjs/seo v6 and on by default; not used here.
+  aiReady: false,
+  skewProtection: false,
   routeRules: {
     '/': { prerender: true },
     '/editor': { prerender: true, robots: true }
