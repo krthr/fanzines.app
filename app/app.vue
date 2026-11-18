@@ -36,7 +36,7 @@ useHead({
 </script>
 
 <template>
-  <UApp>
+  <UApp :toaster="{ progress: false }">
     <NuxtRouteAnnouncer />
     <NuxtPage />
   </UApp>

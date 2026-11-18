@@ -2,7 +2,8 @@ import type { ImageBatchSkippedFile, PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
-export type ImageInputMethod = 'file_picker' | 'drag_drop'
+// 'file_picker' is the top bar button and a click on an empty page, as before.
+export type ImageInputMethod = 'file_picker' | 'empty_state_button' | 'mobile_bar' | 'drag_drop'
 export type ImageDropTarget = 'canvas' | 'page_tile' | 'shell'
 
 export type ProcessImageFilesOptions = {
@@ -21,6 +22,10 @@ export function useZineImageImport() {
     const extraCount = files.length - 3
 
     return extraCount > 0 ? `${names} y ${extraCount} más` : names
+  }
+
+  function formatSkippedCount(count: number) {
+    return count === 1 ? 'Se omitió 1 archivo' : `Se omitieron ${count} archivos`
   }
 
   async function processImageFiles(files: File[], options: ProcessImageFilesOptions) {
@@ -48,25 +53,22 @@ export function useZineImageImport() {
     if (failedFiles.length > 0) {
       toast.add({
         color: 'error',
-        icon: 'i-lucide-triangle-alert',
         title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
-        description: `Se omitieron ${failedFiles.length} archivo${failedFiles.length === 1 ? '' : 's'}: ${formatSkippedFiles(failedFiles)}.`
+        description: `${formatSkippedCount(failedFiles.length)}: ${formatSkippedFiles(failedFiles)}.`
       })
     }
 
     if (result.overflowCount > 0) {
       toast.add({
         color: 'warning',
-        icon: 'i-lucide-info',
         title: 'No caben todas las imágenes',
-        description: `Se omitieron ${result.overflowCount} archivo${result.overflowCount === 1 ? '' : 's'} porque no quedaban páginas disponibles.`
+        description: `${formatSkippedCount(result.overflowCount)} porque no quedaban páginas disponibles.`
       })
     }
 
     if (result.largeFileCount > 0) {
       toast.add({
         color: 'warning',
-        icon: 'i-lucide-info',
         title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
         description: result.largeFileCount === 1
           ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'

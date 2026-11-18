@@ -44,6 +44,15 @@ export const FONT_OPTIONS = [
   'system-ui'
 ] as const
 
+// Text colour is one of these five swatches; the first is the default for new text.
+export const TEXT_COLOR_OPTIONS = [
+  '#0b0a09',
+  '#ffffff',
+  '#d25a36',
+  '#e9ff5c',
+  '#2f5bea'
+] as const
+
 export const DEFAULT_TEXT_CONTENT = 'Escribe aquí'
 
 export type FontOption = typeof FONT_OPTIONS[number]

@@ -1,39 +1,53 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* Brand tokens, defined once for the landing, the error page and the editor. */
 :root {
-  --zine-bg: #070706;
-  --zine-page: #ffffff;
-  --zine-paper: #eee8d8;
-  --zine-paper-hot: #fff6c8;
-  --zine-paper-deep: #d6c9ae;
-  --zine-ink: #070706;
-  --zine-muted: #665f51;
-  --zine-border: rgb(7 7 6 / 38%);
-  --zine-accent: #e7ff36;
-  --zine-accent-strong: #f23d25;
-  --zine-cut: #f23d25;
-  --zine-cyan: #17b6c8;
-  --zine-shadow: 14px 14px 0 rgb(242 61 37 / 72%), 0 22px 54px rgb(0 0 0 / 40%);
-  --ui-radius: 0.125rem;
-  --ui-primary: var(--zine-accent);
-  --ui-secondary: var(--zine-cyan);
-  --ui-error: var(--zine-cut);
-  --ui-text-dimmed: rgb(7 7 6 / 46%);
-  --ui-text-muted: rgb(7 7 6 / 62%);
-  --ui-text-toned: rgb(7 7 6 / 76%);
-  --ui-text: var(--zine-ink);
-  --ui-text-highlighted: var(--zine-ink);
-  --ui-text-inverted: var(--zine-ink);
-  --ui-bg: var(--zine-paper);
-  --ui-bg-muted: #e4dcc9;
-  --ui-bg-elevated: var(--zine-paper-hot);
-  --ui-bg-accented: #d9cdb4;
-  --ui-bg-inverted: var(--zine-bg);
-  --ui-border: rgb(7 7 6 / 36%);
-  --ui-border-muted: rgb(7 7 6 / 20%);
-  --ui-border-accented: rgb(7 7 6 / 52%);
-  --ui-border-inverted: var(--zine-paper);
+  --bg: #0b0a09;
+  --ink: #ede7da;
+  --muted: #a8a196;
+  --line: #2a2724;
+  --orange: #d25a36;
+  --orange-deep: #8e3a22;
+  --acid: #e9ff5c;
+  --paper: #f4f0e8;
+  --ink-dark: #0b0a09;
+  --text-dark: #3a3631;
+  --panel-num: #b5aea2;
+  --font-display: Anton, Impact, "Arial Narrow Bold", sans-serif;
+  --font-body: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-type: "Special Elite", "Courier New", monospace;
+
+  /* Editor-only neutrals that sit between the brand tokens. They live here because
+     the drawer and the dialog are teleported outside the editor shell. */
+  --ed-canvas: #100e0d;
+  --ed-raised: #1f1c19;
+  --ed-dim: #5a554e;
+  --ed-faint: #6b655c;
+  --ed-label: #8a8378;
+  --ed-hairline: rgb(11 10 9 / 20%);
+  --ed-focus: var(--acid);
+
+  /* Nuxt UI surfaces (drawer, dialog, toasts) sit on cream paper with dark ink. */
+  --ui-radius: 0rem;
+  --ui-primary: var(--acid);
+  --ui-secondary: var(--orange);
+  --ui-error: var(--orange-deep);
+  --ui-text-dimmed: rgb(11 10 9 / 46%);
+  --ui-text-muted: var(--text-dark);
+  --ui-text-toned: var(--text-dark);
+  --ui-text: var(--ink-dark);
+  --ui-text-highlighted: var(--ink-dark);
+  --ui-text-inverted: var(--ink);
+  --ui-bg: var(--ink);
+  --ui-bg-muted: var(--paper);
+  --ui-bg-elevated: var(--paper);
+  --ui-bg-accented: rgb(11 10 9 / 20%);
+  --ui-bg-inverted: var(--bg);
+  --ui-border: rgb(11 10 9 / 20%);
+  --ui-border-muted: rgb(11 10 9 / 15%);
+  --ui-border-accented: var(--ink-dark);
+  --ui-border-inverted: var(--ink);
 }
 
 html,
@@ -44,9 +58,9 @@ body,
 
 body {
   margin: 0;
-  background: var(--zine-bg);
-  color: var(--zine-paper);
-  font-family: Outfit, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
 }
 
 button,
@@ -56,432 +70,520 @@ select {
   font: inherit;
 }
 
-.zine-shell {
+/* ───────────────────────── Editor shell ───────────────────────── */
+
+.ed-shell {
   position: relative;
-  isolation: isolate;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  background:
-    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
-    radial-gradient(circle at 76% 8%, rgb(242 61 37 / 18%), transparent 26rem),
-    var(--zine-bg);
-  background-size: 24px 24px, 24px 24px, auto, auto;
-  color: var(--zine-paper);
-  --ui-text-dimmed: rgb(7 7 6 / 44%);
-  --ui-text-muted: rgb(7 7 6 / 62%);
-  --ui-text-toned: rgb(7 7 6 / 78%);
-  --ui-text: var(--zine-ink);
-  --ui-text-highlighted: var(--zine-ink);
-  --ui-text-inverted: var(--zine-ink);
-  --ui-bg: var(--zine-paper);
-  --ui-bg-muted: #e4dcc9;
-  --ui-bg-elevated: var(--zine-paper-hot);
-  --ui-bg-accented: #d9cdb4;
-  --ui-border: rgb(7 7 6 / 36%);
-  --ui-border-muted: rgb(7 7 6 / 22%);
-  --ui-border-accented: rgb(7 7 6 / 52%);
-}
-
-.zine-shell::before,
-.zine-shell::after {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  content: "";
-}
-
-.zine-shell::before {
-  opacity: 0.2;
-  background:
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 9%) 0 1px, transparent 1px 5px),
-    repeating-linear-gradient(90deg, rgb(0 0 0 / 45%) 0 2px, transparent 2px 7px);
-  mix-blend-mode: overlay;
-}
-
-.zine-shell::after {
-  opacity: 0.22;
-  background-image:
-    radial-gradient(circle, rgb(255 255 255 / 26%) 0 1px, transparent 1px),
-    radial-gradient(circle, rgb(0 0 0 / 42%) 0 1px, transparent 1px);
-  background-position: 0 0, 9px 13px;
-  background-size: 18px 18px, 22px 22px;
-}
-
-.zine-editor-header,
-.zine-editor-grid {
-  position: relative;
-  z-index: 1;
-}
-
-.zine-editor-header {
-  border-bottom: 2px solid rgb(238 232 216 / 72%);
-  background:
-    linear-gradient(90deg, rgb(7 7 6 / 94%), rgb(7 7 6 / 82%)),
-    var(--zine-bg);
-  box-shadow: 0 3px 0 var(--zine-accent);
-  color: var(--zine-paper);
-  --ui-primary: var(--zine-accent);
-  --ui-text-dimmed: rgb(238 232 216 / 48%);
-  --ui-text-muted: rgb(238 232 216 / 68%);
-  --ui-text-toned: rgb(238 232 216 / 82%);
-  --ui-text: var(--zine-paper);
-  --ui-text-highlighted: var(--zine-paper);
-  --ui-text-inverted: var(--zine-ink);
-  --ui-border: rgb(238 232 216 / 36%);
-  --ui-border-muted: rgb(238 232 216 / 28%);
-  --ui-bg: rgb(238 232 216 / 8%);
-  --ui-bg-muted: rgb(238 232 216 / 12%);
-  --ui-bg-elevated: rgb(238 232 216 / 16%);
-}
-
-.zine-editor-mark {
-  color: var(--zine-cut);
-  line-height: 0;
-  transform: rotate(-6deg);
-}
-
-.zine-editor-mark:focus-visible {
-  outline: 2px solid var(--zine-accent);
-  outline-offset: 2px;
-}
-
-.zine-editor-mark-icon {
-  width: 26px;
-  height: 26px;
-}
-
-.zine-toolbar-button {
-  border-radius: 0 !important;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.zine-contrast-switch [data-slot="base"] {
-  border-color: var(--zine-ink);
-  background: var(--zine-paper-deep);
-  box-shadow: 3px 3px 0 rgb(0 0 0 / 72%);
-}
-
-.zine-contrast-switch [data-slot="base"][data-state="checked"] {
-  background: var(--zine-accent);
-}
-
-.zine-contrast-switch [data-slot="base"][data-state="unchecked"] {
-  background: var(--zine-paper);
-}
-
-.zine-contrast-switch [data-slot="thumb"] {
-  border: 1px solid var(--zine-ink);
-  background: var(--zine-ink);
-  box-shadow: none;
-}
-
-.zine-contrast-switch [data-slot="thumb"][data-state="unchecked"] {
-  background: var(--zine-paper-hot);
-}
-
-.zine-contrast-switch:hover [data-slot="base"] {
-  box-shadow: 2px 2px 0 rgb(0 0 0 / 86%);
-}
-
-.zine-contrast-switch [data-slot="base"]:focus-visible {
-  outline: 3px solid var(--zine-cut);
-  outline-offset: 3px;
-}
-
-.zine-workspace {
-  min-width: 0;
-}
-
-.zine-workbar {
-  border-bottom: 2px solid rgb(238 232 216 / 44%);
-  background: rgb(7 7 6 / 76%);
-  color: var(--zine-paper);
-  --ui-primary: var(--zine-accent);
-  --ui-text-dimmed: rgb(238 232 216 / 48%);
-  --ui-text-muted: rgb(238 232 216 / 68%);
-  --ui-text: var(--zine-paper);
-  --ui-text-highlighted: var(--zine-paper);
-  --ui-border: rgb(238 232 216 / 28%);
-  --ui-bg: rgb(238 232 216 / 8%);
-}
-
-.zine-panel {
-  border: 2px solid var(--zine-ink);
-  background:
-    linear-gradient(135deg, rgb(255 255 255 / 24%) 0 1px, transparent 1px 100%),
-    var(--zine-paper);
-  box-shadow: 7px 7px 0 rgb(0 0 0 / 88%);
-  color: var(--zine-ink);
-}
-
-.zine-panel h2,
-.zine-inspector h2,
-.zine-export-panel h2 {
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.zine-mobile-panel {
-  border-top: 2px solid var(--zine-ink);
-  background: var(--zine-paper);
-  color: var(--zine-ink);
-  box-shadow: 0 -6px 0 rgb(0 0 0 / 50%);
-}
-
-.zine-canvas-wrap {
-  position: relative;
-  touch-action: none;
-  background:
-    linear-gradient(90deg, rgb(238 232 216 / 6%) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(238 232 216 / 5%) 1px, transparent 1px),
-    rgb(7 7 6 / 36%);
-  background-size: 22px 22px;
-}
-
-.zine-inline-text-editor {
-  position: absolute;
-  z-index: 30;
-  box-sizing: border-box;
-  overflow: hidden;
-  margin: 0;
-  border: 2px solid var(--zine-cut);
-  border-radius: 0;
-  outline: 2px solid var(--zine-accent);
-  background: rgb(255 255 255 / 90%);
-  padding: 0;
-  resize: none;
-  box-shadow: 4px 4px 0 rgb(0 0 0 / 58%);
-  caret-color: var(--zine-cut);
-  cursor: text;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-}
-
-.zine-page-tile {
-  border: 2px solid currentcolor;
-  background: var(--zine-paper);
-  color: var(--zine-ink);
-  box-shadow: 4px 4px 0 rgb(0 0 0 / 72%);
-}
-
-.zine-page-tile:hover {
-  background: var(--zine-paper-hot);
-  transform: translate(-2px, -2px);
-}
-
-.zine-page-tile-active {
-  background: var(--zine-accent);
-  color: var(--zine-ink);
-}
-
-.zine-page-tile-idle {
-  color: rgb(7 7 6 / 72%);
-}
-
-.zine-page-tile-dropover {
-  border-style: dashed;
-  border-color: var(--zine-accent-strong);
-  background: var(--zine-accent);
-  color: var(--zine-ink);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 rgb(242 61 37 / 82%);
-}
-
-.zine-canvas-dragover {
-  outline: 3px dashed var(--zine-accent);
-  outline-offset: -6px;
-  background:
-    linear-gradient(90deg, rgb(231 255 54 / 14%) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(231 255 54 / 12%) 1px, transparent 1px),
-    rgb(7 7 6 / 46%);
-  background-size: 22px 22px;
-}
-
-.zine-canvas-empty-hint {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 12;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 1.5rem 2rem;
-  border: 2px dashed rgb(29 28 24 / 26%);
-  background: rgb(255 255 255 / 60%);
-  color: rgb(29 28 24 / 46%);
-  pointer-events: none;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  height: 100dvh;
+  min-width: 320px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.25;
 }
 
-.zine-canvas-empty-hint-active {
-  border-color: var(--zine-accent-strong);
-  background: rgb(231 255 54 / 22%);
-  color: rgb(29 28 24 / 78%);
+/* Cream surfaces: the focus ring flips to dark ink. */
+.ed-light {
+  --ed-focus: var(--ink-dark);
+  background: var(--ink);
+  color: var(--ink-dark);
 }
 
-.zine-canvas-empty-hint-icon {
-  width: 30px;
-  height: 30px;
-}
-
-.zine-canvas-empty-hint-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.zine-canvas-empty-hint-sub {
-  margin: 0;
-  font-size: 0.78rem;
-  opacity: 0.8;
-}
-
-.zine-canvas-empty .konva-content {
+.ed-shell button,
+.ed-light button {
   cursor: pointer;
 }
 
-.zine-drop-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  background: rgb(7 7 6 / 64%);
-  backdrop-filter: blur(2px);
+.ed-shell button:disabled,
+.ed-light button:disabled {
+  cursor: default;
 }
 
-.zine-drop-overlay-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 2rem 2.75rem;
-  border: 3px dashed var(--zine-accent);
-  background: rgb(7 7 6 / 86%);
-  color: var(--zine-paper);
-  box-shadow: 10px 10px 0 rgb(242 61 37 / 72%);
-  text-align: center;
+.ed-shell :focus-visible,
+.ed-light :focus-visible {
+  outline: 2px solid var(--ed-focus);
+  outline-offset: 2px;
 }
 
-.zine-drop-overlay-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--zine-accent);
-}
-
-.zine-drop-overlay-title {
+.ed-display {
   margin: 0;
-  font-size: 1.15rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 27px;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
 }
 
-.zine-drop-overlay-sub {
+/* Top bar and brand: shared with the prerendered fallback in pages/editor.vue. */
+
+.ed-topbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ed-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px;
+}
+
+.ed-brand-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--orange);
+  line-height: 0;
+}
+
+.ed-brand-mark:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 4px;
+}
+
+.ed-brand-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.ed-brand-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ed-brand-name {
   margin: 0;
-  font-size: 0.85rem;
-  color: rgb(238 232 216 / 72%);
-}
-
-.zine-empty-state,
-.zine-element-card {
-  border: 2px dashed rgb(7 7 6 / 42%);
-  background: var(--zine-paper-hot);
-  color: rgb(7 7 6 / 72%);
-}
-
-.zine-element-card {
-  border-style: solid;
-}
-
-.zine-sheet-preview {
-  position: relative;
-  aspect-ratio: 297 / 210;
   overflow: hidden;
-  border: 2px solid var(--zine-ink);
-  background: var(--zine-page);
-  box-shadow: 6px 6px 0 rgb(0 0 0 / 82%);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.zine-sheet-slot {
-  border-radius: 0;
+.ed-brand-status {
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.zine-sheet-label {
-  border: 1px solid rgb(7 7 6 / 58%);
-  background: var(--zine-accent);
-  color: var(--zine-ink);
-  font-family: "Special Elite", "Courier New", monospace;
-  box-shadow: 2px 2px 0 rgb(0 0 0 / 54%);
-}
-
-.zine-sheet-guide {
-  position: absolute;
-  pointer-events: none;
-  z-index: 18;
-}
-
-.zine-sheet-guide.fold-v {
-  top: 0;
-  bottom: 0;
-  border-left: 1px dashed rgb(7 7 6 / 48%);
-}
-
-.zine-sheet-guide.fold-h {
-  border-top: 1px dashed rgb(7 7 6 / 48%);
-}
-
-.zine-sheet-guide.cut-h {
-  left: 25%;
-  right: 25%;
-  top: 50%;
-  border-top: 2px solid var(--zine-cut);
-}
-
-.zine-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(231 255 54 / 72%) transparent;
-}
-
-.zine-scrollbar::-webkit-scrollbar {
-  height: 9px;
-  width: 9px;
-}
-
-.zine-scrollbar::-webkit-scrollbar-thumb {
-  background: rgb(231 255 54 / 72%);
-  border-radius: 0;
-}
-
-.zine-input-color {
-  height: 2rem;
-  width: 100%;
-  border: 2px solid var(--zine-ink);
-  border-radius: 0;
-  background: var(--zine-page);
-  padding: 0.125rem;
-}
-
-@media (min-width: 1024px) {
-  .zine-editor-grid {
-    display: grid;
-    grid-template-columns: 270px minmax(0, 1fr) 330px;
-    gap: 14px;
-    height: calc(100dvh - 67px);
-    padding: 14px;
+@media (max-width: 1023.98px) {
+  .ed-topbar {
+    height: 56px;
+    padding: 0 12px;
   }
 
-  .zine-editor-grid .zine-workspace {
-    min-height: 0;
+  .ed-brand {
+    gap: 10px;
+  }
+
+  .ed-brand-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ed-brand-name {
+    font-size: 15px;
+    line-height: 19px;
+  }
+
+  .ed-brand-status {
+    display: none;
+  }
+}
+
+/* Buttons */
+
+.ed-btn-primary {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 0;
+  background: var(--orange);
+  box-shadow: 4px 4px 0 var(--orange-deep);
+  color: var(--ink-dark);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 19px;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.ed-btn-primary:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--orange-deep);
+}
+
+.ed-btn-primary:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--orange-deep);
+}
+
+.ed-btn-primary:disabled {
+  opacity: 0.6;
+}
+
+/* Still works, just not asking for attention yet. */
+.ed-btn-primary.is-quiet {
+  opacity: 0.4;
+}
+
+.ed-btn-primary.is-quiet:hover,
+.ed-btn-primary.is-quiet:focus-visible {
+  opacity: 1;
+}
+
+.ed-btn-primary .iconify {
+  width: 18px;
+  height: 18px;
+}
+
+.ed-btn-primary.is-tall {
+  padding-block: 14px;
+}
+
+.ed-btn-primary.is-small {
+  gap: 6px;
+  padding: 9px 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.ed-btn-primary.is-small .iconify {
+  width: 16px;
+  height: 16px;
+}
+
+.ed-btn-outline {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  /* A 1.5px border would snap to 1px on standard-density screens. */
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.ed-btn-outline:hover {
+  background: var(--ink);
+  color: var(--ink-dark);
+}
+
+.ed-btn-outline .iconify {
+  width: 16px;
+  height: 16px;
+}
+
+/* Bordered action on cream: icon + label. */
+.ed-btn-line {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 9px;
+  border: 1px solid var(--ink-dark);
+  background: transparent;
+  color: var(--ink-dark);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.ed-btn-line:hover:not(:disabled) {
+  background: var(--ink-dark);
+  color: var(--ink);
+}
+
+.ed-btn-line .iconify {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.ed-btn-line.is-danger {
+  color: var(--orange-deep);
+}
+
+.ed-btn-line.is-danger:hover {
+  border-color: var(--orange-deep);
+  background: var(--orange-deep);
+  color: var(--ink);
+}
+
+/* Segmented switch */
+
+.ed-segment {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+}
+
+.ed-segment-item {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.ed-segment-item .iconify {
+  width: 14px;
+  height: 14px;
+}
+
+.ed-segment-item:hover:not(:disabled):not(.is-active) {
+  color: var(--ink);
+}
+
+.ed-segment-item.is-active {
+  background: var(--ink);
+  color: var(--ink-dark);
+}
+
+.ed-segment-item:disabled {
+  opacity: 0.45;
+}
+
+/* Toggle */
+
+.ed-toggle {
+  --toggle-off: var(--text-dark);
+  --toggle-off-knob: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.ed-light .ed-toggle {
+  --toggle-off: transparent;
+  --toggle-off-knob: var(--ink-dark);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+}
+
+.ed-toggle-track {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border: 2px solid var(--ink-dark);
+  border-radius: 11px;
+  background: var(--toggle-off);
+  transition: background 180ms ease;
+}
+
+.ed-toggle-knob {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--toggle-off-knob);
+  transition:
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.ed-toggle[aria-checked="true"] .ed-toggle-track {
+  background: var(--acid);
+}
+
+.ed-toggle[aria-checked="true"] .ed-toggle-knob {
+  background: var(--ink-dark);
+  transform: translateX(20px);
+}
+
+/* Range slider: 3px track, square acid knob. */
+
+.ed-range {
+  --fill: 50%;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.ed-range::-webkit-slider-runnable-track {
+  height: 3px;
+  background: linear-gradient(to right, var(--ink-dark) var(--fill), var(--ed-hairline) var(--fill));
+}
+
+.ed-range::-moz-range-track {
+  height: 3px;
+  background: linear-gradient(to right, var(--ink-dark) var(--fill), var(--ed-hairline) var(--fill));
+}
+
+.ed-range::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border: 2px solid var(--ink-dark);
+  border-radius: 0;
+  background: var(--acid);
+  appearance: none;
+}
+
+.ed-range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink-dark);
+  border-radius: 0;
+  background: var(--acid);
+}
+
+/* Field: grey label on the left, value on the right, in a white box. */
+
+.ed-field {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--ed-hairline);
+  background: #fff;
+  color: var(--ink-dark);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ed-field:focus-within {
+  border-color: var(--ink-dark);
+}
+
+.ed-field-label {
+  flex: none;
+  color: var(--ed-label);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ed-field-value {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.ed-field input,
+.ed-field select {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 500;
+  text-align: right;
+}
+
+.ed-field select {
+  cursor: pointer;
+  appearance: none;
+  text-align-last: right;
+}
+
+/* Type the value or step it with the arrow keys; the box stays as clean as a label. */
+.ed-field input[type="number"] {
+  appearance: textfield;
+}
+
+.ed-field input[type="number"]::-webkit-inner-spin-button,
+.ed-field input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* Keyboard hint */
+
+.ed-key {
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-type);
+  font-size: 13px;
+  line-height: 13px;
+}
+
+/* Thin scrollbars inside the panels */
+
+.ed-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ed-dim) transparent;
+}
+
+.ed-light .ed-scroll,
+.ed-light.ed-scroll {
+  scrollbar-color: rgb(11 10 9 / 30%) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-shell *,
+  .ed-light * {
+    transition-duration: 0ms !important;
   }
 }
