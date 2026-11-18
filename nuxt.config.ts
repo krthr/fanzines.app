@@ -49,7 +49,8 @@ export default defineNuxtConfig({
   },
   fonts: {
     families: [
-      { name: 'Outfit', weights: [400, 600, 700, 800, 900] },
+      { name: 'Anton', weights: [400] },
+      { name: 'Outfit', weights: [400, 500, 600, 700, 800, 900] },
       { name: 'Special Elite', weights: [400] }
     ]
   },
