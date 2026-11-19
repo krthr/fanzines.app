@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # npm: security updates only, grouped into a single PR instead of one PR per
+  # transitive package. The limit of 0 turns off routine version-update PRs.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  # Keep the CI actions current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

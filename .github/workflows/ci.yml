@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type-check and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      # Production runs on Cloudflare Workers. A plain local build uses the Node
+      # preset; this builds what Workers Builds deploys, so fork PRs (which Workers
+      # Builds doesn't build) are checked against the real target too.
+      - name: Build for Cloudflare Workers
+        run: npm run build
+        env:
+          NITRO_PRESET: cloudflare_module
