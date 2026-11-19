@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import LocaleSwitch from '~/components/LocaleSwitch.vue'
 import DropOverlay from '~/components/zine/DropOverlay.vue'
 import EditorBrand from '~/components/zine/EditorBrand.vue'
 import ElementInspector from '~/components/zine/ElementInspector.vue'
@@ -12,7 +13,7 @@ import PdfReadyDialog from '~/components/zine/PdfReadyDialog.vue'
 import ReviewPanel from '~/components/zine/ReviewPanel.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
 import ZineToggle from '~/components/zine/ZineToggle.vue'
-import { PAGE_IDS, PAGE_LABELS } from '~/types/zine'
+import { PAGE_IDS } from '~/types/zine'
 import { PANEL_SIZE_LABEL } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
@@ -22,6 +23,7 @@ import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useZineExport, type ExportInputMethod } from '~/composables/useZineExport.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 type TextInputMethod = 'top_bar' | 'empty_state_link' | 'mobile_bar'
 
@@ -34,6 +36,8 @@ const {
   resetZine
 } = useZineStore()
 
+const { t } = useI18n()
+const { pageLabel, pagePlace } = useZinePageLabels()
 const { trackZineEvent } = useZineAnalytics()
 const { processImageFiles } = useZineImageImport()
 const { isDragActive, markDragEnter, markDragLeave, resetDrag } = useZineDragState()
@@ -65,15 +69,15 @@ let pickerInputMethod: ImageInputMethod = 'file_picker'
 let desktopMediaQuery: MediaQueryList | null = null
 let removeDesktopMediaQueryListener: (() => void) | null = null
 
-const pageTitle = computed(() => PAGE_LABELS[state.value.selectedPageId])
+const pageTitle = computed(() => pageLabel(state.value.selectedPageId))
 
 const pageMeta = computed(() => {
   const facing = facingPageId.value
   const pairing = facing
-    ? `Junto a la ${PAGE_LABELS[facing].toLowerCase()}`
+    ? t('editor.canvas.facing', { page: pagePlace(facing) })
     : state.value.selectedPageId === 'front-cover'
-      ? 'La tapa va sola'
-      : 'La contratapa va sola'
+      ? t('editor.canvas.frontCoverAlone')
+      : t('editor.canvas.backCoverAlone')
 
   return `${pairing} · ${PANEL_SIZE_LABEL}`
 })
@@ -85,15 +89,15 @@ const pageTicks = computed(() => PAGE_IDS.map((pageId) => filledPageIds.value.in
 const hints = computed(() => {
   if (isEditingText.value) {
     return [
-      { key: 'Esc', label: 'cancelar' },
-      { key: commitKeyLabel, label: 'terminar' }
+      { key: 'Esc', label: t('editor.hints.cancel') },
+      { key: commitKeyLabel, label: t('editor.hints.finish') }
     ]
   }
 
   if (selectedElement.value) {
     return [
-      { key: 'Supr', label: 'eliminar' },
-      { key: 'Esc', label: 'deseleccionar' }
+      { key: t('editor.hints.deleteKey'), label: t('editor.hints.delete') },
+      { key: 'Esc', label: t('editor.hints.deselect') }
     ]
   }
 
@@ -122,7 +126,7 @@ async function handleFileChange(event: Event) {
 async function handleAddTextElement(inputMethod: TextInputMethod) {
   const pageId = state.value.selectedPageId
 
-  const elementId = addTextElement()
+  const elementId = addTextElement(t('editor.canvas.defaultText'))
   trackZineEvent('zine_text_element_added', {
     page_id: pageId,
     element_count: elementCount.value,
@@ -192,7 +196,7 @@ function preventDefaultFileDrop(event: DragEvent) {
 }
 
 function confirmReset() {
-  if (window.confirm('¿Reiniciar el fanzine y eliminar todos los elementos?')) {
+  if (window.confirm(t('editor.sidebar.resetConfirm'))) {
     const previousElementCount = elementCount.value
 
     resetZine()
@@ -278,28 +282,29 @@ onBeforeUnmount(() => {
         <div v-if="isDesktopLayout" class="add">
           <button type="button" class="ed-btn-outline" @click="handleAddTextElement('top_bar')">
             <UIcon name="i-lucide-plus" aria-hidden="true" />
-            Texto
+            {{ t('editor.topbar.addText') }}
           </button>
           <button type="button" class="ed-btn-outline" @click="openFilePicker('file_picker')">
             <UIcon name="i-lucide-plus" aria-hidden="true" />
-            Imagen
+            {{ t('editor.topbar.addImage') }}
           </button>
         </div>
 
         <div class="topbar-right">
+          <LocaleSwitch class="lang" short />
           <div
             v-if="isDesktopLayout"
             class="progress"
             role="img"
-            :aria-label="`${filledPageIds.length} de ${PAGE_IDS.length} páginas con contenido`"
+            :aria-label="t('editor.topbar.progressLabel', { filled: filledPageIds.length, total: PAGE_IDS.length })"
           >
             <span class="ticks">
               <span v-for="(filled, index) in pageTicks" :key="index" class="tick" :class="{ 'is-on': filled }" />
             </span>
-            <span>{{ filledPageIds.length }} de {{ PAGE_IDS.length }} páginas</span>
+            <span>{{ t('editor.topbar.progress', { filled: filledPageIds.length, total: PAGE_IDS.length }) }}</span>
           </div>
           <ZineToggle v-else v-model="state.previewGuides" class="guides-tablet">
-            Guías
+            {{ t('editor.topbar.guides') }}
           </ZineToggle>
 
           <button
@@ -308,7 +313,7 @@ onBeforeUnmount(() => {
             :class="{ 'is-quiet': filledPageIds.length === 0, 'is-small': !isDesktopLayout }"
             @click="openReview"
           >
-            {{ isDesktopLayout ? 'Revisar e imprimir' : 'Revisar' }}
+            {{ isDesktopLayout ? t('editor.topbar.reviewAndPrint') : t('editor.topbar.review') }}
             <UIcon name="i-lucide-arrow-right" aria-hidden="true" />
           </button>
         </div>
@@ -320,7 +325,7 @@ onBeforeUnmount(() => {
         <div class="topbar-right">
           <button v-if="isDesktopLayout" type="button" class="back" @click="backToDesign">
             <UIcon name="i-lucide-arrow-left" aria-hidden="true" />
-            Volver a editar
+            {{ t('editor.topbar.backToDesign') }}
           </button>
           <button
             type="button"
@@ -329,7 +334,7 @@ onBeforeUnmount(() => {
             :disabled="isExporting"
             @click="downloadPdf('review')"
           >
-            Descargar PDF
+            {{ t('editor.topbar.download') }}
             <UIcon
               :name="isExporting ? 'i-lucide-loader-circle' : 'i-lucide-download'"
               :class="{ spinning: isExporting }"
@@ -343,14 +348,14 @@ onBeforeUnmount(() => {
     <div class="body">
       <PagesSidebar v-if="isDesktopLayout" class="pages-col" @reset="confirmReset" />
 
-      <!-- Diseñar -->
-      <section v-if="mode === 'design'" class="canvas-area" aria-label="Página">
+      <!-- Design -->
+      <section v-if="mode === 'design'" class="canvas-area" :aria-label="t('editor.canvas.label')">
         <div v-if="isDesktopLayout" class="canvas-head">
           <div class="page-nav">
             <button
               type="button"
               class="nav-arrow"
-              aria-label="Página anterior"
+              :aria-label="t('editor.canvas.previousPage')"
               :disabled="!previousPageId"
               @click="goToPage(previousPageId)"
             >
@@ -363,7 +368,7 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="nav-arrow"
-              aria-label="Página siguiente"
+              :aria-label="t('editor.canvas.nextPage')"
               :disabled="!nextPageId"
               @click="goToPage(nextPageId)"
             >
@@ -372,7 +377,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="view-controls">
-            <div class="ed-segment is-fit" role="group" aria-label="Vista del lienzo">
+            <div class="ed-segment is-fit" role="group" :aria-label="t('editor.canvas.viewLabel')">
               <button
                 type="button"
                 class="ed-segment-item"
@@ -381,7 +386,7 @@ onBeforeUnmount(() => {
                 @click="prefersSpread = false"
               >
                 <UIcon name="i-lucide-file" aria-hidden="true" />
-                <span class="view-label">Página</span>
+                <span class="view-label">{{ t('editor.canvas.viewPage') }}</span>
               </button>
               <button
                 type="button"
@@ -389,15 +394,15 @@ onBeforeUnmount(() => {
                 :class="{ 'is-active': showsSpread }"
                 :aria-pressed="showsSpread"
                 :disabled="!canShowSpread"
-                :title="canShowSpread ? undefined : 'Las tapas no tienen página enfrentada'"
+                :title="canShowSpread ? undefined : t('editor.canvas.noSpread')"
                 @click="prefersSpread = true"
               >
                 <UIcon name="i-lucide-book-open" aria-hidden="true" />
-                <span class="view-label">Doble</span>
+                <span class="view-label">{{ t('editor.canvas.viewSpread') }}</span>
               </button>
             </div>
             <ZineToggle v-model="state.previewGuides">
-              Guías
+              {{ t('editor.topbar.guides') }}
             </ZineToggle>
           </div>
         </div>
@@ -406,7 +411,7 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="nav-arrow"
-            aria-label="Página anterior"
+            :aria-label="t('editor.canvas.previousPage')"
             :disabled="!previousPageId"
             @click="goToPage(previousPageId)"
           >
@@ -414,12 +419,12 @@ onBeforeUnmount(() => {
           </button>
           <div class="page-title">
             <h2>{{ pageTitle }}</h2>
-            <p>{{ pageIndex + 1 }} de {{ PAGE_IDS.length }}</p>
+            <p>{{ t('editor.canvas.position', { current: pageIndex + 1, total: PAGE_IDS.length }) }}</p>
           </div>
           <button
             type="button"
             class="nav-arrow"
-            aria-label="Página siguiente"
+            :aria-label="t('editor.canvas.nextPage')"
             :disabled="!nextPageId"
             @click="goToPage(nextPageId)"
           >
@@ -447,20 +452,20 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <!-- Revisar -->
-      <section v-else class="canvas-area is-review ed-scroll" aria-label="Revisión del pliego">
+      <!-- Review -->
+      <section v-else class="canvas-area is-review ed-scroll" :aria-label="t('editor.review.label')">
         <div v-if="!isDesktopLayout" class="review-nav">
           <button type="button" class="back" @click="backToDesign">
             <UIcon name="i-lucide-arrow-left" aria-hidden="true" />
-            Volver a editar
+            {{ t('editor.topbar.backToDesign') }}
           </button>
           <FlowSteps :current="isPdfReadyOpen ? 3 : 2" />
         </div>
 
         <div class="canvas-head">
           <div class="page-title">
-            <h2>Revisa antes de descargar</h2>
-            <p>A4 horizontal · 297 × 210 mm</p>
+            <h2>{{ t('editor.review.heading') }}</h2>
+            <p>{{ t('editor.review.format') }}</p>
           </div>
         </div>
 
@@ -494,8 +499,8 @@ onBeforeUnmount(() => {
 
     <UDrawer
       v-model:open="mobileToolsOpen"
-      title="Ajustes"
-      description="Opciones del elemento seleccionado"
+      :title="t('editor.settings.title')"
+      :description="t('editor.settings.description')"
       :ui="{
         overlay: 'ed-drawer-overlay',
         content: 'ed-drawer ed-light max-h-[88dvh]',
@@ -556,6 +561,27 @@ onBeforeUnmount(() => {
 
 .tick.is-on {
   background: var(--ink);
+}
+
+.lang {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  text-underline-offset: 4px;
+  transition: color 180ms ease;
+}
+
+.lang:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* On the narrowest phones the language link would otherwise clip the editor's name. */
+@media (max-width: 359.98px) {
+  .topbar-right {
+    gap: 10px;
+  }
 }
 
 .back {

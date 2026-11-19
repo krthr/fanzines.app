@@ -1,0 +1,335 @@
+{
+  "nuxtSiteConfig": {
+    "description": "Editor en el navegador para crear, imprimir y exportar fanzines A4 plegables."
+  },
+  "app": {
+    "description": "Editor en el navegador para diseñar ocho paneles de un fanzine A4 plegable y exportarlo como PDF listo para imprimir.",
+    "homeLabel": "Fanzines inicio"
+  },
+  "pages": {
+    "label": {
+      "frontCover": "Portada",
+      "backCover": "Contraportada",
+      "inner": "Página {n}"
+    },
+    "short": {
+      "frontCover": "Portada",
+      "backCover": "Contra"
+    },
+    "name": {
+      "frontCover": "portada",
+      "backCover": "contraportada",
+      "inner": "página {n}"
+    },
+    "place": {
+      "frontCover": "la portada",
+      "backCover": "la contraportada",
+      "inner": "la página {n}"
+    },
+    "abbr": "p. {n}"
+  },
+  "home": {
+    "seo": {
+      "title": "Crea y exporta un fanzine A4",
+      "description": "Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.",
+      "socialDescription": "Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.",
+      "imageAlt": "Fanzine plegable y herramientas de edición en Fanzines"
+    },
+    "anchors": {
+      "content": "contenido",
+      "how": "como-se-hace",
+      "print": "imprimir",
+      "faq": "preguntas"
+    },
+    "skip": "Saltar al contenido",
+    "nav": {
+      "label": "Secciones",
+      "how": "Cómo funciona",
+      "print": "Imprimir",
+      "editor": "Abrir editor"
+    },
+    "hero": {
+      "tag": "Gratis · Sin registro · 1 hoja A4",
+      "title": "Una hoja.\nOcho páginas.\nTu fanzine.",
+      "lede": "Diseña cada panel en el navegador y descarga un PDF ya impuesto. Imprime, corta una línea, dobla. Listo para repartir en 10 minutos.",
+      "cta": "Crear mi fanzine",
+      "more": "Ver cómo se imprime",
+      "foldedAlt": "Fanzine desplegado sobre una mesa",
+      "handAlt": "Fanzine pequeño abierto en una mano",
+      "sticker": "hecho con una sola hoja"
+    },
+    "how": {
+      "title": "Del navegador\na la mesa.",
+      "intro": "Nada de calcular el orden de las páginas. El editor monta el pliego por ti.",
+      "sheetLabel": "Pliego A4 · se imprime así",
+      "sheetAlt": "Pliego A4: arriba, las páginas 6, 5, 4 y 3 boca abajo; abajo, contraportada, portada, 1 y 2.",
+      "sheetNote": "la fila de arriba se imprime al revés · corta solo la línea central",
+      "steps": {
+        "design": {
+          "title": "Diseña cada panel",
+          "text": "Sube fotos, escribe y mueve, gira o escala cada pieza directamente sobre la página."
+        },
+        "download": {
+          "title": "Descarga el PDF",
+          "text": "Las ocho caras salen ordenadas en una hoja A4 horizontal, con guías de corte y doblez."
+        },
+        "print": {
+          "title": "Imprime, corta, dobla",
+          "text": "Una impresora casera basta. En dos minutos tienes un fanzine para regalar o vender."
+        }
+      }
+    },
+    "feature": {
+      "eyebrow": "El editor",
+      "title": "Diseña en pantalla.\nTermina con papel\ny tijeras.",
+      "intro": "Las ocho páginas a la vista, medidas en milímetros y una revisión del pliego antes de descargar.",
+      "shotAlt": "Editor de Fanzines: las ocho páginas en miniatura a la izquierda, la portada en el lienzo y los paneles de imagen y capas a la derecha",
+      "list": {
+        "guides": "Guías de corte y doblez",
+        "collage": "Fotos, textos y collage libre",
+        "pdf": "PDF listo para imprimir",
+        "noAccount": "Sin cuentas ni instalaciones"
+      }
+    },
+    "faq": {
+      "title": "Antes de\nempezar.",
+      "sticker": "4 dudas, 4 respuestas",
+      "items": {
+        "need": {
+          "question": "¿Qué necesito?",
+          "answer": "Una impresora A4 (la de casa o la de la copistería), unas tijeras y una hoja. Nada más."
+        },
+        "account": {
+          "question": "¿Tengo que crear una cuenta?",
+          "answer": "No. Abres el editor y empiezas a diseñar."
+        },
+        "blackAndWhite": {
+          "question": "¿Se puede imprimir en blanco y negro?",
+          "answer": "Sí. El PDF se imprime igual en color o en blanco y negro, como los fanzines de toda la vida."
+        },
+        "fold": {
+          "question": "¿Cómo se dobla?",
+          "answer": "El PDF trae guías de corte y doblez. Doblas a lo largo, cortas la línea central y cierras como un libro."
+        }
+      }
+    },
+    "cta": {
+      "title": "Empieza con una portada\ny una imagen.",
+      "button": "Crear fanzine gratis",
+      "note": "Tarda menos que ir a la copistería.",
+      "photoAlt": "Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+    },
+    "footer": {
+      "by": "Por Wilson Tovar"
+    }
+  },
+  "editorPage": {
+    "seo": {
+      "title": "Editor de fanzines A4",
+      "description": "Diseña un fanzine de ocho paneles en el navegador, revisa el pliego A4 y exporta un PDF listo para imprimir y doblar.",
+      "imageAlt": "Editor de Fanzines con pliego A4 y paneles de fanzine"
+    },
+    "free": "Es gratis y no necesitas cuenta.",
+    "loading": "Cargando editor…",
+    "howItWorks": "Ver cómo funciona Fanzines"
+  },
+  "editor": {
+    "brand": {
+      "title": "Editor de fanzines",
+      "status": "Pliego A4 · 8 páginas"
+    },
+    "steps": {
+      "label": "Pasos para imprimir",
+      "design": "Diseñar",
+      "review": "Revisar",
+      "print": "Imprimir y doblar"
+    },
+    "topbar": {
+      "addText": "Texto",
+      "addImage": "Imagen",
+      "progress": "{filled} de {total} páginas",
+      "progressLabel": "{filled} de {total} páginas con contenido",
+      "guides": "Guías",
+      "review": "Revisar",
+      "reviewAndPrint": "Revisar e imprimir",
+      "backToDesign": "Volver a editar",
+      "download": "Descargar PDF"
+    },
+    "canvas": {
+      "label": "Página",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente",
+      "facing": "Junto a {page}",
+      "frontCoverAlone": "La tapa va sola",
+      "backCoverAlone": "La contratapa va sola",
+      "position": "{current} de {total}",
+      "viewLabel": "Vista del lienzo",
+      "viewPage": "Página",
+      "viewSpread": "Doble",
+      "noSpread": "Las tapas no tienen página enfrentada",
+      "editPage": "Editar {page}",
+      "editing": "editando",
+      "clickToEdit": "clic para editarla",
+      "editText": "Editar texto del fanzine",
+      "defaultText": "Escribe aquí"
+    },
+    "empty": {
+      "title": "Suelta tus fotos",
+      "upTo": "Hasta {count} a la vez: va una en cada página",
+      "lastPage": "Aquí va una: es la última página",
+      "choose": "Elegir fotos",
+      "orWrite": "o empieza escribiendo el título"
+    },
+    "hints": {
+      "deleteKey": "Supr",
+      "delete": "eliminar",
+      "deselect": "deseleccionar",
+      "cancel": "cancelar",
+      "finish": "terminar"
+    },
+    "actions": {
+      "label": "Acciones de la selección",
+      "fill": "Rellenar",
+      "fit": "Encajar",
+      "center": "Centrar",
+      "forward": "Al frente",
+      "backward": "Atrás",
+      "delete": "Eliminar",
+      "deleteShort": "Borrar",
+      "settings": "Ajustes",
+      "addText": "+ Texto",
+      "addPhoto": "+ Foto"
+    },
+    "settings": {
+      "title": "Ajustes",
+      "description": "Opciones del elemento seleccionado"
+    },
+    "sidebar": {
+      "label": "Páginas del fanzine",
+      "title": "Páginas",
+      "reset": "Reiniciar fanzine",
+      "resetConfirm": "¿Reiniciar el fanzine y eliminar todos los elementos?",
+      "orderLabel": "Orden de las páginas",
+      "reading": "Lectura",
+      "sheet": "Pliego",
+      "empty": "vacía",
+      "addPhoto": "+ foto"
+    },
+    "drop": {
+      "onlyImages": "Solo se pueden añadir imágenes",
+      "title": "Suelta la foto | Suelta las {count} fotos",
+      "titleUnknown": "Suelta tus fotos",
+      "ruleTitle": "Una en cada página",
+      "ruleUnknown": "Empiezan en {start} y siguen en orden de lectura. La miniatura marca dónde empiezan.",
+      "ruleOne": "Va en {start}. La miniatura te lo muestra.",
+      "ruleMany": "Empiezan en {start} y siguen en orden: {order}. Las miniaturas te lo muestran.",
+      "ruleOverflow": "Empiezan en {start} y siguen en orden: {order}. {fit}; el resto no se añade.",
+      "fit": "Solo cabe 1 | Solo caben {count}",
+      "hint": "Suéltala sobre otra miniatura para ponerla en esa página. | Suéltalas sobre otra miniatura para empezar desde esa página."
+    },
+    "inspector": {
+      "title": "Propiedades",
+      "empty": "Toca una foto o un texto de la página y aquí verás sus opciones.",
+      "image": "Imagen",
+      "text": "Texto",
+      "selected": "seleccionado",
+      "fitToPage": "Ajustar a la página",
+      "font": "Fuente",
+      "size": "Tamaño",
+      "style": "Estilo",
+      "styles": {
+        "normal": "Normal",
+        "bold": "Negrita",
+        "italic": "Cursiva"
+      },
+      "align": "Alineación",
+      "alignLabel": "Alineación del texto",
+      "alignLeft": "Alinear a la izquierda",
+      "alignCenter": "Centrar texto",
+      "alignRight": "Alinear a la derecha",
+      "color": "Color",
+      "colorLabel": "Color del texto",
+      "colors": {
+        "black": "Negro",
+        "white": "Blanco",
+        "orange": "Naranja",
+        "acid": "Amarillo ácido",
+        "blue": "Azul"
+      },
+      "opacity": "Opacidad",
+      "rotation": "Giro",
+      "measures": "Medidas exactas",
+      "width": "Ancho",
+      "height": "Alto",
+      "horizontal": "Horizontal",
+      "horizontalLabel": "Alinear en horizontal dentro de la página",
+      "pageLeft": "Pegar a la izquierda de la página",
+      "pageCenter": "Centrar en horizontal",
+      "pageRight": "Pegar a la derecha de la página",
+      "vertical": "Vertical",
+      "verticalLabel": "Alinear en vertical dentro de la página",
+      "pageTop": "Pegar arriba de la página",
+      "pageMiddle": "Centrar en vertical",
+      "pageBottom": "Pegar abajo de la página"
+    },
+    "review": {
+      "label": "Revisión del pliego",
+      "heading": "Revisa antes de descargar",
+      "format": "A4 horizontal · 297 × 210 mm",
+      "title": "Revisión",
+      "filled": "{filled} de {total} páginas con contenido",
+      "order": "Orden de impresión correcto",
+      "options": "Opciones del PDF",
+      "guides": "Guías de corte y doblez",
+      "guidesHelp": "Líneas finas para saber dónde cortar.",
+      "safeMargin": "Margen seguro de 5 mm",
+      "safeMarginHelp": "Evita que la impresora recorte el contenido.",
+      "sheetAlt": "Previsualización del pliego A4 del fanzine",
+      "cut": "corte"
+    },
+    "export": {
+      "failed": "No se pudo generar el PDF. Revisa las imágenes cargadas e inténtalo de nuevo."
+    },
+    "ready": {
+      "title": "Tu fanzine\nestá listo.",
+      "dialogTitle": "Tu fanzine está listo",
+      "dialogDescription": "El PDF se ha descargado. Imprímelo a tamaño real, córtalo y dóblalo.",
+      "guideAlt": "Instrucciones dibujadas a mano para doblar, cortar y abrir el fanzine",
+      "sticker": "PDF descargado",
+      "printTitle": "Imprime a tamaño real (100%)",
+      "printText": "Desactiva «Ajustar a la página». Si se reduce, las páginas no encajan al doblar.",
+      "stepFold": "Dobla a lo largo y corta solo la línea roja central.",
+      "stepOpen": "Abre, empuja hacia el centro y dobla como un libro.",
+      "downloadAgain": "Descargar otra vez",
+      "back": "Volver al editor",
+      "close": "Cerrar"
+    },
+    "import": {
+      "unnamedFile": "Archivo sin nombre",
+      "andMore": "{names} y {count} más",
+      "skipped": "Se omitió 1 archivo | Se omitieron {count} archivos",
+      "failedTitle": "Imagen no cargada | Algunas imágenes no se cargaron",
+      "failedText": "{skipped}: {files}.",
+      "overflowTitle": "No caben todas las imágenes",
+      "overflowText": "{skipped} porque no quedaban páginas disponibles.",
+      "largeTitle": "Imagen grande | Imágenes grandes",
+      "largeText": "La imagen es grande; si notas lentitud, conviene usar una versión reducida. | {count} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas."
+    }
+  },
+  "error": {
+    "notFound": {
+      "tag": "Error 404 · página perdida",
+      "title": "Esta página\nno existe.",
+      "text": "Quizá el enlace está mal escrito o la página se quedó fuera del pliego. Vuelve al inicio o empieza tu propio fanzine.",
+      "headTitle": "Página no encontrada"
+    },
+    "generic": {
+      "tag": "Error {status}",
+      "title": "Algo salió\nmal.",
+      "text": "No pudimos cargar esta página. Inténtalo de nuevo en un momento, vuelve al inicio o empieza un fanzine.",
+      "headTitle": "Algo salió mal"
+    },
+    "create": "Crear un fanzine",
+    "home": "Volver al inicio"
+  }
+}

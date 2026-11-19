@@ -18,13 +18,14 @@ import type { Node as KonvaNode } from 'konva/lib/Node'
 import type { Stage as KonvaStage } from 'konva/lib/Stage'
 import type { Rect as KonvaRect } from 'konva/lib/shapes/Rect'
 import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
-import { PAGE_IDS, PAGE_LABELS, type ImageElement, type TextElement, type ZineElement } from '~/types/zine'
+import { PAGE_IDS, type ImageElement, type TextElement, type ZineElement } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineImageImport, type ImageInputMethod } from '~/composables/useZineImageImport.client'
 import { useZineDragState } from '~/composables/useZineDragState.client'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import {
   PAGE_H,
   PAGE_W,
@@ -98,6 +99,8 @@ const { isDragActive, resetDrag } = useZineDragState()
 const { isEditingText, facingPageId } = useZineEditorView()
 const { coverPage, containPage, bringForward, sendBackward, removeSelected } = useZineElementActions()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+const { t } = useI18n()
+const { pageLabel, pageName } = useZinePageLabels()
 
 const containerRef = ref<HTMLElement | null>(null)
 const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
@@ -276,8 +279,8 @@ const sizeTagStyle = computed<CSSProperties>(() => {
 const emptySub = computed(() => {
   const remaining = PAGE_IDS.length - PAGE_IDS.indexOf(activePageId.value)
   return remaining > 1
-    ? `Hasta ${remaining} a la vez: va una en cada página`
-    : 'Aquí va una: es la última página'
+    ? t('editor.empty.upTo', { count: remaining })
+    : t('editor.empty.lastPage')
 })
 
 // ── Inline text editor ──────────────────────────────────────────────────────
@@ -850,7 +853,7 @@ defineExpose({
           type="button"
           class="page page-facing"
           :style="pageStyle"
-          :aria-label="`Editar ${PAGE_LABELS[facingId].toLowerCase()}`"
+          :aria-label="t('editor.canvas.editPage', { page: pageName(facingId) })"
           @click="selectFacingPage"
         >
           <ZinePageRender :page-id="facingId" :width="pageWidth" />
@@ -928,7 +931,7 @@ defineExpose({
               <UIcon name="i-lucide-image-plus" aria-hidden="true" />
             </span>
             <p class="empty-title">
-              Suelta tus fotos
+              {{ t('editor.empty.title') }}
             </p>
             <p class="empty-sub">
               {{ emptySub }}
@@ -936,10 +939,10 @@ defineExpose({
             <div class="empty-actions">
               <button type="button" class="empty-pick" @click="emit('request-upload', 'empty_state_button')">
                 <UIcon name="i-lucide-upload" aria-hidden="true" />
-                Elegir fotos
+                {{ t('editor.empty.choose') }}
               </button>
               <button type="button" class="empty-link" @click="emit('add-text')">
-                o empieza escribiendo el título
+                {{ t('editor.empty.orWrite') }}
               </button>
             </div>
           </div>
@@ -947,7 +950,7 @@ defineExpose({
           <div v-if="editingTextElement" class="text-edit" :style="textEditorStyle">
             <textarea
               ref="textEditorRef"
-              aria-label="Editar texto del fanzine"
+              :aria-label="t('editor.canvas.editText')"
               class="text-edit-input"
               :style="textEditorFontStyle"
               :value="editingTextValue"
@@ -964,32 +967,44 @@ defineExpose({
             ref="toolbarRef"
             class="toolbar ed-light"
             role="toolbar"
-            aria-label="Acciones de la selección"
+            :aria-label="t('editor.actions.label')"
             :style="toolbarStyle"
           >
             <template v-if="selectedElement.type === 'image'">
               <button type="button" class="tool has-label" @click="coverPage">
                 <UIcon name="i-lucide-expand" aria-hidden="true" />
-                Rellenar
+                {{ t('editor.actions.fill') }}
               </button>
               <button type="button" class="tool has-label" @click="containPage">
                 <UIcon name="i-lucide-scan" aria-hidden="true" />
-                Encajar
+                {{ t('editor.actions.fit') }}
               </button>
               <span class="tool-sep" aria-hidden="true" />
             </template>
-            <button type="button" class="tool" aria-label="Al frente" title="Al frente" @click="bringForward">
+            <button
+              type="button"
+              class="tool"
+              :aria-label="t('editor.actions.forward')"
+              :title="t('editor.actions.forward')"
+              @click="bringForward"
+            >
               <UIcon name="i-lucide-bring-to-front" aria-hidden="true" />
             </button>
-            <button type="button" class="tool" aria-label="Atrás" title="Atrás" @click="sendBackward">
+            <button
+              type="button"
+              class="tool"
+              :aria-label="t('editor.actions.backward')"
+              :title="t('editor.actions.backward')"
+              @click="sendBackward"
+            >
               <UIcon name="i-lucide-send-to-back" aria-hidden="true" />
             </button>
             <span class="tool-sep" aria-hidden="true" />
             <button
               type="button"
               class="tool is-danger"
-              aria-label="Eliminar"
-              title="Eliminar"
+              :aria-label="t('editor.actions.delete')"
+              :title="t('editor.actions.delete')"
               @click="removeSelected('toolbar')"
             >
               <UIcon name="i-lucide-trash-2" aria-hidden="true" />
@@ -1006,7 +1021,7 @@ defineExpose({
           type="button"
           class="page page-facing"
           :style="pageStyle"
-          :aria-label="`Editar ${PAGE_LABELS[facingId].toLowerCase()}`"
+          :aria-label="t('editor.canvas.editPage', { page: pageName(facingId) })"
           @click="selectFacingPage"
         >
           <ZinePageRender :page-id="facingId" :width="pageWidth" />
@@ -1015,12 +1030,12 @@ defineExpose({
 
       <div v-if="facingId" class="labels" :class="{ 'is-reversed': activeSide === 'right' }">
         <p class="label" :style="{ width: `${pageWidth}px` }">
-          <strong>{{ PAGE_LABELS[activePageId] }}</strong>
-          <span class="label-state">editando</span>
+          <strong>{{ pageLabel(activePageId) }}</strong>
+          <span class="label-state">{{ t('editor.canvas.editing') }}</span>
         </p>
         <p class="label is-facing" :style="{ width: `${pageWidth}px` }">
-          <strong>{{ PAGE_LABELS[facingId] }}</strong>
-          <span>clic para editarla</span>
+          <strong>{{ pageLabel(facingId) }}</strong>
+          <span>{{ t('editor.canvas.clickToEdit') }}</span>
         </p>
       </div>
     </div>

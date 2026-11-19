@@ -1,6 +1,5 @@
 import { computed } from 'vue'
 import {
-  DEFAULT_TEXT_CONTENT,
   FONT_OPTIONS,
   PAGE_IDS,
   TEXT_COLOR_OPTIONS,
@@ -56,7 +55,7 @@ function loadImageFromObjectUrl(src: string): Promise<HTMLImageElement> {
     const image = new Image()
 
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('No se pudo cargar la imagen.'))
+    image.onerror = () => reject(new Error('The image could not be loaded.'))
     image.src = src
   })
 }
@@ -67,7 +66,7 @@ function createCanvasBlob(canvas: HTMLCanvasElement, mimeType: string, quality?:
       if (blob) {
         resolve(blob)
       } else {
-        reject(new Error('No se pudo optimizar la imagen.'))
+        reject(new Error('The image could not be downsampled.'))
       }
     }, mimeType, quality)
   })
@@ -118,7 +117,7 @@ async function prepareImageFile(file: File) {
       }
     } catch {
       URL.revokeObjectURL(downsampledSrc)
-      throw new Error('No se pudo cargar la imagen optimizada.')
+      throw new Error('The downsampled image could not be loaded.')
     }
   } catch (error) {
     URL.revokeObjectURL(originalSrc)
@@ -128,7 +127,7 @@ async function prepareImageFile(file: File) {
 
 function createSkippedFile(file: File, reason: ImageBatchSkippedFile['reason']): ImageBatchSkippedFile {
   return {
-    fileName: file.name || 'Archivo sin nombre',
+    fileName: file.name,
     reason
   }
 }
@@ -276,12 +275,13 @@ export function useZineStore() {
     return result
   }
 
-  function addTextElement() {
+  // The caller passes the placeholder text, in the language of the editor.
+  function addTextElement(text: string) {
     const element: TextElement = {
       id: createId(),
       type: 'text',
       pageId: state.value.selectedPageId,
-      text: DEFAULT_TEXT_CONTENT,
+      text,
       x: PAGE_W * 0.15,
       y: PAGE_H * 0.16,
       width: PAGE_W * 0.7,

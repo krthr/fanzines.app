@@ -11,7 +11,15 @@ const author = {
   ]
 } as const
 
-useHead({
+const { t, localeProperties } = useI18n()
+
+// <html lang>, the canonical URL, og:url, og:locale and one hreflang alternate per language.
+const localeHead = useLocaleHead()
+
+useHead(() => ({
+  htmlAttrs: localeHead.value.htmlAttrs,
+  link: localeHead.value.link,
+  meta: localeHead.value.meta,
   script: [
     {
       type: 'application/ld+json',
@@ -26,16 +34,16 @@ useHead({
         copyrightHolder: author,
         applicationCategory: 'DesignApplication',
         operatingSystem: 'Web',
-        inLanguage: 'es',
-        description:
-          'Editor en el navegador para diseñar ocho paneles de un fanzine A4 plegable y exportarlo como PDF listo para imprimir.'
+        inLanguage: localeProperties.value.language,
+        description: t('app.description')
       })
     }
   ]
-})
+}))
 </script>
 
 <template>
+  <!-- Nuxt UI follows the i18n locale by itself for its own labels (a toast's close button). -->
   <UApp :toaster="{ progress: false }">
     <NuxtRouteAnnouncer />
     <NuxtPage />

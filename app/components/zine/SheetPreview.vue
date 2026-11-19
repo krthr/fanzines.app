@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CSSProperties } from 'vue'
-import type { PageId } from '~/types/zine'
-import { PAGE_LABELS } from '~/types/zine'
+import { getPageNumber, type PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import { renderSheetBlob } from '~/utils/renderSheet.client'
 import { IMPOSED_PAGE_IDS, IMPOSITION_SLOTS } from '~/utils/zineLayout'
 
@@ -15,8 +15,10 @@ const emit = defineEmits<{ select: [pageId: PageId] }>()
 
 const PREVIEW_RENDER_DELAY_MS = 140
 
+const { t } = useI18n()
 const { state } = useZineStore()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+const { pageLabel, pageName } = useZinePageLabels()
 const previewImageUrl = ref('')
 const renderFailed = ref(false)
 
@@ -24,17 +26,18 @@ let isMounted = false
 let renderVersion = 0
 let renderTimeoutId: number | null = null
 
-const slots = computed(() => IMPOSED_PAGE_IDS.map((pageId) => ({
-  pageId,
-  slot: IMPOSITION_SLOTS[pageId]
-})))
-
 const showGuides = computed(() => props.review ? state.value.exportGuides : state.value.previewGuides)
 
 const renderKey = computed(() => JSON.stringify({
   elements: state.value.elements,
   pageElementIds: state.value.pageElementIds
 }))
+
+// "Portada", "p. 1": the label printed on a slot of the small sheet.
+function slotLabel(pageId: PageId) {
+  const number = getPageNumber(pageId)
+  return number === null ? pageLabel(pageId) : t('pages.abbr', { n: number })
+}
 
 function slotStyle(pageId: PageId): CSSProperties {
   const slot = IMPOSITION_SLOTS[pageId]
@@ -59,7 +62,7 @@ async function renderPreview() {
       ? { pxPerMm: 2.75, pixelRatio: Math.min(window.devicePixelRatio || 1, 2) }
       : { pxPerMm: 2, pixelRatio: 1 })
 
-    if (!blob) throw new Error('No se pudo generar la previsualización.')
+    if (!blob) throw new Error('The sheet preview could not be rendered.')
 
     const imageUrl = URL.createObjectURL(blob)
 
@@ -125,29 +128,29 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
     <img
       v-if="previewImageUrl && !renderFailed"
       :src="previewImageUrl"
-      alt="Previsualización del pliego A4 del fanzine"
+      :alt="t('editor.review.sheetAlt')"
       class="sheet-image"
       draggable="false"
     >
 
     <button
-      v-for="item in slots"
-      :key="item.pageId"
+      v-for="pageId in IMPOSED_PAGE_IDS"
+      :key="pageId"
       type="button"
       class="slot"
-      :class="{ 'is-active': !review && state.selectedPageId === item.pageId }"
-      :style="slotStyle(item.pageId)"
-      :title="review ? `Editar ${PAGE_LABELS[item.pageId].toLowerCase()}` : undefined"
-      @click="choosePage(item.pageId)"
+      :class="{ 'is-active': !review && state.selectedPageId === pageId }"
+      :style="slotStyle(pageId)"
+      :title="review ? t('editor.canvas.editPage', { page: pageName(pageId) }) : undefined"
+      @click="choosePage(pageId)"
     >
       <span
         v-if="!review"
         class="slot-label"
-        :class="{ 'is-shown': showGuides || state.selectedPageId === item.pageId }"
+        :class="{ 'is-shown': showGuides || state.selectedPageId === pageId }"
       >
-        {{ item.slot.label === 'Portada' || item.slot.label === 'Contraportada' ? item.slot.label : `p. ${item.slot.label}` }}
+        {{ slotLabel(pageId) }}
       </span>
-      <span class="sr-only">{{ PAGE_LABELS[item.pageId] }}</span>
+      <span class="sr-only">{{ pageLabel(pageId) }}</span>
     </button>
 
     <template v-if="showGuides">
@@ -159,7 +162,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
       <span class="guide cut" />
       <span v-if="review" class="cut-label">
         <UIcon name="i-lucide-scissors" aria-hidden="true" />
-        corte
+        {{ t('editor.review.cut') }}
       </span>
     </template>
   </div>

@@ -1,28 +1,32 @@
 <script setup lang="ts">
-import { PAGE_LABELS, PAGE_SHORT_LABELS, type PageId } from '~/types/zine'
+import { computed } from 'vue'
+import type { PageId } from '~/types/zine'
 import { READING_SPREADS } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { usePageTileDrop } from '~/composables/usePageTileDrop.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import PageMini from '~/components/zine/PageMini.vue'
 
 // The mobile page navigator: the same reading spreads as the sidebar, in one row.
 const MINI_WIDTH = 34
 
+const { t } = useI18n()
 const { state } = useZineStore()
+const { pageLabel, pageShortLabel } = useZinePageLabels()
 const { mode, dropTargetPageIds } = useZineEditorView()
 const { selectTrackedPage } = useTrackedZinePageSelection()
 const { onTileDragOver, onTileDragLeave, onTileDrop } = usePageTileDrop()
 
-const groups = READING_SPREADS.map((spread) => {
+const groups = computed(() => READING_SPREADS.map((spread) => {
   const pageIds = spread.filter((pageId): pageId is PageId => pageId !== null)
 
   return {
     pageIds,
-    label: pageIds.map((pageId) => PAGE_SHORT_LABELS[pageId]).join(' · ')
+    label: pageIds.map(pageShortLabel).join(' · ')
   }
-})
+}))
 
 function isActive(pageId: PageId) {
   return mode.value === 'design' && state.value.selectedPageId === pageId
@@ -40,10 +44,10 @@ function choosePage(pageId: PageId) {
 </script>
 
 <template>
-  <nav class="strip" aria-label="Páginas del fanzine">
+  <nav class="strip" :aria-label="t('editor.sidebar.label')">
     <div
       v-for="group in groups"
-      :key="group.label"
+      :key="group.pageIds.join()"
       class="group"
       :class="{ 'is-active': group.pageIds.some(isActive) }"
     >
@@ -53,7 +57,7 @@ function choosePage(pageId: PageId) {
           :key="pageId"
           type="button"
           class="page"
-          :aria-label="PAGE_LABELS[pageId]"
+          :aria-label="pageLabel(pageId)"
           :aria-current="isActive(pageId) ? 'page' : undefined"
           @click="choosePage(pageId)"
           @dragover="onTileDragOver($event, pageId)"

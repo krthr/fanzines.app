@@ -1,0 +1,335 @@
+{
+  "nuxtSiteConfig": {
+    "description": "A browser-based editor to make, print and export foldable A4 zines."
+  },
+  "app": {
+    "description": "A browser-based editor to design the eight panels of a foldable A4 zine and export it as a print-ready PDF.",
+    "homeLabel": "Fanzines home"
+  },
+  "pages": {
+    "label": {
+      "frontCover": "Front cover",
+      "backCover": "Back cover",
+      "inner": "Page {n}"
+    },
+    "short": {
+      "frontCover": "Front",
+      "backCover": "Back"
+    },
+    "name": {
+      "frontCover": "front cover",
+      "backCover": "back cover",
+      "inner": "page {n}"
+    },
+    "place": {
+      "frontCover": "the front cover",
+      "backCover": "the back cover",
+      "inner": "page {n}"
+    },
+    "abbr": "p. {n}"
+  },
+  "home": {
+    "seo": {
+      "title": "Make and print an A4 zine",
+      "description": "Fanzines is an editor for laying out a foldable zine on a single A4 sheet: add text and images, then export it as a PDF.",
+      "socialDescription": "A simple editor to design, preview, print and fold your own zine.",
+      "imageAlt": "A folded zine and the editing tools in Fanzines"
+    },
+    "anchors": {
+      "content": "content",
+      "how": "how-it-works",
+      "print": "print",
+      "faq": "questions"
+    },
+    "skip": "Skip to content",
+    "nav": {
+      "label": "Sections",
+      "how": "How it works",
+      "print": "Print",
+      "editor": "Open editor"
+    },
+    "hero": {
+      "tag": "Free · No sign-up · 1 A4 sheet",
+      "title": "One sheet.\nEight pages.\nYour zine.",
+      "lede": "Design each panel in your browser and download a PDF that is already imposed. Print, cut one line, fold. Ready to hand out in 10 minutes.",
+      "cta": "Make my zine",
+      "more": "See how it prints",
+      "foldedAlt": "An unfolded zine on a table",
+      "handAlt": "A small zine held open in one hand",
+      "sticker": "made from a single sheet"
+    },
+    "how": {
+      "title": "From the browser\nto the table.",
+      "intro": "No working out the page order. The editor lays out the sheet for you.",
+      "sheetLabel": "A4 sheet · it prints like this",
+      "sheetAlt": "A4 sheet: on top, pages 6, 5, 4 and 3 upside down; below, back cover, front cover, 1 and 2.",
+      "sheetNote": "the top row prints upside down · cut only the center line",
+      "steps": {
+        "design": {
+          "title": "Design each panel",
+          "text": "Upload photos, write, and move, rotate or scale each piece right on the page."
+        },
+        "download": {
+          "title": "Download the PDF",
+          "text": "All eight pages come out in order on a landscape A4 sheet, with cut and fold guides."
+        },
+        "print": {
+          "title": "Print, cut, fold",
+          "text": "A home printer is enough. In two minutes you have a zine to give away or sell."
+        }
+      }
+    },
+    "feature": {
+      "eyebrow": "The editor",
+      "title": "Design on screen.\nFinish with paper\nand scissors.",
+      "intro": "All eight pages in view, measurements in millimeters and a sheet review before you download.",
+      "shotAlt": "The Fanzines editor: the eight pages as thumbnails on the left, the front cover on the canvas and the options of the selected image on the right",
+      "list": {
+        "guides": "Cut and fold guides",
+        "collage": "Photos, text and free-form collage",
+        "pdf": "Print-ready PDF",
+        "noAccount": "No accounts, nothing to install"
+      }
+    },
+    "faq": {
+      "title": "Before\nyou start.",
+      "sticker": "4 questions, 4 answers",
+      "items": {
+        "need": {
+          "question": "What do I need?",
+          "answer": "An A4 printer (yours at home or the one at the copy shop), a pair of scissors and a sheet of paper. That's it."
+        },
+        "account": {
+          "question": "Do I have to create an account?",
+          "answer": "No. Open the editor and start designing."
+        },
+        "blackAndWhite": {
+          "question": "Can I print it in black and white?",
+          "answer": "Yes. The PDF prints just as well in color or in black and white, the way zines always have."
+        },
+        "fold": {
+          "question": "How do I fold it?",
+          "answer": "The PDF comes with cut and fold guides. Fold it lengthwise, cut the center line and close it like a book."
+        }
+      }
+    },
+    "cta": {
+      "title": "Start with a cover\nand one image.",
+      "button": "Make a zine for free",
+      "note": "It takes less time than a trip to the copy shop.",
+      "photoAlt": "A worktable with printed photos, a craft knife, a ruler and scissors"
+    },
+    "footer": {
+      "by": "By Wilson Tovar"
+    }
+  },
+  "editorPage": {
+    "seo": {
+      "title": "A4 zine editor",
+      "description": "Design an eight-panel zine in your browser, check the A4 sheet and export a PDF that is ready to print and fold.",
+      "imageAlt": "The Fanzines editor with an A4 sheet and zine panels"
+    },
+    "free": "It's free and you don't need an account.",
+    "loading": "Loading editor…",
+    "howItWorks": "See how Fanzines works"
+  },
+  "editor": {
+    "brand": {
+      "title": "Zine editor",
+      "status": "A4 sheet · 8 pages"
+    },
+    "steps": {
+      "label": "Steps to print",
+      "design": "Design",
+      "review": "Review",
+      "print": "Print and fold"
+    },
+    "topbar": {
+      "addText": "Text",
+      "addImage": "Image",
+      "progress": "{filled} of {total} pages",
+      "progressLabel": "{filled} of {total} pages have content",
+      "guides": "Guides",
+      "review": "Review",
+      "reviewAndPrint": "Review and print",
+      "backToDesign": "Back to editing",
+      "download": "Download PDF"
+    },
+    "canvas": {
+      "label": "Page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "facing": "Next to {page}",
+      "frontCoverAlone": "The front cover stands alone",
+      "backCoverAlone": "The back cover stands alone",
+      "position": "{current} of {total}",
+      "viewLabel": "Canvas view",
+      "viewPage": "Page",
+      "viewSpread": "Spread",
+      "noSpread": "The covers have no facing page",
+      "editPage": "Edit {page}",
+      "editing": "editing",
+      "clickToEdit": "click to edit it",
+      "editText": "Edit the zine text",
+      "defaultText": "Type here"
+    },
+    "empty": {
+      "title": "Drop your photos",
+      "upTo": "Up to {count} at once: one goes on each page",
+      "lastPage": "One goes here: it's the last page",
+      "choose": "Choose photos",
+      "orWrite": "or start by typing the title"
+    },
+    "hints": {
+      "deleteKey": "Del",
+      "delete": "delete",
+      "deselect": "deselect",
+      "cancel": "cancel",
+      "finish": "finish"
+    },
+    "actions": {
+      "label": "Selection actions",
+      "fill": "Fill",
+      "fit": "Fit",
+      "center": "Center",
+      "forward": "Forward",
+      "backward": "Backward",
+      "delete": "Delete",
+      "deleteShort": "Delete",
+      "settings": "Settings",
+      "addText": "+ Text",
+      "addPhoto": "+ Photo"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Options for the selected element"
+    },
+    "sidebar": {
+      "label": "Zine pages",
+      "title": "Pages",
+      "reset": "Reset zine",
+      "resetConfirm": "Reset the zine and delete every element?",
+      "orderLabel": "Page order",
+      "reading": "Reading",
+      "sheet": "Sheet",
+      "empty": "empty",
+      "addPhoto": "+ photo"
+    },
+    "drop": {
+      "onlyImages": "Only images can be added",
+      "title": "Drop the photo | Drop the {count} photos",
+      "titleUnknown": "Drop your photos",
+      "ruleTitle": "One on each page",
+      "ruleUnknown": "They start on {start} and continue in reading order. The thumbnail marks where they start.",
+      "ruleOne": "It goes on {start}. The thumbnail shows you where.",
+      "ruleMany": "They start on {start} and continue in order: {order}. The thumbnails show you where.",
+      "ruleOverflow": "They start on {start} and continue in order: {order}. {fit}; the rest won't be added.",
+      "fit": "Only 1 fits | Only {count} fit",
+      "hint": "Drop it on another thumbnail to put it on that page. | Drop them on another thumbnail to start from that page."
+    },
+    "inspector": {
+      "title": "Properties",
+      "empty": "Tap a photo or a text on the page and its options will show up here.",
+      "image": "Image",
+      "text": "Text",
+      "selected": "selected",
+      "fitToPage": "Fit to the page",
+      "font": "Font",
+      "size": "Size",
+      "style": "Style",
+      "styles": {
+        "normal": "Regular",
+        "bold": "Bold",
+        "italic": "Italic"
+      },
+      "align": "Alignment",
+      "alignLabel": "Text alignment",
+      "alignLeft": "Align left",
+      "alignCenter": "Center text",
+      "alignRight": "Align right",
+      "color": "Color",
+      "colorLabel": "Text color",
+      "colors": {
+        "black": "Black",
+        "white": "White",
+        "orange": "Orange",
+        "acid": "Acid yellow",
+        "blue": "Blue"
+      },
+      "opacity": "Opacity",
+      "rotation": "Rotation",
+      "measures": "Exact measurements",
+      "width": "Width",
+      "height": "Height",
+      "horizontal": "Horizontal",
+      "horizontalLabel": "Align horizontally on the page",
+      "pageLeft": "Snap to the left of the page",
+      "pageCenter": "Center horizontally",
+      "pageRight": "Snap to the right of the page",
+      "vertical": "Vertical",
+      "verticalLabel": "Align vertically on the page",
+      "pageTop": "Snap to the top of the page",
+      "pageMiddle": "Center vertically",
+      "pageBottom": "Snap to the bottom of the page"
+    },
+    "review": {
+      "label": "Sheet review",
+      "heading": "Review before you download",
+      "format": "A4 landscape · 297 × 210 mm",
+      "title": "Review",
+      "filled": "{filled} of {total} pages have content",
+      "order": "Print order is correct",
+      "options": "PDF options",
+      "guides": "Cut and fold guides",
+      "guidesHelp": "Thin lines that show where to cut.",
+      "safeMargin": "5 mm safe margin",
+      "safeMarginHelp": "Keeps the printer from cropping your content.",
+      "sheetAlt": "Preview of the zine's A4 sheet",
+      "cut": "cut"
+    },
+    "export": {
+      "failed": "The PDF could not be generated. Check the images you uploaded and try again."
+    },
+    "ready": {
+      "title": "Your zine\nis ready.",
+      "dialogTitle": "Your zine is ready",
+      "dialogDescription": "The PDF has been downloaded. Print it at actual size, cut it and fold it.",
+      "guideAlt": "Hand-drawn instructions for folding, cutting and opening the zine",
+      "sticker": "PDF downloaded",
+      "printTitle": "Print at actual size (100%)",
+      "printText": "Turn off “Fit to page”. If the sheet is scaled down, the pages won't line up when you fold.",
+      "stepFold": "Fold it lengthwise and cut only the red center line.",
+      "stepOpen": "Open it, push toward the center and fold it like a book.",
+      "downloadAgain": "Download again",
+      "back": "Back to the editor",
+      "close": "Close"
+    },
+    "import": {
+      "unnamedFile": "Unnamed file",
+      "andMore": "{names} and {count} more",
+      "skipped": "1 file was skipped | {count} files were skipped",
+      "failedTitle": "Image not loaded | Some images did not load",
+      "failedText": "{skipped}: {files}.",
+      "overflowTitle": "Not all the images fit",
+      "overflowText": "{skipped} because there were no pages left.",
+      "largeTitle": "Large image | Large images",
+      "largeText": "The image is large; if the editor feels slow, try a smaller version. | {count} images are large; if the editor feels slow, try smaller versions."
+    }
+  },
+  "error": {
+    "notFound": {
+      "tag": "Error 404 · lost page",
+      "title": "This page\ndoes not exist.",
+      "text": "Maybe the link is misspelled or the page was left off the sheet. Go back home or start your own zine.",
+      "headTitle": "Page not found"
+    },
+    "generic": {
+      "tag": "Error {status}",
+      "title": "Something went\nwrong.",
+      "text": "We could not load this page. Try again in a moment, go back home or start a zine.",
+      "headTitle": "Something went wrong"
+    },
+    "create": "Make a zine",
+    "home": "Back to home"
+  }
+}

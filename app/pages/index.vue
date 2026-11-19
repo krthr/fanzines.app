@@ -1,34 +1,32 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted } from 'vue'
+import LocaleSwitch from '~/components/LocaleSwitch.vue'
 
-const siteUrl = 'https://fanzines.app'
-const pageTitle = 'Crea y exporta un fanzine A4'
-const socialTitle = 'Fanzines | Crea y exporta un fanzine A4'
-const pageDescription =
-  'Fanzines es un editor para montar una publicación plegable en una hoja A4, añadir texto e imágenes, y exportarla como PDF.'
-const socialDescription = 'Un editor sencillo para diseñar, previsualizar, imprimir y doblar tu propio fanzine.'
-const socialImage = `${siteUrl}/images/og-fanzines.webp`
+const { t } = useI18n()
+const localizedImage = useLocalizedImage()
 
+const socialImage = () => localizedImage('https://fanzines.app/images/og-fanzines.webp')
+const socialTitle = () => `Fanzines | ${t('home.seo.title')}`
+
+// The canonical URL, og:url and the hreflang alternates come from useLocaleHead in app.vue.
 useSeoMeta({
-  title: pageTitle,
-  description: pageDescription,
+  title: () => t('home.seo.title'),
+  description: () => t('home.seo.description'),
   robots: 'index, follow',
   ogTitle: socialTitle,
-  ogDescription: socialDescription,
+  ogDescription: () => t('home.seo.socialDescription'),
   ogType: 'website',
-  ogUrl: siteUrl,
   ogSiteName: 'Fanzines',
   ogImage: socialImage,
-  ogImageAlt: 'Fanzine plegable y herramientas de edición en Fanzines',
+  ogImageAlt: () => t('home.seo.imageAlt'),
   twitterCard: 'summary_large_image',
   twitterTitle: socialTitle,
-  twitterDescription: socialDescription,
+  twitterDescription: () => t('home.seo.socialDescription'),
   twitterImage: socialImage
 })
 
 useHead({
   link: [
-    { rel: 'canonical', href: siteUrl },
     {
       rel: 'preload',
       as: 'image',
@@ -42,58 +40,28 @@ useHead({
 })
 
 // Mirrors IMPOSITION_SLOTS in utils/zineLayout.ts: top row prints upside down.
-const sheetPanels = [
+const sheetPanels = computed(() => [
   { label: '6', flipped: true },
   { label: '5', flipped: true },
   { label: '4', flipped: true },
   { label: '3', flipped: true },
-  { label: 'Contra', word: true },
-  { label: 'Portada', word: true, cover: true },
+  { label: t('pages.short.backCover'), word: true },
+  { label: t('pages.short.frontCover'), word: true, cover: true },
   { label: '1' },
   { label: '2' }
-]
+])
 
-const steps = [
-  {
-    title: 'Diseña cada panel',
-    text: 'Sube fotos, escribe y mueve, gira o escala cada pieza directamente sobre la página.'
-  },
-  {
-    title: 'Descarga el PDF',
-    text: 'Las ocho caras salen ordenadas en una hoja A4 horizontal, con guías de corte y doblez.'
-  },
-  {
-    title: 'Imprime, corta, dobla',
-    text: 'Una impresora casera basta. En dos minutos tienes un fanzine para regalar o vender.'
-  }
-]
+// The copy of each list lives in the `home` messages, under these keys.
+const steps = ['design', 'download', 'print'] as const
 
 const features = [
-  { icon: 'i-lucide-layout-grid', text: 'Guías de corte y doblez' },
-  { icon: 'i-lucide-image', text: 'Fotos, textos y collage libre' },
-  { icon: 'i-lucide-file-down', text: 'PDF listo para imprimir' },
-  { icon: 'i-lucide-user-x', text: 'Sin cuentas ni instalaciones' }
-]
+  { key: 'guides', icon: 'i-lucide-layout-grid' },
+  { key: 'collage', icon: 'i-lucide-image' },
+  { key: 'pdf', icon: 'i-lucide-file-down' },
+  { key: 'noAccount', icon: 'i-lucide-user-x' }
+] as const
 
-const faqs = [
-  {
-    question: '¿Qué necesito?',
-    answer: 'Una impresora A4 (la de casa o la de la copistería), unas tijeras y una hoja. Nada más.'
-  },
-  {
-    question: '¿Tengo que crear una cuenta?',
-    answer: 'No. Abres el editor y empiezas a diseñar.'
-  },
-  {
-    question: '¿Se puede imprimir en blanco y negro?',
-    answer: 'Sí. El PDF se imprime igual en color o en blanco y negro, como los fanzines de toda la vida.'
-  },
-  {
-    question: '¿Cómo se dobla?',
-    answer:
-      'El PDF trae guías de corte y doblez. Doblas a lo largo, cortas la línea central y cierras como un libro.'
-  }
-]
+const faqs = ['need', 'account', 'blackAndWhite', 'fold'] as const
 
 let animationContext: { revert: () => void } | null = null
 
@@ -167,40 +135,38 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="home-page">
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <a class="skip-link" :href="`#${t('home.anchors.content')}`">{{ t('home.skip') }}</a>
 
     <header class="site-header band">
-      <NuxtLink class="brand" to="/" aria-label="Fanzines inicio">
+      <NuxtLinkLocale class="brand" to="/" :aria-label="t('app.homeLabel')">
         <UIcon class="brand-icon" name="i-lucide-scissors" aria-hidden="true" />
         <span>Fanzines</span>
-      </NuxtLink>
-      <nav class="site-nav" aria-label="Secciones">
-        <a class="nav-link" href="#como-se-hace">Cómo funciona</a>
-        <a class="nav-link" href="#imprimir">Imprimir</a>
-        <NuxtLink class="nav-cta" to="/editor">Abrir editor</NuxtLink>
+      </NuxtLinkLocale>
+      <nav class="site-nav" :aria-label="t('home.nav.label')">
+        <a class="nav-link" :href="`#${t('home.anchors.how')}`">{{ t('home.nav.how') }}</a>
+        <a class="nav-link" :href="`#${t('home.anchors.print')}`">{{ t('home.nav.print') }}</a>
+        <LocaleSwitch class="nav-lang" short />
+        <NuxtLinkLocale class="nav-cta" to="/editor">{{ t('home.nav.editor') }}</NuxtLinkLocale>
       </nav>
     </header>
 
-    <main id="contenido">
+    <main :id="t('home.anchors.content')">
       <section class="hero band" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="hero-tag">Gratis · Sin registro · 1 hoja A4</p>
+          <p class="hero-tag">{{ t('home.hero.tag') }}</p>
           <h1 id="hero-title" class="display hero-title">
-            <span>Una hoja. </span>
-            <span>Ocho páginas. </span>
-            <span>Tu fanzine.</span>
+            <span v-for="line in toLines(t('home.hero.title'))" :key="line">{{ line }}</span>
           </h1>
           <p class="hero-lede">
-            Diseña cada panel en el navegador y descarga un PDF ya impuesto. Imprime, corta una línea,
-            dobla. Listo para repartir en 10 minutos.
+            {{ t('home.hero.lede') }}
           </p>
           <div class="hero-actions">
-            <NuxtLink class="button button-primary" to="/editor">
-              Crear mi fanzine
+            <NuxtLinkLocale class="button button-primary" to="/editor">
+              {{ t('home.hero.cta') }}
               <UIcon class="button-icon" name="i-lucide-arrow-right" aria-hidden="true" />
-            </NuxtLink>
-            <a class="text-link" href="#como-se-hace">
-              Ver cómo se imprime
+            </NuxtLinkLocale>
+            <a class="text-link" :href="`#${t('home.anchors.how')}`">
+              {{ t('home.hero.more') }}
               <UIcon class="text-link-icon" name="i-lucide-arrow-down" aria-hidden="true" />
             </a>
           </div>
@@ -210,7 +176,7 @@ onBeforeUnmount(() => {
           <div class="photo shot-folded">
             <NuxtImg
               src="/images/folded-zine.webp"
-              alt="Fanzine desplegado sobre una mesa"
+              :alt="t('home.hero.foldedAlt')"
               width="460"
               height="360"
               sizes="300px sm:460px"
@@ -223,7 +189,7 @@ onBeforeUnmount(() => {
           <div class="photo shot-hand">
             <NuxtImg
               src="/images/hand-zine.webp"
-              alt="Fanzine pequeño abierto en una mano"
+              :alt="t('home.hero.handAlt')"
               width="230"
               height="340"
               sizes="160px sm:230px"
@@ -232,28 +198,27 @@ onBeforeUnmount(() => {
               decoding="async"
             />
           </div>
-          <p class="sticker hero-sticker">hecho con una sola hoja</p>
+          <p class="sticker hero-sticker">{{ t('home.hero.sticker') }}</p>
         </div>
       </section>
 
-      <section id="como-se-hace" class="how band" aria-labelledby="how-title">
+      <section :id="t('home.anchors.how')" class="how band" aria-labelledby="how-title">
         <div class="how-header reveal">
           <h2 id="how-title" class="display how-title">
-            <span>Del navegador </span>
-            <span>a la mesa.</span>
+            <span v-for="line in toLines(t('home.how.title'))" :key="line">{{ line }}</span>
           </h2>
           <p class="how-intro">
-            Nada de calcular el orden de las páginas. El editor monta el pliego por ti.
+            {{ t('home.how.intro') }}
           </p>
         </div>
 
-        <div id="imprimir" class="how-body">
+        <div :id="t('home.anchors.print')" class="how-body">
           <figure class="sheet reveal">
-            <figcaption class="sheet-label">Pliego A4 · se imprime así</figcaption>
+            <figcaption class="sheet-label">{{ t('home.how.sheetLabel') }}</figcaption>
             <div
               class="sheet-grid"
               role="img"
-              aria-label="Pliego A4: arriba, las páginas 6, 5, 4 y 3 boca abajo; abajo, contraportada, portada, 1 y 2."
+              :aria-label="t('home.how.sheetAlt')"
             >
               <span
                 v-for="panel in sheetPanels"
@@ -266,16 +231,16 @@ onBeforeUnmount(() => {
             </div>
             <p class="sheet-note">
               <UIcon class="sheet-note-icon" name="i-lucide-scissors" aria-hidden="true" />
-              la fila de arriba se imprime al revés · corta solo la línea central
+              {{ t('home.how.sheetNote') }}
             </p>
           </figure>
 
           <ol class="steps">
-            <li v-for="(step, index) in steps" :key="step.title" class="step reveal">
+            <li v-for="(step, index) in steps" :key="step" class="step reveal">
               <span class="step-num" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
               <div class="step-copy">
-                <h3 class="step-title">{{ step.title }}</h3>
-                <p class="step-text">{{ step.text }}</p>
+                <h3 class="step-title">{{ t(`home.how.steps.${step}.title`) }}</h3>
+                <p class="step-text">{{ t(`home.how.steps.${step}.text`) }}</p>
               </div>
             </li>
           </ol>
@@ -285,23 +250,20 @@ onBeforeUnmount(() => {
       <section id="editor" class="feature band" aria-labelledby="feature-title">
         <div class="feature-header reveal">
           <div class="feature-heading">
-            <p class="eyebrow">El editor</p>
+            <p class="eyebrow">{{ t('home.feature.eyebrow') }}</p>
             <h2 id="feature-title" class="display feature-title">
-              <span>Diseña en pantalla. </span>
-              <span>Termina con papel </span>
-              <span>y tijeras.</span>
+              <span v-for="line in toLines(t('home.feature.title'))" :key="line">{{ line }}</span>
             </h2>
           </div>
           <p class="feature-intro">
-            Las ocho páginas a la vista, medidas en milímetros y una revisión del pliego antes de
-            descargar.
+            {{ t('home.feature.intro') }}
           </p>
         </div>
 
         <figure class="editor-shot reveal">
           <NuxtImg
-            src="/images/editor-shot.webp"
-            alt="Editor de Fanzines: las ocho páginas en miniatura a la izquierda, la portada en el lienzo y los paneles de imagen y capas a la derecha"
+            :src="localizedImage('/images/editor-shot.webp')"
+            :alt="t('home.feature.shotAlt')"
             width="1200"
             height="750"
             sizes="340px sm:480px md:720px lg:980px xl:1200px"
@@ -312,26 +274,25 @@ onBeforeUnmount(() => {
         </figure>
 
         <ul class="feature-list reveal">
-          <li v-for="feature in features" :key="feature.text" class="feature-item">
+          <li v-for="feature in features" :key="feature.key" class="feature-item">
             <UIcon class="feature-icon" :name="feature.icon" aria-hidden="true" />
-            {{ feature.text }}
+            {{ t(`home.feature.list.${feature.key}`) }}
           </li>
         </ul>
       </section>
 
-      <section id="preguntas" class="faq band" aria-labelledby="faq-title">
+      <section :id="t('home.anchors.faq')" class="faq band" aria-labelledby="faq-title">
         <div class="faq-heading reveal">
           <h2 id="faq-title" class="display faq-title">
-            <span>Antes de </span>
-            <span>empezar.</span>
+            <span v-for="line in toLines(t('home.faq.title'))" :key="line">{{ line }}</span>
           </h2>
-          <p class="sticker faq-sticker">4 dudas, 4 respuestas</p>
+          <p class="sticker faq-sticker">{{ t('home.faq.sticker') }}</p>
         </div>
 
         <dl class="faq-list">
-          <div v-for="faq in faqs" :key="faq.question" class="faq-item reveal">
-            <dt class="faq-question">{{ faq.question }}</dt>
-            <dd class="faq-answer">{{ faq.answer }}</dd>
+          <div v-for="faq in faqs" :key="faq" class="faq-item reveal">
+            <dt class="faq-question">{{ t(`home.faq.items.${faq}.question`) }}</dt>
+            <dd class="faq-answer">{{ t(`home.faq.items.${faq}.answer`) }}</dd>
           </div>
         </dl>
       </section>
@@ -339,21 +300,20 @@ onBeforeUnmount(() => {
       <section class="final-cta band" aria-labelledby="cta-title">
         <div class="cta-copy">
           <h2 id="cta-title" class="display cta-title reveal">
-            <span>Empieza con una portada </span>
-            <span>y una imagen.</span>
+            <span v-for="line in toLines(t('home.cta.title'))" :key="line">{{ line }}</span>
           </h2>
           <div class="cta-row reveal">
-            <NuxtLink class="button button-dark" to="/editor">
-              Crear fanzine gratis
+            <NuxtLinkLocale class="button button-dark" to="/editor">
+              {{ t('home.cta.button') }}
               <UIcon class="button-icon" name="i-lucide-arrow-right" aria-hidden="true" />
-            </NuxtLink>
-            <p class="cta-note">Tarda menos que ir a la copistería.</p>
+            </NuxtLinkLocale>
+            <p class="cta-note">{{ t('home.cta.note') }}</p>
           </div>
         </div>
         <figure class="cta-photo reveal">
           <NuxtImg
             src="/images/making-table.webp"
-            alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
+            :alt="t('home.cta.photoAlt')"
             width="250"
             height="320"
             sizes="250px"
@@ -368,11 +328,12 @@ onBeforeUnmount(() => {
     <footer class="site-footer band">
       <span class="footer-brand">Fanzines</span>
       <div class="footer-links">
-        <span>Por Wilson Tovar</span>
+        <span>{{ t('home.footer.by') }}</span>
         <a href="https://krthr.co" target="_blank" rel="author me noopener noreferrer">krthr.co</a>
         <a href="https://www.instagram.com/wilson__tovar/" target="_blank" rel="me noopener noreferrer">
           Instagram
         </a>
+        <LocaleSwitch />
       </div>
     </footer>
   </div>
@@ -469,11 +430,21 @@ onBeforeUnmount(() => {
   transition: color 180ms ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-lang:hover {
   color: var(--ink);
 }
 
+/* The language link stays in the header on phones, where the section links are hidden. */
+.nav-lang {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 180ms ease;
+}
+
 .nav-cta {
+  flex: none;
   padding: 10px 18px;
   background: var(--ink);
   color: var(--ink-dark);
@@ -1179,6 +1150,10 @@ onBeforeUnmount(() => {
     padding-block: 20px;
   }
 
+  .site-nav {
+    gap: 20px;
+  }
+
   .nav-link {
     display: none;
   }
@@ -1271,6 +1246,13 @@ onBeforeUnmount(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+}
+
+/* The smallest phones have no room for it beside the button; the footer has it too. */
+@media (max-width: 340px) {
+  .nav-lang {
+    display: none;
   }
 }
 </style>

@@ -10,6 +10,7 @@ const exportError = ref('')
 export function useZineExport() {
   const { state, elementCount } = useZineStore()
   const { trackZineEvent, trackZineException } = useZineAnalytics()
+  const { t } = useI18n()
 
   // Resolves to true when the PDF was generated and handed to the browser.
   async function exportPdf(inputMethod: ExportInputMethod): Promise<boolean> {
@@ -41,7 +42,7 @@ export function useZineExport() {
 
       return true
     } catch (error) {
-      exportError.value = 'No se pudo generar el PDF. Revisa las imágenes cargadas e inténtalo de nuevo.'
+      exportError.value = t('editor.export.failed')
       trackZineEvent('zine_pdf_export_failed', {
         page_id: state.value.selectedPageId,
         element_count: elementCount.value,

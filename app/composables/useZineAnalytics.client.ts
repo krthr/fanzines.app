@@ -33,6 +33,8 @@ export function useZineAnalytics() {
   const route = useRoute()
   const runtimeConfig = useRuntimeConfig()
   const { proxy } = useScriptPostHog()
+  // Not useI18n(): the error plugin calls this composable outside a component.
+  const { $i18n } = useNuxtApp()
 
   const enabled = computed(() => {
     const posthogConfig = runtimeConfig.public.scripts?.posthog
@@ -44,6 +46,7 @@ export function useZineAnalytics() {
       app: 'fanzines',
       surface: 'zine_editor',
       route_path: route.path,
+      locale: $i18n.locale.value,
       page_id: properties.page_id as PageId | undefined,
       ...properties
     })

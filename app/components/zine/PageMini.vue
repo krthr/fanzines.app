@@ -15,6 +15,7 @@ const props = defineProps<{
   captions?: boolean
 }>()
 
+const { t } = useI18n()
 const { state } = useZineStore()
 const isEmpty = computed(() => state.value.pageElementIds[props.pageId].length === 0)
 </script>
@@ -29,7 +30,7 @@ const isEmpty = computed(() => state.value.pageElementIds[props.pageId].length =
     }"
   >
     <ZinePageRender v-if="!isEmpty" :page-id="pageId" :width="width" />
-    <span v-else-if="captions" class="mini-caption">{{ dropTarget ? '+ foto' : 'vacía' }}</span>
+    <span v-else-if="captions" class="mini-caption">{{ dropTarget ? t('editor.sidebar.addPhoto') : t('editor.sidebar.empty') }}</span>
   </span>
 </template>
 
