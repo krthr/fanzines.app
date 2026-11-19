@@ -3,6 +3,7 @@ import {
   DEFAULT_TEXT_CONTENT,
   FONT_OPTIONS,
   PAGE_IDS,
+  TEXT_COLOR_OPTIONS,
   type ImageBatchInsertResult,
   type ImageBatchSkippedFile,
   type ImageElement,
@@ -290,7 +291,7 @@ export function useZineStore() {
       fontFamily: FONT_OPTIONS[0],
       fontSize: 64,
       fontStyle: 'normal',
-      fill: '#1d1c18',
+      fill: TEXT_COLOR_OPTIONS[0],
       align: 'left',
       lineHeight: 1.2
     }

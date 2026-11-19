@@ -64,18 +64,8 @@ function leave(event: MouseEvent, redirect: string) {
 </template>
 
 <style scoped>
-/* Tokens and button styles mirror app/pages/index.vue. */
+/* Colour and font tokens come from assets/css/main.css; button styles mirror app/pages/index.vue. */
 .error-page {
-  --bg: #0b0a09;
-  --ink: #ede7da;
-  --muted: #a8a196;
-  --orange: #d25a36;
-  --orange-deep: #8e3a22;
-  --acid: #e9ff5c;
-  --ink-dark: #0b0a09;
-  --font-display: Anton, Impact, "Arial Narrow Bold", sans-serif;
-  --font-body: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-type: "Special Elite", "Courier New", monospace;
   --content: 1200px;
   --gutter: 48px;
   display: flex;

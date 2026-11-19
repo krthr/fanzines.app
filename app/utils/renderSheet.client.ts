@@ -21,7 +21,7 @@ type RenderSheetOptions = {
   pixelRatio?: number
 }
 
-function createOffscreenContainer(width: number, height: number) {
+export function createOffscreenContainer(width: number, height: number) {
   const container = document.createElement('div')
   container.style.position = 'fixed'
   container.style.left = '-10000px'

@@ -40,10 +40,10 @@ useHead({
       <ZineEditor />
       <template #fallback>
         <div>
-          <header class="zine-editor-header flex h-auto min-h-16 flex-wrap items-center gap-3 px-3 py-2 lg:h-16 lg:px-4">
-            <EditorBrand subtitle="Pliego A4" />
+          <header class="ed-topbar">
+            <EditorBrand />
           </header>
-          <section class="editor-loading px-3 py-5 lg:px-4">
+          <section class="editor-loading">
             <p>
               {{ pageDescription }} Es gratis y no necesitas cuenta.
             </p>
@@ -60,23 +60,18 @@ useHead({
 
 <style scoped>
 .editor-page {
-  position: relative;
   min-width: 320px;
   min-height: 100dvh;
-  overflow: hidden;
-  background:
-    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
-    var(--zine-bg);
-  background-size: 24px 24px;
-  color: var(--zine-paper);
-  font-family: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
 }
 
 .editor-loading {
   max-width: 40rem;
-  color: rgb(238 232 216 / 82%);
-  font-size: 0.95rem;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 15px;
   line-height: 1.5;
 }
 
@@ -85,20 +80,24 @@ useHead({
   flex-wrap: wrap;
   gap: 4px 16px;
   margin-top: 12px;
-  color: rgb(238 232 216 / 60%);
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
 .editor-loading-meta a {
-  color: var(--zine-accent);
+  color: var(--acid);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .editor-loading-meta a:focus-visible {
-  outline: 2px solid var(--zine-accent);
+  outline: 2px solid var(--acid);
   outline-offset: 2px;
 }
 
+@media (max-width: 1023.98px) {
+  .editor-loading {
+    padding: 16px 12px;
+  }
+}
 </style>

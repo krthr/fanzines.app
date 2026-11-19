@@ -33,9 +33,10 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 - **Texto e imágenes.** Sube fotos (una a una o por lotes) **arrastrándolas al lienzo, a una miniatura de página o a la ventana**, o desde el botón de carga, y escribe directamente sobre el lienzo. Cada elemento se puede **mover, girar, escalar, ajustar opacidad, reordenar (z-order) y alinear** dentro del panel.
 - **Edición de texto en línea.** Haz clic en un cuadro de texto y escribe sobre el lienzo.
 - **Carga por lotes con auto-optimización.** Al importar varias imágenes, se reparten entre las páginas disponibles y se reducen automáticamente si superan los 2400 px en el lado mayor.
-- **Previsualización del pliego.** Revisa la hoja A4 completa con los 8 paneles antes de exportar.
+- **Páginas en orden de lectura.** La barra lateral muestra miniaturas en vivo agrupadas como se leen (Portada, 1|2, 3|4, 5|6, Contraportada) y el lienzo puede enseñar la página enfrentada.
+- **Revisión del pliego.** Antes de descargar, el paso «Revisar» muestra la hoja A4 completa con los 8 paneles y las opciones del PDF.
 - **Exportación PDF a 300 DPI.** El PDF sale impuesto para una hoja A4 horizontal, con **guías de corte y doblez** opcionales y **márgenes de seguridad**.
-- **Guías de previsualización.** Activa/desactiva las guías del editor mientras diseñas.
+- **Guías de previsualización.** Activa/desactiva el margen seguro de 5 mm sobre el lienzo mientras diseñas.
 - **Analítica opcional con PostHog.** Solo se activa si se define la clave de API; captura eventos de uso y errores, sin grabación de sesión.
 - **SEO listo.** Sitemap, robots, metadatos Open Graph/Twitter y JSON-LD `WebApplication` mediante `@nuxtjs/seo`.
 - **Accesible y responsive.** Skip link, foco visible, `prefers-reduced-motion` y diseño adaptado a móvil.
@@ -98,32 +99,47 @@ Sin esta variable, la analítica permanece desactivada.
 fanzines/
 ├── app/
 │   ├── app.vue                     # Raíz: UApp + JSON-LD WebApplication
-│   ├── app.config.ts               # Tema @nuxt/ui (colores: lime / cyan / stone)
-│   ├── assets/css/main.css         # Estilos globales y variables de marca
+│   ├── app.config.ts               # Tema @nuxt/ui (colores y estilo de los avisos)
+│   ├── error.vue                   # Página de error
+│   ├── assets/css/main.css         # Tokens de marca (landing, error y editor) y piezas base del editor
 │   ├── components/zine/
-│   │   ├── ZineEditor.client.vue   # Editor principal (cliente)
-│   │   ├── PageCanvas.vue          # Lienzo Konva de un panel
-│   │   ├── PageSelector.vue        # Navegación entre las 8 páginas
+│   │   ├── ZineEditor.client.vue   # Editor: barra superior, modos Diseñar y Revisar, versión móvil
+│   │   ├── EditorBrand.vue         # Marca y H1, compartidos con el fallback prerenderizado
+│   │   ├── PagesSidebar.vue        # Barra de páginas: pliegos de lectura o vista del pliego
+│   │   ├── PageStrip.vue           # Tira de páginas (móvil)
+│   │   ├── PageMini.vue            # Miniatura de una página
+│   │   ├── ZinePageRender.vue      # Render en vivo de una página (miniaturas y página enfrentada)
+│   │   ├── PageCanvas.vue          # Lienzo Konva: página activa, página enfrentada y barra flotante
+│   │   ├── DropOverlay.vue         # Aviso al arrastrar archivos sobre el editor
 │   │   ├── ElementInspector.vue    # Panel de propiedades del elemento
-│   │   ├── ExportPanel.vue         # Opciones y acción de exportar PDF
-│   │   └── SheetPreview.vue        # Previsualización del pliego A4
+│   │   ├── MobileBar.vue           # Barra de acciones (móvil)
+│   │   ├── SheetPreview.vue        # Pliego A4 impuesto (barra lateral y revisión)
+│   │   ├── ReviewPanel.vue         # Revisión y opciones del PDF
+│   │   ├── PdfReadyDialog.vue      # Diálogo «Tu fanzine está listo»
+│   │   ├── FlowSteps.vue           # Pasos Diseñar → Revisar → Imprimir y doblar
+│   │   └── ZineToggle.vue          # Interruptor
 │   ├── composables/
-│   │   ├── useZineStore.ts                 # Estado del fanzine (useState)
-│   │   ├── useZineImageImport.client.ts    # Importación de imágenes
-│   │   ├── useZineDragState.client.ts      # Estado de arrastre
-│   │   ├── useZineAnalytics.client.ts      # Eventos PostHog
+│   │   ├── useZineStore.ts                  # Estado del fanzine (useState)
+│   │   ├── useZineEditorView.client.ts      # Estado de la vista: modo, página enfrentada, páginas con contenido
+│   │   ├── useZineElementActions.client.ts  # Acciones sobre el elemento seleccionado
+│   │   ├── useZineExport.client.ts          # Exportación del PDF y su estado
+│   │   ├── useZineImageImport.client.ts     # Importación de imágenes
+│   │   ├── usePageTileDrop.client.ts        # Soltar archivos sobre una miniatura
+│   │   ├── useZineDragState.client.ts       # Estado de arrastre
+│   │   ├── useZineAnalytics.client.ts       # Eventos PostHog
 │   │   └── useTrackedZinePageSelection.client.ts
 │   ├── utils/
-│   │   ├── zineLayout.ts            # Geometría A4 e imposición de paneles
+│   │   ├── zineLayout.ts            # Geometría A4, imposición, orden de lectura y conversión a mm y pt
 │   │   ├── renderZine.client.ts     # Render de elementos a Konva
+│   │   ├── renderPage.client.ts     # Render de una página a canvas
 │   │   ├── renderSheet.client.ts    # Render del pliego completo a canvas
 │   │   ├── exportPdf.client.ts      # Generación del PDF con jsPDF
 │   │   └── zineImageCache.ts        # Caché de imágenes HTML
 │   ├── types/zine.ts               # Tipos: PageId, ZineElement, ZineState…
 │   ├── plugins/posthog-errors.client.ts
 │   └── pages/
-│       ├── index.vue               # Landing (hero + cómo se hace)
-│       └── editor.vue              # Página del editor
+│       ├── index.vue               # Landing
+│       └── editor.vue              # Página del editor y su fallback prerenderizado
 ├── public/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
@@ -140,9 +156,11 @@ fanzines/
 
 El estado vive en `useState<ZineState>` a través de [`useZineStore`](app/composables/useZineStore.ts). Contiene la página seleccionada, el elemento seleccionado, el mapa de elementos y el orden por página. Las imágenes se guardan como `blob:` URLs y se liberan (`URL.revokeObjectURL`) al eliminarlas o reiniciar.
 
+Lo que solo afecta a cómo se ve el editor (modo Diseñar o Revisar, página sola o doble, pestaña de la barra lateral, diálogo del PDF) vive aparte, en [`useZineEditorView`](app/composables/useZineEditorView.client.ts), y no forma parte del fanzine. «Revisar» es un modo dentro de `/editor`, no otra ruta, porque el fanzine solo existe en memoria.
+
 ### Geometría e imposición
 
-[`zineLayout.ts`](app/utils/zineLayout.ts) define el formato A4 (297 × 210 mm) y el mapeo de las 8 páginas a una rejilla de 4 columnas × 2 filas. Los paneles superiores van rotados 180° para que, tras imprimir por una cara, cortar la línea central y plegar, el fanzine se lea en orden:
+[`zineLayout.ts`](app/utils/zineLayout.ts) define el formato A4 (297 × 210 mm) y el mapeo de las 8 páginas a una rejilla de 4 columnas × 2 filas. Un panel mide 74,25 × 105 mm; el estado trabaja en unidades de página (`PAGE_W` = 1000) y la interfaz siempre muestra milímetros (y puntos para el tamaño del texto). Los paneles superiores van rotados 180° para que, tras imprimir por una cara, cortar la línea central y plegar, el fanzine se lea en orden:
 
 ```
 ┌─────┬─────┬─────┬─────┐
@@ -154,7 +172,7 @@ El estado vive en `useState<ZineState>` a través de [`useZineStore`](app/compos
 
 ### Renderizado
 
-El lienzo del editor usa **Konva** vía `vue-konva`. Para exportar, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) monta un `Stage` fuera de pantalla con todos los paneles impuestos y devuelve un canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) lo incrusta en un PDF A4 horizontal con **jsPDF** a 300 DPI, añadiendo las guías de corte/doblez y los márgenes de seguridad si están activados.
+El lienzo del editor usa **Konva** vía `vue-konva`. Las miniaturas y la página enfrentada se dibujan con [`renderPage.client.ts`](app/utils/renderPage.client.ts), que usa los mismos nodos que el pliego y el PDF. Para exportar, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) monta un `Stage` fuera de pantalla con todos los paneles impuestos y devuelve un canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) lo incrusta en un PDF A4 horizontal con **jsPDF** a 300 DPI, añadiendo las guías de corte/doblez y los márgenes de seguridad si están activados.
 
 ### SEO y rutas
 

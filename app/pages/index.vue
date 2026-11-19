@@ -379,20 +379,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* Colour and font tokens come from assets/css/main.css, shared with the editor. */
 .home-page {
-  --bg: #0b0a09;
-  --ink: #ede7da;
-  --muted: #a8a196;
-  --orange: #d25a36;
-  --orange-deep: #8e3a22;
-  --acid: #e9ff5c;
-  --paper: #f4f0e8;
-  --ink-dark: #0b0a09;
-  --text-dark: #3a3631;
-  --panel-num: #b5aea2;
-  --font-display: Anton, Impact, "Arial Narrow Bold", sans-serif;
-  --font-body: Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-type: "Special Elite", "Courier New", monospace;
   --content: 1200px;
   --gutter: 48px;
   --section-y: 120px;
