@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement to the editor, the PDF or the site.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write in English or Spanish.
+
+        Some things are deliberate and unlikely to change: the zine is an 8-panel fold from one A4 sheet, and everything happens in the browser, so nothing is uploaded to a server.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the zine you were making and where the editor got in the way.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help?
+      description: How you imagine it working. Sketches and screenshots welcome.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to work on this myself.

@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Wrangler local state (wrangler dev)
+.wrangler
+
 # Node dependencies
 node_modules
 
@@ -17,6 +20,13 @@ logs
 .DS_Store
 .fleet
 .idea
+
+# Screenshots and other output from local browser checks
+/output
+
+# Personal AI agent skills (install them locally, don't commit them)
+/.agents
+/skills-lock.json
 
 # Local env files
 .env

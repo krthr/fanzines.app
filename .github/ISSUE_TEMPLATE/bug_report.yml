@@ -1,0 +1,56 @@
+name: Bug report
+description: Something in fanzines.app doesn't work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. You can write in English or Spanish.
+
+        Found a security problem? Please don't open an issue: report it privately instead (see SECURITY.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect to see instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Start from opening the page. Mention the page (landing or editor), and which panels, images or text you used.
+      placeholder: |
+        1. Open https://fanzines.app/en/editor
+        2. Drop two photos on the front cover
+        3. Click "Review and print"
+        4. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Site language
+      options:
+        - Spanish (/, /editor)
+        - English (/en, /en/editor)
+        - Both
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: e.g. Safari 19 on iPhone 16, Chrome 142 on Windows 11
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, exported PDF or console errors
+      description: Drag files here. If the problem is in the PDF, attach the PDF or a photo of the printed sheet.

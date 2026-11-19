@@ -1,5 +1,6 @@
 # Fanzines
 
+[![CI](https://github.com/krthr/fanzines.app/actions/workflows/ci.yml/badge.svg)](https://github.com/krthr/fanzines.app/actions/workflows/ci.yml)
 [![Nuxt](https://img.shields.io/badge/Nuxt-4-00DC82?logo=nuxt.js&logoColor=white)](https://nuxt.com)
 [![Vue](https://img.shields.io/badge/Vue-3-42b883?logo=vue.js&logoColor=white)](https://vuejs.org)
 [![Node](https://img.shields.io/badge/Node-26-339933?logo=node.js&logoColor=white)](https://nodejs.org)
@@ -68,7 +69,7 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 ## Instalación y desarrollo
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -76,7 +77,7 @@ El servidor de desarrollo arranca en **http://localhost:3000**. El editor está 
 
 ### Variables de entorno
 
-PostHog es **opcional**. Para activar la analítica, define la clave pública en el entorno (por ejemplo en `.env`):
+PostHog es **opcional** y para desarrollar no hace falta. Para activar la analítica, copia [`.env.example`](.env.example) a `.env` y pon la clave pública:
 
 ```bash
 NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY=tu_clave_publica
@@ -92,6 +93,7 @@ Sin esta variable, la analítica permanece desactivada.
 | `npm run build` | Compila la app para producción (salida en `.output/`) |
 | `npm run generate` | Genera el sitio estático |
 | `npm run preview` | Previsualiza localmente el build de producción |
+| `npm run typecheck` | Comprueba los tipos con `vue-tsc` |
 | `npm run analyze` | Analiza el bundle de la app sin servir |
 | `npm run postinstall` | Prepara tipos de Nuxt (`nuxt prepare`, se ejecuta tras `npm install`) |
 
@@ -154,8 +156,12 @@ fanzines/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
 │   └── images/                     # Fotos y guías (webp); las que llevan texto tienen gemela -en
+├── .github/                        # CI, plantillas de issues y PR, Dependabot
 ├── nuxt.config.ts                  # Módulos, SEO, idiomas, fuentes, iconos, routeRules
 ├── wrangler.jsonc                  # Configuración de Cloudflare Workers (dominios)
+├── DESIGN.md                       # Sistema de diseño: colores, tipografía, componentes
+├── CONTRIBUTING.md                 # Guía para contribuir (en inglés)
+├── .env.example                    # Variables de entorno (todas opcionales)
 ├── .nvmrc                          # Node 26
 └── package.json
 ```
@@ -208,32 +214,31 @@ Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está defi
 
 El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominios personalizados `fanzines.app` y `www.fanzines.app`, flag `nodejs_compat`, observabilidad activada).
 
-El Worker de producción es `fanzines-app` y lo despliega **Workers Builds** en cada push a `main` (las demás ramas suben versiones de preview). El `name` de `wrangler.jsonc` tiene que coincidir con ese nombre: si no, un `wrangler deploy` manual crearía otro Worker y le movería los dominios.
+El Worker de producción es `fanzines-app` y lo despliega **Workers Builds** en cada push a `main` (las demás ramas de este repositorio suben versiones de preview; los PR desde forks no, y por eso el [CI](.github/workflows/ci.yml) compila el Worker en cada PR). El `name` de `wrangler.jsonc` tiene que coincidir con ese nombre: si no, un `wrangler deploy` manual crearía otro Worker y le movería los dominios.
 
 La URL canónica es `https://fanzines.app`. Las redirecciones se configuran en la zona de Cloudflare, no en el código, porque las páginas prerenderizadas y los archivos estáticos se sirven antes de que se ejecute el Worker:
 
 - **Redirect Rule** (Rules → Redirect Rules): `www.fanzines.app` y `http://fanzines.app` → `https://fanzines.app` + ruta, 301, conservando la query string, en un solo salto.
 - **Always Use HTTPS** y **HSTS** (SSL/TLS → Edge Certificates).
 
-```bash
-npm run build
-npx wrangler deploy
-```
-
-Para desarrollo local con el entorno de Workers:
+En local, `npm run build` usa el preset de Node. Para compilar exactamente lo que despliega Workers Builds (el preset `cloudflare_module` y la configuración de Wrangler que genera Nitro, con el binding `ASSETS`), define `WORKERS_CI`:
 
 ```bash
-npx wrangler dev
+WORKERS_CI=1 npm run build
+npx wrangler dev      # probar el Worker en local
+npx wrangler deploy   # despliegue manual; normalmente no hace falta
 ```
+
+Sin `WORKERS_CI`, `npx wrangler deploy` falla con «Missing entry-point», y pasarle la ruta del Worker a mano despliega sin el binding `ASSETS` ni los flags que añade Nitro.
 
 Consulta la [documentación de despliegue de Nuxt](https://nuxt.com/docs/getting-started/deployment) para otros destinos.
 
 ## Contribuir
 
-1. Haz un fork del repositorio.
-2. Crea una rama para tu cambio: `git checkout -b mi-mejora`.
-3. Sigue las convenciones existentes (TypeScript, estilo de los componentes en `app/components/zine/`, sin dependencias innecesarias).
-4. Abre un Pull Request describiendo el cambio.
+Las contribuciones son bienvenidas, en español o en inglés. La guía está en [`CONTRIBUTING.md`](CONTRIBUTING.md) (en inglés): cómo preparar el entorno, las convenciones de código, textos y diseño, cómo comprobar un cambio y cómo abrir un PR. Para cambios grandes, abre antes un issue.
+
+- [Código de conducta](CODE_OF_CONDUCT.md)
+- [Política de seguridad](SECURITY.md): los problemas de seguridad se reportan en privado, no en un issue.
 
 ## Licencia
 
