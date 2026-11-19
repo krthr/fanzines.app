@@ -16,16 +16,20 @@ export function useZineImageImport() {
   const { state, elementCount, addImageElements } = useZineStore()
   const { trackZineEvent } = useZineAnalytics()
   const toast = useToast()
+  const { t } = useI18n()
 
   function formatSkippedFiles(files: ImageBatchSkippedFile[]) {
-    const names = files.slice(0, 3).map((file) => file.fileName).join(', ')
+    const names = files
+      .slice(0, 3)
+      .map((file) => file.fileName || t('editor.import.unnamedFile'))
+      .join(', ')
     const extraCount = files.length - 3
 
-    return extraCount > 0 ? `${names} y ${extraCount} más` : names
+    return extraCount > 0 ? t('editor.import.andMore', { names, count: extraCount }) : names
   }
 
   function formatSkippedCount(count: number) {
-    return count === 1 ? 'Se omitió 1 archivo' : `Se omitieron ${count} archivos`
+    return t('editor.import.skipped', count)
   }
 
   async function processImageFiles(files: File[], options: ProcessImageFilesOptions) {
@@ -53,26 +57,27 @@ export function useZineImageImport() {
     if (failedFiles.length > 0) {
       toast.add({
         color: 'error',
-        title: failedFiles.length === 1 ? 'Imagen no cargada' : 'Algunas imágenes no se cargaron',
-        description: `${formatSkippedCount(failedFiles.length)}: ${formatSkippedFiles(failedFiles)}.`
+        title: t('editor.import.failedTitle', failedFiles.length),
+        description: t('editor.import.failedText', {
+          skipped: formatSkippedCount(failedFiles.length),
+          files: formatSkippedFiles(failedFiles)
+        })
       })
     }
 
     if (result.overflowCount > 0) {
       toast.add({
         color: 'warning',
-        title: 'No caben todas las imágenes',
-        description: `${formatSkippedCount(result.overflowCount)} porque no quedaban páginas disponibles.`
+        title: t('editor.import.overflowTitle'),
+        description: t('editor.import.overflowText', { skipped: formatSkippedCount(result.overflowCount) })
       })
     }
 
     if (result.largeFileCount > 0) {
       toast.add({
         color: 'warning',
-        title: result.largeFileCount === 1 ? 'Imagen grande' : 'Imágenes grandes',
-        description: result.largeFileCount === 1
-          ? 'La imagen es grande; si notas lentitud, conviene usar una versión reducida.'
-          : `${result.largeFileCount} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas.`
+        title: t('editor.import.largeTitle', result.largeFileCount),
+        description: t('editor.import.largeText', result.largeFileCount)
       })
     }
   }

@@ -7,6 +7,7 @@ import { useZineExport } from '~/composables/useZineExport.client'
 import ZineToggle from '~/components/zine/ZineToggle.vue'
 
 // The right panel in review: what the sheet holds and the two PDF options.
+const { t } = useI18n()
 const { state } = useZineStore()
 const { filledPageIds } = useZineEditorView()
 const { exportError } = useZineExport()
@@ -18,16 +19,16 @@ const allFilled = computed(() => filledPageIds.value.length === PAGE_IDS.length)
   <section class="review">
     <div class="block">
       <h2 class="ed-display">
-        Revisión
+        {{ t('editor.review.title') }}
       </h2>
       <ul class="checks">
         <li class="check" :class="{ 'is-pending': !allFilled }">
           <UIcon :name="allFilled ? 'i-lucide-circle-check' : 'i-lucide-circle-dashed'" aria-hidden="true" />
-          {{ filledPageIds.length }} de {{ PAGE_IDS.length }} páginas con contenido
+          {{ t('editor.review.filled', { filled: filledPageIds.length, total: PAGE_IDS.length }) }}
         </li>
         <li class="check">
           <UIcon name="i-lucide-circle-check" aria-hidden="true" />
-          Orden de impresión correcto
+          {{ t('editor.review.order') }}
         </li>
       </ul>
     </div>
@@ -36,19 +37,19 @@ const allFilled = computed(() => filledPageIds.value.length === PAGE_IDS.length)
 
     <div class="block is-options">
       <h2 class="ed-display">
-        Opciones del PDF
+        {{ t('editor.review.options') }}
       </h2>
       <div class="option">
         <ZineToggle v-model="state.exportGuides">
-          Guías de corte y doblez
+          {{ t('editor.review.guides') }}
         </ZineToggle>
-        <p>Líneas finas para saber dónde cortar.</p>
+        <p>{{ t('editor.review.guidesHelp') }}</p>
       </div>
       <div class="option">
         <ZineToggle v-model="state.exportSafeMargins">
-          Margen seguro de 5 mm
+          {{ t('editor.review.safeMargin') }}
         </ZineToggle>
-        <p>Evita que la impresora recorte el contenido.</p>
+        <p>{{ t('editor.review.safeMarginHelp') }}</p>
       </div>
     </div>
 

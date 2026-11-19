@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { PAGE_LABELS, PAGE_SHORT_LABELS, type PageId } from '~/types/zine'
+import type { PageId } from '~/types/zine'
 import { READING_SPREADS } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { usePageTileDrop } from '~/composables/usePageTileDrop.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import PageMini from '~/components/zine/PageMini.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
 
@@ -12,7 +13,9 @@ const THUMB_WIDTH = 74
 
 const emit = defineEmits<{ reset: [] }>()
 
+const { t } = useI18n()
 const { state } = useZineStore()
+const { pageLabel, pageShortLabel } = useZinePageLabels()
 const { mode, sidebarView, dropTargetPageIds } = useZineEditorView()
 const { selectTrackedPage } = useTrackedZinePageSelection()
 const { onTileDragOver, onTileDragLeave, onTileDrop } = usePageTileDrop()
@@ -43,23 +46,23 @@ function leaveReview() {
 </script>
 
 <template>
-  <aside class="sidebar ed-scroll" aria-label="Páginas del fanzine">
+  <aside class="sidebar ed-scroll" :aria-label="t('editor.sidebar.label')">
     <div class="head">
       <h2 class="ed-display">
-        Páginas
+        {{ t('editor.sidebar.title') }}
       </h2>
       <button
         type="button"
         class="reset"
-        aria-label="Reiniciar fanzine"
-        title="Reiniciar fanzine"
+        :aria-label="t('editor.sidebar.reset')"
+        :title="t('editor.sidebar.reset')"
         @click="emit('reset')"
       >
         <UIcon name="i-lucide-refresh-cw" aria-hidden="true" />
       </button>
     </div>
 
-    <div class="ed-segment" role="group" aria-label="Orden de las páginas">
+    <div class="ed-segment" role="group" :aria-label="t('editor.sidebar.orderLabel')">
       <button
         type="button"
         class="ed-segment-item"
@@ -67,7 +70,7 @@ function leaveReview() {
         :aria-pressed="sidebarView === 'reading'"
         @click="sidebarView = 'reading'"
       >
-        Lectura
+        {{ t('editor.sidebar.reading') }}
       </button>
       <button
         type="button"
@@ -76,7 +79,7 @@ function leaveReview() {
         :aria-pressed="sidebarView === 'sheet'"
         @click="sidebarView = 'sheet'"
       >
-        Pliego
+        {{ t('editor.sidebar.sheet') }}
       </button>
     </div>
 
@@ -96,7 +99,7 @@ function leaveReview() {
               'is-active': isActive(pageId),
               'is-target': isDropTarget(pageId)
             }"
-            :aria-label="PAGE_LABELS[pageId]"
+            :aria-label="pageLabel(pageId)"
             :aria-current="isActive(pageId) ? 'page' : undefined"
             @click="choosePage(pageId)"
             @dragover="onTileDragOver($event, pageId)"
@@ -112,7 +115,7 @@ function leaveReview() {
                 captions
               />
             </span>
-            <span class="thumb-label">{{ PAGE_SHORT_LABELS[pageId] }}</span>
+            <span class="thumb-label">{{ pageShortLabel(pageId) }}</span>
           </button>
           <span v-else class="no-page" aria-hidden="true" />
         </template>

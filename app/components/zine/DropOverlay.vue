@@ -1,78 +1,57 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PAGE_IDS, type PageId } from '~/types/zine'
+import { PAGE_IDS, getPageNumber, type PageId } from '~/types/zine'
 import { useZineDragState } from '~/composables/useZineDragState.client'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 // Shown over the canvas while files are dragged across the editor. It only
 // states the rule the import already follows: one image per page, from the
 // start page onward, in reading order.
+const { t, localeProperties } = useI18n()
 const { dragFileCount } = useZineDragState()
 const { dropStartPageId, dropTargetPageIds } = useZineEditorView()
-
-const READING_NAMES: Record<PageId, string> = {
-  'front-cover': 'portada',
-  p1: '1',
-  p2: '2',
-  p3: '3',
-  p4: '4',
-  p5: '5',
-  p6: '6',
-  'back-cover': 'contraportada'
-}
-
-const PLACE_NAMES: Record<PageId, string> = {
-  'front-cover': 'la portada',
-  p1: 'la página 1',
-  p2: 'la página 2',
-  p3: 'la página 3',
-  p4: 'la página 4',
-  p5: 'la página 5',
-  p6: 'la página 6',
-  'back-cover': 'la contraportada'
-}
+const { pageName, pagePlace } = useZinePageLabels()
 
 // null when the browser does not say how many files are being dragged;
 // 0 when it does and none of them is an image.
 const count = computed(() => dragFileCount.value)
 const hasNoImages = computed(() => count.value === 0)
 const targets = computed(() => dropTargetPageIds.value)
-const start = computed(() => PLACE_NAMES[dropStartPageId.value])
 const available = computed(() => PAGE_IDS.length - PAGE_IDS.indexOf(dropStartPageId.value))
 
-const title = computed(() => {
-  if (hasNoImages.value) return 'Solo se pueden añadir imágenes'
-  if (count.value === null) return 'Suelta tus fotos'
-  return count.value === 1 ? 'Suelta la foto' : `Suelta las ${count.value} fotos`
-})
+// "portada, 1, 2 y 3" / "front cover, 1, 2, and 3".
+const listFormat = computed(() => new Intl.ListFormat(localeProperties.value.language, { type: 'conjunction' }))
 
-function joinNames(names: string[]) {
-  if (names.length <= 1) return names.join('')
-  return `${names.slice(0, -1).join(', ')} y ${names.at(-1)}`
+// In the reading order the inner pages go by their number alone.
+function readingName(pageId: PageId) {
+  const number = getPageNumber(pageId)
+  return number === null ? pageName(pageId) : String(number)
 }
 
-const rule = computed(() => {
-  if (count.value === null) {
-    return `Empiezan en ${start.value} y siguen en orden de lectura. La miniatura marca dónde empiezan.`
-  }
-
-  if (count.value === 1) {
-    return `Va en ${start.value}. La miniatura te lo muestra.`
-  }
-
-  const order = joinNames(targets.value.map((pageId) => READING_NAMES[pageId]))
-
-  if (count.value > available.value) {
-    const fit = available.value === 1 ? 'Solo cabe 1' : `Solo caben ${available.value}`
-    return `Empiezan en ${start.value} y siguen en orden: ${order}. ${fit}; el resto no se añade.`
-  }
-
-  return `Empiezan en ${start.value} y siguen en orden: ${order}. Las miniaturas te lo muestran.`
+const title = computed(() => {
+  if (hasNoImages.value) return t('editor.drop.onlyImages')
+  if (count.value === null) return t('editor.drop.titleUnknown')
+  return t('editor.drop.title', count.value)
 })
 
-const hint = computed(() => count.value === 1
-  ? 'Suéltala sobre otra miniatura para ponerla en esa página.'
-  : 'Suéltalas sobre otra miniatura para empezar desde esa página.')
+const rule = computed(() => {
+  const start = pagePlace(dropStartPageId.value)
+
+  if (count.value === null) return t('editor.drop.ruleUnknown', { start })
+  if (count.value === 1) return t('editor.drop.ruleOne', { start })
+
+  const order = listFormat.value.format(targets.value.map(readingName))
+
+  if (count.value > available.value) {
+    return t('editor.drop.ruleOverflow', { start, order, fit: t('editor.drop.fit', available.value) })
+  }
+
+  return t('editor.drop.ruleMany', { start, order })
+})
+
+// One photo goes on a page; several start from it.
+const hint = computed(() => t('editor.drop.hint', count.value === 1 ? 1 : 2))
 
 const diagramCount = computed(() => count.value === null ? 3 : Math.max(1, targets.value.length))
 </script>
@@ -88,7 +67,7 @@ const diagramCount = computed(() => count.value === null ? 3 : Math.max(1, targe
         <span v-for="index in diagramCount" :key="index" class="drop-mini" />
       </div>
       <p class="drop-rule-title">
-        Una en cada página
+        {{ t('editor.drop.ruleTitle') }}
       </p>
       <p class="drop-rule">
         {{ rule }}

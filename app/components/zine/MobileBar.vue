@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PAGE_LABELS } from '~/types/zine'
 import { PANEL_SIZE_LABEL, formatMmSize } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineElementActions } from '~/composables/useZineElementActions.client'
+import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 // The mobile context bar: the selection's actions, or the two ways to add
 // something when nothing is selected.
@@ -13,12 +13,14 @@ const emit = defineEmits<{
   'open-settings': []
 }>()
 
+const { t } = useI18n()
 const { state, selectedElement } = useZineStore()
+const { pageLabel } = useZinePageLabels()
 const { coverPage, containPage, bringForward, sendBackward, removeSelected } = useZineElementActions()
 
 const title = computed(() => {
-  if (!selectedElement.value) return PAGE_LABELS[state.value.selectedPageId]
-  return selectedElement.value.type === 'image' ? 'Imagen' : 'Texto'
+  if (!selectedElement.value) return pageLabel(state.value.selectedPageId)
+  return selectedElement.value.type === 'image' ? t('editor.inspector.image') : t('editor.inspector.text')
 })
 
 const sizeLabel = computed(() => selectedElement.value
@@ -41,39 +43,39 @@ const sizeLabel = computed(() => selectedElement.value
       <template v-if="selectedElement.type === 'image'">
         <button type="button" class="action" @click="coverPage">
           <UIcon name="i-lucide-expand" aria-hidden="true" />
-          Rellenar
+          {{ t('editor.actions.fill') }}
         </button>
         <button type="button" class="action" @click="containPage">
           <UIcon name="i-lucide-scan" aria-hidden="true" />
-          Encajar
+          {{ t('editor.actions.fit') }}
         </button>
       </template>
       <button type="button" class="action" @click="bringForward">
         <UIcon name="i-lucide-bring-to-front" aria-hidden="true" />
-        Al frente
+        {{ t('editor.actions.forward') }}
       </button>
       <button type="button" class="action" @click="sendBackward">
         <UIcon name="i-lucide-send-to-back" aria-hidden="true" />
-        Atrás
+        {{ t('editor.actions.backward') }}
       </button>
       <button type="button" class="action" @click="emit('open-settings')">
         <UIcon name="i-lucide-sliders-horizontal" aria-hidden="true" />
-        Ajustes
+        {{ t('editor.actions.settings') }}
       </button>
       <button type="button" class="action is-danger" @click="removeSelected('mobile_bar')">
         <UIcon name="i-lucide-trash-2" aria-hidden="true" />
-        Borrar
+        {{ t('editor.actions.deleteShort') }}
       </button>
     </div>
 
     <div v-else class="actions">
       <button type="button" class="action" @click="emit('add-text')">
         <UIcon name="i-lucide-type" aria-hidden="true" />
-        + Texto
+        {{ t('editor.actions.addText') }}
       </button>
       <button type="button" class="action" @click="emit('add-image')">
         <UIcon name="i-lucide-image-plus" aria-hidden="true" />
-        + Foto
+        {{ t('editor.actions.addPhoto') }}
       </button>
     </div>
   </div>

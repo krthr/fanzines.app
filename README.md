@@ -10,8 +10,8 @@
 
 Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sobre una hoja **A4** plegable: colocas textos e imágenes en cada panel, revisas el pliego completo y exportas un **PDF listo para imprimir, cortar y doblar**. Todo ocurre en el navegador; no se sube nada a ningún servidor.
 
-- **Web:** [fanzines.app](https://fanzines.app)
-- **Editor:** [fanzines.app/editor](https://fanzines.app/editor)
+- **Web:** [fanzines.app](https://fanzines.app) · en inglés: [fanzines.app/en](https://fanzines.app/en)
+- **Editor:** [fanzines.app/editor](https://fanzines.app/editor) · en inglés: [fanzines.app/en/editor](https://fanzines.app/en/editor)
 - **Autor:** [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)
 
 ## Capturas
@@ -37,8 +37,9 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 - **Revisión del pliego.** Antes de descargar, el paso «Revisar» muestra la hoja A4 completa con los 8 paneles y las opciones del PDF.
 - **Exportación PDF a 300 DPI.** El PDF sale impuesto para una hoja A4 horizontal, con **guías de corte y doblez** opcionales y **márgenes de seguridad**.
 - **Guías de previsualización.** Activa/desactiva el margen seguro de 5 mm sobre el lienzo mientras diseñas.
+- **En español e inglés.** Español (Colombia) en `/` y `/editor`; inglés (Estados Unidos) en `/en` y `/en/editor`. Cada página enlaza a su versión en el otro idioma y el fanzine que estés haciendo se conserva al cambiar.
 - **Analítica opcional con PostHog.** Solo se activa si se define la clave de API; captura eventos de uso y errores, sin grabación de sesión.
-- **SEO listo.** Sitemap, robots, metadatos Open Graph/Twitter y JSON-LD `WebApplication` mediante `@nuxtjs/seo`.
+- **SEO listo.** Sitemap, robots, metadatos Open Graph/Twitter, `hreflang` por idioma y JSON-LD `WebApplication` mediante `@nuxtjs/seo` y `@nuxtjs/i18n`.
 - **Accesible y responsive.** Skip link, foco visible, `prefers-reduced-motion` y diseño adaptado a móvil.
 
 ## Tecnologías
@@ -52,6 +53,7 @@ Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sob
 | Animaciones | [GSAP](https://gsap.com) + ScrollTrigger |
 | Imágenes / fuentes | [@nuxt/image](https://image.nuxt.com) · [@nuxt/fonts](https://fonts.nuxt.com) |
 | SEO | [@nuxtjs/seo](https://nuxtseo.com) |
+| Idiomas | [@nuxtjs/i18n](https://i18n.nuxtjs.org) |
 | Scripts / analítica | [@nuxt/scripts](https://scripts.nuxt.com) · [PostHog](https://posthog.com) |
 | Despliegue | [Cloudflare Workers](https://workers.cloudflare.com) · [Wrangler](https://developers.cloudflare.com/workers/wrangler/) |
 
@@ -102,6 +104,8 @@ fanzines/
 │   ├── app.config.ts               # Tema @nuxt/ui (colores y estilo de los avisos)
 │   ├── error.vue                   # Página de error
 │   ├── assets/css/main.css         # Tokens de marca (landing, error y editor) y piezas base del editor
+│   ├── components/
+│   │   └── LocaleSwitch.vue        # Enlace a la misma página en el otro idioma
 │   ├── components/zine/
 │   │   ├── ZineEditor.client.vue   # Editor: barra superior, modos Diseñar y Revisar, versión móvil
 │   │   ├── EditorBrand.vue         # Marca y H1, compartidos con el fallback prerenderizado
@@ -127,24 +131,30 @@ fanzines/
 │   │   ├── usePageTileDrop.client.ts        # Soltar archivos sobre una miniatura
 │   │   ├── useZineDragState.client.ts       # Estado de arrastre
 │   │   ├── useZineAnalytics.client.ts       # Eventos PostHog
-│   │   └── useTrackedZinePageSelection.client.ts
+│   │   ├── useTrackedZinePageSelection.client.ts
+│   │   ├── useZinePageLabels.ts             # Nombres de las páginas en el idioma actual
+│   │   └── useLocalizedImage.ts             # Imágenes con texto: la versión del idioma actual
 │   ├── utils/
 │   │   ├── zineLayout.ts            # Geometría A4, imposición, orden de lectura y conversión a mm y pt
 │   │   ├── renderZine.client.ts     # Render de elementos a Konva
 │   │   ├── renderPage.client.ts     # Render de una página a canvas
 │   │   ├── renderSheet.client.ts    # Render del pliego completo a canvas
 │   │   ├── exportPdf.client.ts      # Generación del PDF con jsPDF
-│   │   └── zineImageCache.ts        # Caché de imágenes HTML
+│   │   ├── zineImageCache.ts        # Caché de imágenes HTML
+│   │   └── textLines.ts             # Títulos de varias líneas a partir de un mensaje
 │   ├── types/zine.ts               # Tipos: PageId, ZineElement, ZineState…
 │   ├── plugins/posthog-errors.client.ts
 │   └── pages/
 │       ├── index.vue               # Landing
 │       └── editor.vue              # Página del editor y su fallback prerenderizado
+├── i18n/locales/
+│   ├── es-CO.json                  # Textos en español (idioma por defecto)
+│   └── en-US.json                  # Textos en inglés
 ├── public/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
-│   └── images/                     # Fotos y guías (webp)
-├── nuxt.config.ts                  # Módulos, SEO, fuentes, iconos, routeRules
+│   └── images/                     # Fotos y guías (webp); las que llevan texto tienen gemela -en
+├── nuxt.config.ts                  # Módulos, SEO, idiomas, fuentes, iconos, routeRules
 ├── wrangler.jsonc                  # Configuración de Cloudflare Workers (dominios)
 ├── .nvmrc                          # Node 26
 └── package.json
@@ -174,13 +184,25 @@ Lo que solo afecta a cómo se ve el editor (modo Diseñar o Revisar, página sol
 
 El lienzo del editor usa **Konva** vía `vue-konva`. Las miniaturas y la página enfrentada se dibujan con [`renderPage.client.ts`](app/utils/renderPage.client.ts), que usa los mismos nodos que el pliego y el PDF. Para exportar, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) monta un `Stage` fuera de pantalla con todos los paneles impuestos y devuelve un canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) lo incrusta en un PDF A4 horizontal con **jsPDF** a 300 DPI, añadiendo las guías de corte/doblez y los márgenes de seguridad si están activados.
 
+### Idiomas
+
+La app está en español de Colombia (`es-CO`, el idioma por defecto) y en inglés de Estados Unidos (`en-US`), con [`@nuxtjs/i18n`](https://i18n.nuxtjs.org). El idioma es parte de la URL: el español conserva las rutas de siempre (`/`, `/editor`) y el inglés vive bajo `/en` (`/en`, `/en/editor`).
+
+- **Textos.** Todo lo que se lee está en [`i18n/locales/es-CO.json`](i18n/locales/es-CO.json) y [`i18n/locales/en-US.json`](i18n/locales/en-US.json), con las mismas claves. En los componentes se usa `t('clave')`. Un texto con `|` tiene singular y plural (`"Suelta la foto | Suelta las {count} fotos"`), así que una barra literal no puede ir en un mensaje. Un título de varias líneas es un solo mensaje con saltos de línea (`\n`), que [`toLines`](app/utils/textLines.ts) reparte.
+- **Nombres de las páginas.** «Portada», «Página 1» o «la contraportada» salen de [`useZinePageLabels`](app/composables/useZinePageLabels.ts), no de constantes.
+- **Enlaces.** Los enlaces internos usan `<NuxtLinkLocale>` (o `useLocalePath`) para quedarse en el idioma actual. [`LocaleSwitch`](app/components/LocaleSwitch.vue) lleva a la misma página en el otro idioma; en el editor el fanzine se conserva, porque el estado vive en `useState`.
+- **Imágenes con texto.** La captura del editor, la guía de plegado y la imagen para redes tienen una gemela en inglés con el sufijo `-en` (`fold-guide.webp` y `fold-guide-en.webp`). [`useLocalizedImage`](app/composables/useLocalizedImage.ts) elige la que toca.
+- **Sin redirección por idioma del navegador.** Las páginas están prerenderizadas y se sirven antes de que se ejecute el Worker, así que solo se podría redirigir en el cliente, con la página en español ya pintada, y Googlebot (que renderiza como `en-US`) acabaría fuera de las páginas en español. Los buscadores eligen la versión con `hreflang` y las personas con el enlace de idioma.
+
+Para añadir un idioma: un archivo nuevo en `i18n/locales/`, su entrada en `i18n.locales` y sus rutas en `routeRules` y `nitro.prerender.routes` de [`nuxt.config.ts`](nuxt.config.ts), y las imágenes gemelas. `LocaleSwitch` y `useLocalizedImage` dan por hecho que hay dos idiomas.
+
 ### SEO y rutas
 
-`@nuxtjs/seo` gestiona sitemap, robots y metadatos. En [`nuxt.config.ts`](nuxt.config.ts), `routeRules` prerenderiza `/` e `/editor`, y `site` define la URL canónica `https://fanzines.app`. El JSON-LD `WebApplication` se inyecta desde [`app.vue`](app/app.vue).
+`@nuxtjs/seo` gestiona sitemap, robots y metadatos. En [`nuxt.config.ts`](nuxt.config.ts), `routeRules` prerenderiza `/`, `/editor`, `/en` y `/en/editor`, y `site` define la URL canónica `https://fanzines.app`. Cada página declara su idioma (`<html lang>`), su URL canónica, `og:locale` y un `hreflang` por idioma desde [`app.vue`](app/app.vue), que también inyecta el JSON-LD `WebApplication`. `sitemap.xml` es uno solo, con las cuatro URL y sus alternativas.
 
 ### Analítica
 
-Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está definida. [`useZineAnalytics.client.ts`](app/composables/useZineAnalytics.client.ts) envía eventos como `zine_pdf_export_started`, `zine_images_uploaded`, etc., y [`posthog-errors.client.ts`](app/plugins/posthog-errors.client.ts) captura excepciones no controladas.
+Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está definida. [`useZineAnalytics.client.ts`](app/composables/useZineAnalytics.client.ts) envía eventos como `zine_pdf_export_started`, `zine_images_uploaded`, etc., cada uno con el idioma (`locale`), y [`posthog-errors.client.ts`](app/plugins/posthog-errors.client.ts) captura excepciones no controladas.
 
 ## Despliegue
 

@@ -25,46 +25,44 @@ const MIN_FONT_SIZE = 12
 const MAX_FONT_SIZE = 220
 const MIN_OPACITY = 10
 
-const styleItems = [
-  { label: 'Normal', value: 'normal' },
-  { label: 'Negrita', value: 'bold' },
-  { label: 'Cursiva', value: 'italic' }
-] as const
+// Every `label` below is a key of the `editor.inspector` messages.
+const styleItems = ['normal', 'bold', 'italic'] as const
 
 const textAlignItems = [
-  { label: 'Alinear a la izquierda', value: 'left', icon: 'i-lucide-text-align-start' },
-  { label: 'Centrar texto', value: 'center', icon: 'i-lucide-text-align-center' },
-  { label: 'Alinear a la derecha', value: 'right', icon: 'i-lucide-text-align-end' }
+  { label: 'alignLeft', value: 'left', icon: 'i-lucide-text-align-start' },
+  { label: 'alignCenter', value: 'center', icon: 'i-lucide-text-align-center' },
+  { label: 'alignRight', value: 'right', icon: 'i-lucide-text-align-end' }
 ] as const
 
-const colorLabels: Record<typeof TEXT_COLOR_OPTIONS[number], string> = {
-  '#0b0a09': 'Negro',
-  '#ffffff': 'Blanco',
-  '#d25a36': 'Naranja',
-  '#e9ff5c': 'Amarillo ácido',
-  '#2f5bea': 'Azul'
+const colorNames: Record<typeof TEXT_COLOR_OPTIONS[number], string> = {
+  '#0b0a09': 'black',
+  '#ffffff': 'white',
+  '#d25a36': 'orange',
+  '#e9ff5c': 'acid',
+  '#2f5bea': 'blue'
 }
 
 const horizontalAlignItems = [
-  { label: 'Pegar a la izquierda de la página', value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
-  { label: 'Centrar en horizontal', value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
-  { label: 'Pegar a la derecha de la página', value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
+  { label: 'pageLeft', value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
+  { label: 'pageCenter', value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
+  { label: 'pageRight', value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
 ] satisfies Array<{ label: string, value: HorizontalAlignment, icon: string }>
 
 const verticalAlignItems = [
-  { label: 'Pegar arriba de la página', value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
-  { label: 'Centrar en vertical', value: 'middle', icon: 'i-lucide-align-vertical-justify-center' },
-  { label: 'Pegar abajo de la página', value: 'bottom', icon: 'i-lucide-align-vertical-justify-end' }
+  { label: 'pageTop', value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
+  { label: 'pageMiddle', value: 'middle', icon: 'i-lucide-align-vertical-justify-center' },
+  { label: 'pageBottom', value: 'bottom', icon: 'i-lucide-align-vertical-justify-end' }
 ] satisfies Array<{ label: string, value: VerticalAlignment, icon: string }>
 
 // Limits in page units, as before; the fields show millimetres.
-const measureFields: Array<{ key: MeasureKey, label: string, min: number, max: number }> = [
-  { key: 'x', label: 'X', min: -PAGE_W, max: PAGE_W * 2 },
-  { key: 'y', label: 'Y', min: -PAGE_H, max: PAGE_H * 2 },
-  { key: 'width', label: 'Ancho', min: 20, max: PAGE_W * 2 },
-  { key: 'height', label: 'Alto', min: 20, max: PAGE_H * 2 }
+const measureFields: Array<{ key: MeasureKey, min: number, max: number }> = [
+  { key: 'x', min: -PAGE_W, max: PAGE_W * 2 },
+  { key: 'y', min: -PAGE_H, max: PAGE_H * 2 },
+  { key: 'width', min: 20, max: PAGE_W * 2 },
+  { key: 'height', min: 20, max: PAGE_H * 2 }
 ]
 
+const { t } = useI18n()
 const { selectedElement, updateElement } = useZineStore()
 const {
   coverPage,
@@ -167,46 +165,55 @@ function setRotation(event: Event) {
 function isColorSelected(color: string, fill: string) {
   return fill.toLowerCase() === color
 }
+
+function colorLabel(color: typeof TEXT_COLOR_OPTIONS[number]) {
+  return t(`editor.inspector.colors.${colorNames[color]}`)
+}
+
+// X and Y are the same in every language.
+function measureLabel(key: MeasureKey) {
+  return key === 'x' || key === 'y' ? key.toUpperCase() : t(`editor.inspector.${key}`)
+}
 </script>
 
 <template>
   <section class="insp">
     <template v-if="!selectedElement">
       <h2 class="ed-display">
-        Propiedades
+        {{ t('editor.inspector.title') }}
       </h2>
       <p class="note">
-        Toca una foto o un texto de la página y aquí verás sus opciones.
+        {{ t('editor.inspector.empty') }}
       </p>
     </template>
 
     <template v-else-if="selectedElement.type === 'image'">
       <header class="head">
         <h2 class="ed-display">
-          Imagen
+          {{ t('editor.inspector.image') }}
         </h2>
         <p class="file">
-          <span class="file-name">{{ selectedElement.fileName || 'Imagen' }}</span>
+          <span class="file-name">{{ selectedElement.fileName || t('editor.inspector.image') }}</span>
           <span class="file-size"> · {{ selectedElement.naturalWidth }} × {{ selectedElement.naturalHeight }} px</span>
         </p>
       </header>
 
       <div class="group">
         <h3 class="group-label">
-          Ajustar a la página
+          {{ t('editor.inspector.fitToPage') }}
         </h3>
         <div class="fit">
           <button type="button" class="fit-action" @click="coverPage">
             <UIcon name="i-lucide-expand" aria-hidden="true" />
-            Rellenar
+            {{ t('editor.actions.fill') }}
           </button>
           <button type="button" class="fit-action" @click="containPage">
             <UIcon name="i-lucide-scan" aria-hidden="true" />
-            Encajar
+            {{ t('editor.actions.fit') }}
           </button>
           <button type="button" class="fit-action" @click="centerOnPage">
             <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
-            Centrar
+            {{ t('editor.actions.center') }}
           </button>
         </div>
       </div>
@@ -215,14 +222,14 @@ function isColorSelected(color: string, fill: string) {
     <template v-else>
       <header class="head is-row">
         <h2 class="ed-display">
-          Texto
+          {{ t('editor.inspector.text') }}
         </h2>
         <p class="file">
-          seleccionado
+          {{ t('editor.inspector.selected') }}
         </p>
       </header>
 
-      <div class="fonts" role="radiogroup" aria-label="Fuente">
+      <div class="fonts" role="radiogroup" :aria-label="t('editor.inspector.font')">
         <label
           v-for="font in FONT_OPTIONS"
           :key="font"
@@ -244,7 +251,7 @@ function isColorSelected(color: string, fill: string) {
 
       <div class="pair">
         <label class="ed-field">
-          <span class="ed-field-label">Tamaño</span>
+          <span class="ed-field-label">{{ t('editor.inspector.size') }}</span>
           <span class="ed-field-value">
             <input
               type="number"
@@ -260,14 +267,14 @@ function isColorSelected(color: string, fill: string) {
         </label>
 
         <label class="ed-field">
-          <span class="ed-field-label">Estilo</span>
+          <span class="ed-field-label">{{ t('editor.inspector.style') }}</span>
           <span class="ed-field-value">
             <select
               :value="selectedElement.fontStyle"
               @change="patch({ fontStyle: ($event.target as HTMLSelectElement).value })"
             >
-              <option v-for="item in styleItems" :key="item.value" :value="item.value">
-                {{ item.label }}
+              <option v-for="style in styleItems" :key="style" :value="style">
+                {{ t(`editor.inspector.styles.${style}`) }}
               </option>
             </select>
           </span>
@@ -275,20 +282,20 @@ function isColorSelected(color: string, fill: string) {
       </div>
 
       <div class="row">
-        <span class="row-label">Alineación</span>
-        <div class="switch" role="radiogroup" aria-label="Alineación del texto">
+        <span class="row-label">{{ t('editor.inspector.align') }}</span>
+        <div class="switch" role="radiogroup" :aria-label="t('editor.inspector.alignLabel')">
           <label
             v-for="item in textAlignItems"
             :key="item.value"
             class="switch-item"
             :class="{ 'is-active': selectedElement.align === item.value }"
-            :title="item.label"
+            :title="t(`editor.inspector.${item.label}`)"
           >
             <input
               type="radio"
               class="sr-only"
               :name="`${groupId}-align`"
-              :aria-label="item.label"
+              :aria-label="t(`editor.inspector.${item.label}`)"
               :checked="selectedElement.align === item.value"
               @change="patch({ align: item.value })"
             >
@@ -298,20 +305,20 @@ function isColorSelected(color: string, fill: string) {
       </div>
 
       <div class="row is-colors">
-        <span class="row-label">Color</span>
-        <div class="swatches" role="radiogroup" aria-label="Color del texto">
+        <span class="row-label">{{ t('editor.inspector.color') }}</span>
+        <div class="swatches" role="radiogroup" :aria-label="t('editor.inspector.colorLabel')">
           <label
             v-for="color in TEXT_COLOR_OPTIONS"
             :key="color"
             class="swatch"
             :class="{ 'is-active': isColorSelected(color, selectedElement.fill) }"
-            :title="colorLabels[color]"
+            :title="colorLabel(color)"
           >
             <input
               type="radio"
               class="sr-only"
               :name="`${groupId}-color`"
-              :aria-label="colorLabels[color]"
+              :aria-label="colorLabel(color)"
               :checked="isColorSelected(color, selectedElement.fill)"
               @change="patch({ fill: color })"
             >
@@ -325,7 +332,7 @@ function isColorSelected(color: string, fill: string) {
       <!-- An image shows its sliders up front; text keeps them under "Medidas exactas". -->
       <div v-if="selectedElement.type === 'image'" class="sliders">
         <label class="slider">
-          <span class="slider-label">Opacidad</span>
+          <span class="slider-label">{{ t('editor.inspector.opacity') }}</span>
           <input
             type="range"
             class="ed-range"
@@ -339,7 +346,7 @@ function isColorSelected(color: string, fill: string) {
           <span class="slider-value">{{ opacityPercent }}%</span>
         </label>
         <label class="slider">
-          <span class="slider-label">Giro</span>
+          <span class="slider-label">{{ t('editor.inspector.rotation') }}</span>
           <input
             type="range"
             class="ed-range"
@@ -357,18 +364,18 @@ function isColorSelected(color: string, fill: string) {
       <div class="order">
         <button type="button" class="ed-btn-line" @click="bringForward">
           <UIcon name="i-lucide-bring-to-front" aria-hidden="true" />
-          Al frente
+          {{ t('editor.actions.forward') }}
         </button>
         <button type="button" class="ed-btn-line" @click="sendBackward">
           <UIcon name="i-lucide-send-to-back" aria-hidden="true" />
-          Atrás
+          {{ t('editor.actions.backward') }}
         </button>
         <button
           v-if="selectedElement.type === 'text'"
           type="button"
           class="ed-btn-line is-danger is-icon"
-          aria-label="Eliminar"
-          title="Eliminar"
+          :aria-label="t('editor.actions.delete')"
+          :title="t('editor.actions.delete')"
           @click="removeSelected('inspector')"
         >
           <UIcon name="i-lucide-trash-2" aria-hidden="true" />
@@ -385,7 +392,7 @@ function isColorSelected(color: string, fill: string) {
         >
           <span class="measures-title">
             <UIcon name="i-lucide-chevron-right" :class="{ 'is-open': measuresOpen }" aria-hidden="true" />
-            Medidas exactas
+            {{ t('editor.inspector.measures') }}
           </span>
           <span class="measures-summary">{{ sizeLabel }}</span>
         </button>
@@ -393,7 +400,7 @@ function isColorSelected(color: string, fill: string) {
         <div v-if="measuresOpen" id="ed-measures" class="measures-body">
           <div class="pair is-grid">
             <label v-for="field in measureFields" :key="field.key" class="ed-field">
-              <span class="ed-field-label">{{ field.label }}</span>
+              <span class="ed-field-label">{{ measureLabel(field.key) }}</span>
               <span class="ed-field-value">
                 <input
                   type="number"
@@ -409,7 +416,7 @@ function isColorSelected(color: string, fill: string) {
 
           <div v-if="selectedElement.type === 'text'" class="sliders">
             <label class="slider">
-              <span class="slider-label">Opacidad</span>
+              <span class="slider-label">{{ t('editor.inspector.opacity') }}</span>
               <input
                 type="range"
                 class="ed-range"
@@ -423,7 +430,7 @@ function isColorSelected(color: string, fill: string) {
               <span class="slider-value">{{ opacityPercent }}%</span>
             </label>
             <label class="slider">
-              <span class="slider-label">Giro</span>
+              <span class="slider-label">{{ t('editor.inspector.rotation') }}</span>
               <input
                 type="range"
                 class="ed-range"
@@ -439,8 +446,8 @@ function isColorSelected(color: string, fill: string) {
           </div>
 
           <div class="row">
-            <span class="row-label">Horizontal</span>
-            <div class="switch" role="group" aria-label="Alinear en horizontal dentro de la página">
+            <span class="row-label">{{ t('editor.inspector.horizontal') }}</span>
+            <div class="switch" role="group" :aria-label="t('editor.inspector.horizontalLabel')">
               <button
                 v-for="item in horizontalAlignItems"
                 :key="item.value"
@@ -448,8 +455,8 @@ function isColorSelected(color: string, fill: string) {
                 class="switch-item"
                 :class="{ 'is-active': isHorizontallyAligned(item.value) }"
                 :aria-pressed="isHorizontallyAligned(item.value)"
-                :aria-label="item.label"
-                :title="item.label"
+                :aria-label="t(`editor.inspector.${item.label}`)"
+                :title="t(`editor.inspector.${item.label}`)"
                 :disabled="!canAlignHorizontal()"
                 @click="alignHorizontal(item.value)"
               >
@@ -459,8 +466,8 @@ function isColorSelected(color: string, fill: string) {
           </div>
 
           <div class="row">
-            <span class="row-label">Vertical</span>
-            <div class="switch" role="group" aria-label="Alinear en vertical dentro de la página">
+            <span class="row-label">{{ t('editor.inspector.vertical') }}</span>
+            <div class="switch" role="group" :aria-label="t('editor.inspector.verticalLabel')">
               <button
                 v-for="item in verticalAlignItems"
                 :key="item.value"
@@ -468,8 +475,8 @@ function isColorSelected(color: string, fill: string) {
                 class="switch-item"
                 :class="{ 'is-active': isVerticallyAligned(item.value) }"
                 :aria-pressed="isVerticallyAligned(item.value)"
-                :aria-label="item.label"
-                :title="item.label"
+                :aria-label="t(`editor.inspector.${item.label}`)"
+                :title="t(`editor.inspector.${item.label}`)"
                 :disabled="!canAlignVertical()"
                 @click="alignVertical(item.value)"
               >

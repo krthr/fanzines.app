@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalizedImage } from '~/composables/useLocalizedImage'
 import { useZineExport } from '~/composables/useZineExport.client'
 
 // Shown after a successful export: how to print and fold the sheet.
@@ -9,14 +10,16 @@ const emit = defineEmits<{
   'back-to-editor': []
 }>()
 
+const { t } = useI18n()
+const localizedImage = useLocalizedImage()
 const { isExporting, exportError } = useZineExport()
 </script>
 
 <template>
   <UModal
     v-model:open="open"
-    title="Tu fanzine está listo"
-    description="El PDF se ha descargado. Imprímelo a tamaño real, córtalo y dóblalo."
+    :title="t('editor.ready.dialogTitle')"
+    :description="t('editor.ready.dialogDescription')"
     :ui="{
       overlay: 'pdf-ready-overlay',
       content: 'pdf-ready-content ed-light'
@@ -26,8 +29,8 @@ const { isExporting, exportError } = useZineExport()
       <div class="ready">
         <div class="preview">
           <img
-            src="/images/fold-guide.webp"
-            alt="Instrucciones dibujadas a mano para doblar, cortar y abrir el fanzine"
+            :src="localizedImage('/images/fold-guide.webp')"
+            :alt="t('editor.ready.guideAlt')"
             width="392"
             height="294"
           >
@@ -39,28 +42,27 @@ const { isExporting, exportError } = useZineExport()
 
         <div class="content">
           <p class="sticker">
-            PDF descargado
+            {{ t('editor.ready.sticker') }}
           </p>
           <h2 class="title">
-            <span>Tu fanzine</span>
-            <span>está listo.</span>
+            <span v-for="line in toLines(t('editor.ready.title'))" :key="line">{{ line }}</span>
           </h2>
 
           <div class="callout">
             <UIcon name="i-lucide-printer" aria-hidden="true" />
             <div>
               <p class="callout-title">
-                Imprime a tamaño real (100%)
+                {{ t('editor.ready.printTitle') }}
               </p>
               <p class="callout-text">
-                Desactiva «Ajustar a la página». Si se reduce, las páginas no encajan al doblar.
+                {{ t('editor.ready.printText') }}
               </p>
             </div>
           </div>
 
           <ol class="steps">
-            <li>Dobla a lo largo y corta solo la línea roja central.</li>
-            <li>Abre, empuja hacia el centro y dobla como un libro.</li>
+            <li>{{ t('editor.ready.stepFold') }}</li>
+            <li>{{ t('editor.ready.stepOpen') }}</li>
           </ol>
 
           <p v-if="exportError" class="error" role="alert">
@@ -74,7 +76,7 @@ const { isExporting, exportError } = useZineExport()
               :disabled="isExporting"
               @click="emit('download-again')"
             >
-              Descargar otra vez
+              {{ t('editor.ready.downloadAgain') }}
               <UIcon
                 :name="isExporting ? 'i-lucide-loader-circle' : 'i-lucide-download'"
                 :class="{ 'is-spinning': isExporting }"
@@ -85,11 +87,11 @@ const { isExporting, exportError } = useZineExport()
 
           <button type="button" class="back" @click="emit('back-to-editor')">
             <UIcon name="i-lucide-arrow-left" aria-hidden="true" />
-            Volver al editor
+            {{ t('editor.ready.back') }}
           </button>
         </div>
 
-        <button type="button" class="close" aria-label="Cerrar" @click="open = false">
+        <button type="button" class="close" :aria-label="t('editor.ready.close')" @click="open = false">
           <UIcon name="i-lucide-x" aria-hidden="true" />
         </button>
       </div>

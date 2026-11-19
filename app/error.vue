@@ -3,23 +3,26 @@ import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
 
-const isNotFound = computed(() => props.error.status === 404)
+const { t } = useI18n()
+const localePath = useLocalePath()
 
-const copy = computed(() =>
-  isNotFound.value
-    ? {
-        tag: 'Error 404 · página perdida',
-        title: ['Esta página ', 'no existe.'],
-        text: 'Quizá el enlace está mal escrito o la página se quedó fuera del pliego. Vuelve al inicio o empieza tu propio fanzine.',
-        headTitle: 'Página no encontrada | Fanzines'
-      }
-    : {
-        tag: `Error ${props.error.status || 500}`,
-        title: ['Algo salió ', 'mal.'],
-        text: 'No pudimos cargar esta página. Inténtalo de nuevo en un momento, vuelve al inicio o empieza un fanzine.',
-        headTitle: 'Algo salió mal | Fanzines'
-      }
-)
+const copy = computed(() => {
+  const kind = props.error.status === 404 ? 'notFound' : 'generic'
+
+  return {
+    tag: t(`error.${kind}.tag`, { status: props.error.status || 500 }),
+    title: toLines(t(`error.${kind}.title`)),
+    text: t(`error.${kind}.text`),
+    headTitle: `${t(`error.${kind}.headTitle`)} | Fanzines`
+  }
+})
+
+const homePath = computed(() => localePath('/'))
+const editorPath = computed(() => localePath('/editor'))
+
+// The error page replaces app.vue, so it sets <html lang> itself.
+const localeHead = useLocaleHead({ seo: false })
+useHead(() => ({ htmlAttrs: localeHead.value.htmlAttrs }))
 
 // nuxt-robots skips the internal /__nuxt_error render (and useRobotsRule throws there),
 // so set noindex here. Nuxt copies this render's headers onto the real error response.
@@ -40,7 +43,7 @@ function leave(event: MouseEvent, redirect: string) {
 <template>
   <div class="error-page">
     <header class="site-header band">
-      <a class="brand" href="/" aria-label="Fanzines inicio" @click="leave($event, '/')">
+      <a class="brand" :href="homePath" :aria-label="t('app.homeLabel')" @click="leave($event, homePath)">
         <UIcon class="brand-icon" name="i-lucide-scissors" aria-hidden="true" />
         <span>Fanzines</span>
       </a>
@@ -53,11 +56,11 @@ function leave(event: MouseEvent, redirect: string) {
       </h1>
       <p class="error-text">{{ copy.text }}</p>
       <div class="error-actions">
-        <a class="button button-primary" href="/editor" @click="leave($event, '/editor')">
-          Crear un fanzine
+        <a class="button button-primary" :href="editorPath" @click="leave($event, editorPath)">
+          {{ t('error.create') }}
           <UIcon class="button-icon" name="i-lucide-arrow-right" aria-hidden="true" />
         </a>
-        <a class="button button-paper" href="/" @click="leave($event, '/')">Volver al inicio</a>
+        <a class="button button-paper" :href="homePath" @click="leave($event, homePath)">{{ t('error.home') }}</a>
       </div>
     </main>
   </div>

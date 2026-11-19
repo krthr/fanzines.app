@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
+  modules: ['@nuxt/ui', '@nuxtjs/i18n', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
   runtimeConfig: {
     public: {
       scripts: {
@@ -14,9 +14,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      htmlAttrs: {
-        lang: 'es'
-      },
+      // <html lang> is set per locale by useLocaleHead in app.vue and error.vue.
       link: [
         { rel: 'icon', type: 'image/x-icon', sizes: 'any', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }
@@ -27,10 +25,29 @@ export default defineNuxtConfig({
   site: {
     url: 'https://fanzines.app',
     name: 'Fanzines',
-    description: 'Editor en el navegador para crear, imprimir y exportar fanzines A4 plegables.',
-    defaultLocale: 'es'
+    // What build-time files (llms.txt) use. On a page, i18n overrides it with the
+    // `nuxtSiteConfig.description` message of the current locale.
+    description: 'Editor en el navegador para crear, imprimir y exportar fanzines A4 plegables.'
+  },
+  i18n: {
+    baseUrl: 'https://fanzines.app',
+    // Spanish keeps the URLs it always had (/, /editor); English lives under /en.
+    strategy: 'prefix_except_default',
+    defaultLocale: 'es',
+    locales: [
+      { code: 'es', language: 'es-CO', name: 'Español', file: 'es-CO.json' },
+      { code: 'en', language: 'en-US', name: 'English', file: 'en-US.json' }
+    ],
+    // Pages are prerendered and served before the Worker runs, so a redirect by browser
+    // language could only happen in the client, after the Spanish page has painted, and
+    // Googlebot (which renders as en-US) would be sent away from the Spanish pages.
+    // The language is the URL: hreflang tells search engines, the switcher tells people.
+    detectBrowserLanguage: false
   },
   sitemap: {
+    // One sitemap.xml for both languages, each URL with its hreflang alternates. Without
+    // this, i18n splits it into an index with a sitemap per locale.
+    sitemaps: false,
     urls: ['/', '/editor']
   },
   robots: {
@@ -66,7 +83,9 @@ export default defineNuxtConfig({
   skewProtection: false,
   routeRules: {
     '/': { prerender: true },
-    '/editor': { prerender: true, robots: true }
+    '/editor': { prerender: true, robots: true },
+    '/en': { prerender: true },
+    '/en/editor': { prerender: true, robots: true }
   },
   nitro: {
     experimental: {
@@ -77,7 +96,7 @@ export default defineNuxtConfig({
     prerender: {
       // AI Ready only indexes pages at build time (llms-full.txt, sitemap.md, .md twins)
       // when routes are listed here; it ignores `prerender: true` in routeRules.
-      routes: ['/', '/editor'],
+      routes: ['/', '/editor', '/en', '/en/editor'],
       // Emit editor.html (not editor/index.html) so Cloudflare assets serve /editor
       // without a 307 to /editor/, matching the canonical and sitemap URLs.
       autoSubfolderIndex: false

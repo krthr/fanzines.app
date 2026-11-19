@@ -2,35 +2,27 @@
 import EditorBrand from '~/components/zine/EditorBrand.vue'
 import ZineEditor from '~/components/zine/ZineEditor.client.vue'
 
-const siteUrl = 'https://fanzines.app'
-const pageUrl = `${siteUrl}/editor`
-const pageTitle = 'Editor de fanzines A4'
-const socialTitle = 'Editor de fanzines A4 | Fanzines'
-const pageDescription =
-  'Diseña un fanzine de ocho paneles en el navegador, revisa el pliego A4 y exporta un PDF listo para imprimir y doblar.'
-const socialImage = `${siteUrl}/images/og-fanzines.webp`
+const { t } = useI18n()
+const localizedImage = useLocalizedImage()
 
+const socialImage = () => localizedImage('https://fanzines.app/images/og-fanzines.webp')
+const socialTitle = () => `${t('editorPage.seo.title')} | Fanzines`
+
+// The canonical URL, og:url and the hreflang alternates come from useLocaleHead in app.vue.
 useSeoMeta({
-  title: pageTitle,
-  description: pageDescription,
+  title: () => t('editorPage.seo.title'),
+  description: () => t('editorPage.seo.description'),
   robots: 'index, follow',
   ogTitle: socialTitle,
-  ogDescription: pageDescription,
+  ogDescription: () => t('editorPage.seo.description'),
   ogType: 'website',
-  ogUrl: pageUrl,
   ogSiteName: 'Fanzines',
   ogImage: socialImage,
-  ogImageAlt: 'Editor de Fanzines con pliego A4 y paneles de fanzine',
+  ogImageAlt: () => t('editorPage.seo.imageAlt'),
   twitterCard: 'summary_large_image',
   twitterTitle: socialTitle,
-  twitterDescription: pageDescription,
+  twitterDescription: () => t('editorPage.seo.description'),
   twitterImage: socialImage
-})
-
-useHead({
-  link: [
-    { rel: 'canonical', href: pageUrl }
-  ]
 })
 </script>
 
@@ -45,11 +37,11 @@ useHead({
           </header>
           <section class="editor-loading">
             <p>
-              {{ pageDescription }} Es gratis y no necesitas cuenta.
+              {{ t('editorPage.seo.description') }} {{ t('editorPage.free') }}
             </p>
             <p class="editor-loading-meta">
-              <span>Cargando editor…</span>
-              <NuxtLink to="/">Ver cómo funciona Fanzines</NuxtLink>
+              <span>{{ t('editorPage.loading') }}</span>
+              <NuxtLinkLocale to="/">{{ t('editorPage.howItWorks') }}</NuxtLinkLocale>
             </p>
           </section>
         </div>

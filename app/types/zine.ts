@@ -11,26 +11,10 @@ export const PAGE_IDS = [
 
 export type PageId = typeof PAGE_IDS[number]
 
-export const PAGE_LABELS: Record<PageId, string> = {
-  'back-cover': 'Contraportada',
-  'front-cover': 'Portada',
-  p1: 'Página 1',
-  p2: 'Página 2',
-  p3: 'Página 3',
-  p4: 'Página 4',
-  p5: 'Página 5',
-  p6: 'Página 6'
-}
-
-export const PAGE_SHORT_LABELS: Record<PageId, string> = {
-  'back-cover': 'Contra',
-  'front-cover': 'Portada',
-  p1: '1',
-  p2: '2',
-  p3: '3',
-  p4: '4',
-  p5: '5',
-  p6: '6'
+// Inner pages are numbered 1 to 6; the covers have no number. The names of the pages
+// are translated: see useZinePageLabels.
+export function getPageNumber(pageId: PageId): number | null {
+  return pageId === 'front-cover' || pageId === 'back-cover' ? null : PAGE_IDS.indexOf(pageId)
 }
 
 export const FONT_OPTIONS = [
@@ -52,8 +36,6 @@ export const TEXT_COLOR_OPTIONS = [
   '#e9ff5c',
   '#2f5bea'
 ] as const
-
-export const DEFAULT_TEXT_CONTENT = 'Escribe aquí'
 
 export type FontOption = typeof FONT_OPTIONS[number]
 
@@ -100,6 +82,7 @@ export type ZineState = {
 }
 
 export type ImageBatchSkippedFile = {
+  // Empty when the file has no name.
   fileName: string
   reason: 'browser-only' | 'not-image' | 'load-error' | 'no-page'
 }

@@ -3,11 +3,13 @@
 // "PDF listo" dialog is open.
 defineProps<{ current: 2 | 3 }>()
 
-const steps = ['Diseñar', 'Revisar', 'Imprimir y doblar']
+const { t } = useI18n()
+
+const steps = ['design', 'review', 'print'] as const
 </script>
 
 <template>
-  <ol class="steps" aria-label="Pasos para imprimir">
+  <ol class="steps" :aria-label="t('editor.steps.label')">
     <li
       v-for="(step, index) in steps"
       :key="step"
@@ -22,7 +24,7 @@ const steps = ['Diseñar', 'Revisar', 'Imprimir y doblar']
         <UIcon v-if="index + 1 < current" name="i-lucide-check" aria-hidden="true" />
         <template v-else>{{ index + 1 }}</template>
       </span>
-      <span class="label">{{ step }}</span>
+      <span class="label">{{ t(`editor.steps.${step}`) }}</span>
     </li>
   </ol>
 </template>
