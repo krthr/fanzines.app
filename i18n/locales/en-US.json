@@ -51,7 +51,7 @@
     "hero": {
       "tag": "Free · No sign-up · 1 A4 sheet",
       "title": "One sheet.\nEight pages.\nYour zine.",
-      "lede": "Design each panel in your browser and download a PDF that is already imposed. Print, cut one line, fold. Ready to hand out in 10 minutes.",
+      "lede": "Lay out all eight pages in your browser and export a PDF ready to print. Make one cut down the middle, fold it up, and you have a pocket zine.",
       "cta": "Make my zine",
       "more": "See how it prints",
       "foldedAlt": "An unfolded zine on a table",
@@ -60,7 +60,7 @@
     },
     "how": {
       "title": "From the browser\nto the table.",
-      "intro": "No working out the page order. The editor lays out the sheet for you.",
+      "intro": "The editor arranges the pages on the A4 sheet automatically, including the upside-down top row.",
       "sheetLabel": "A4 sheet · it prints like this",
       "sheetAlt": "A4 sheet: on top, pages 6, 5, 4 and 3 upside down; below, back cover, front cover, 1 and 2.",
       "sheetNote": "the top row prints upside down · cut only the center line",
@@ -75,13 +75,13 @@
         },
         "print": {
           "title": "Print, cut, fold",
-          "text": "A home printer is enough. In two minutes you have a zine to give away or sell."
+          "text": "Any standard A4 printer works. Print at 100%, cut the center line, and fold it into a booklet."
         }
       }
     },
     "feature": {
       "eyebrow": "The editor",
-      "title": "Design on screen.\nFinish with paper\nand scissors.",
+      "title": "Built for a single\nA4 sheet.",
       "intro": "All eight pages in view, measurements in millimeters and a sheet review before you download.",
       "shotAlt": "The Fanzines editor: the eight pages as thumbnails on the left, the front cover on the canvas and the options of the selected image on the right",
       "list": {
@@ -97,7 +97,7 @@
       "items": {
         "need": {
           "question": "What do I need?",
-          "answer": "An A4 printer (yours at home or the one at the copy shop), a pair of scissors and a sheet of paper. That's it."
+          "answer": "An A4 printer (at home or at a print shop), a sheet of paper, and a pair of scissors."
         },
         "account": {
           "question": "Do I have to create an account?",
@@ -105,7 +105,7 @@
         },
         "blackAndWhite": {
           "question": "Can I print it in black and white?",
-          "answer": "Yes. The PDF prints just as well in color or in black and white, the way zines always have."
+          "answer": "Yes. The PDF prints cleanly in both color and black and white."
         },
         "fold": {
           "question": "How do I fold it?",
@@ -113,14 +113,14 @@
         },
         "origin": {
           "question": "Where does this fold come from?",
-          "answer": "It's a traditional fold, older than any app, and zine makers have been passing it along for ages. {pocketmod} was doing it on the web long before this site, and {bookbinder} has it too, among lots of other layouts. The tricky part is what printers call imposition: placing the pages on the sheet, some of them upside down, so they read in order once it's folded. That's the part Fanzines does for you."
+          "answer": "It's a traditional single-sheet fold that zine makers have used for decades. {pocketmod} brought it to the web years ago, and {bookbinder} includes it alongside other formats. To make the pages read in order after folding, half of them have to be placed upside down on the sheet (called imposition), which Fanzines handles automatically."
         }
       }
     },
     "cta": {
       "title": "Start with a cover\nand one image.",
       "button": "Make a zine for free",
-      "note": "It takes less time than a trip to the copy shop.",
+      "note": "Free, in your browser, no account needed.",
       "photoAlt": "A worktable with printed photos, a craft knife, a ruler and scissors"
     },
     "footer": {
@@ -232,15 +232,15 @@
       "title": "Drop the photo | Drop the {count} photos",
       "titleUnknown": "Drop your photos",
       "ruleTitle": "One on each page",
-      "ruleUnknown": "They start on {start} and continue in reading order. The thumbnail marks where they start.",
-      "ruleOne": "It goes on {start}. The thumbnail shows you where.",
-      "ruleMany": "They start on {start} and continue in order: {order}. The thumbnails show you where.",
+      "ruleUnknown": "Starts on {start} and fills pages in reading order.",
+      "ruleOne": "Will be placed on {start}.",
+      "ruleMany": "Starts on {start} and fills in order: {order}.",
       "ruleOverflow": "They start on {start} and continue in order: {order}. {fit}; the rest won't be added.",
       "fit": "Only 1 fits | Only {count} fit",
       "hint": "Drop it on another thumbnail to put it on that page. | Drop them on another thumbnail to start from that page."
     },
     "inspector": {
-      "empty": "Tap a photo, a text or a shape on the page and its options will show up here.",
+      "empty": "Select a photo, text, or shape on the page to edit its options here.",
       "image": "Image",
       "text": "Text",
       "selected": "selected",
@@ -322,7 +322,7 @@
       "introTouch": "Tap one to add it to {page}.",
       "add": "Add {layout} to {page}",
       "added": "Layout added",
-      "addedTo": "“{layout}” on {page}, on top of what was there.",
+      "addedTo": "Added “{layout}” to {page}.",
       "undo": "Undo",
       "remove": "Remove “{layout}”",
       "categories": {
@@ -360,7 +360,7 @@
           "issue": "NO. 01",
           "date": "{month}",
           "title": "POCKET\nNOTES",
-          "deck": "Stories, sketches and\nfragments from the week.",
+          "deck": "Notes, drawings and\nshort pieces.",
           "footer": "FREE COPY · PRINT & FOLD"
         },
         "cover-framed": {
@@ -379,7 +379,7 @@
         },
         "title-body": {
           "title": "Chapter title",
-          "body": "Write a short story, an essay, a recipe or a field note here. Double-click any text to edit it, and resize or restyle anything on the page.\n\nAdd a second paragraph, or drop a photo beside it.",
+          "body": "Double-click to edit this text. You can resize the block, change the font, or move it anywhere on the page.\n\nAdd another paragraph or drop a photo next to it.",
           "folio": "01"
         },
         "pull-quote": {
@@ -388,9 +388,9 @@
         },
         "two-part": {
           "firstTitle": "01 · First topic",
-          "firstBody": "A short paragraph, a question, an ingredient list or a verse for the top half.",
+          "firstBody": "Add your text for the top half of the page here.",
           "secondTitle": "02 · Second topic",
-          "secondBody": "Another section below, with the same margins and room to breathe."
+          "secondBody": "Use the bottom half for a second topic, notes, or a follow-up."
         },
         "colophon": {
           "title": "THANKS FOR READING",
@@ -416,7 +416,7 @@
         },
         "tomorrow-back": {
           "title": "TOMORROW",
-          "later": "PARKING LOT"
+          "later": "LATER"
         }
       }
     },
@@ -468,7 +468,7 @@
     "notFound": {
       "tag": "Error 404 · lost page",
       "title": "This page\ndoes not exist.",
-      "text": "Maybe the link is misspelled or the page was left off the sheet. Go back home or start your own zine.",
+      "text": "Check the address, go back home, or open the editor to start a zine.",
       "headTitle": "Page not found"
     },
     "generic": {
