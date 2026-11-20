@@ -16,6 +16,7 @@ import { useZineStore } from '~/composables/useZineStore'
 import ColorPicker from '~/components/zine/ColorPicker.vue'
 import PageLayoutPicker from '~/components/zine/PageLayoutPicker.vue'
 import {
+  canFitToPage,
   useZineElementActions,
   type HorizontalAlignment,
   type VerticalAlignment
@@ -232,6 +233,11 @@ function setPattern(kind: PatternKind) {
   patch({ pattern: kind, ...PATTERN_PRESETS[kind] })
 }
 
+// On paper, "Fill" and "Fit" don't crop anything, so they say what they do.
+function fitHint(action: 'fill' | 'fit') {
+  return selectedElement.value?.type === 'pattern' ? t(`editor.actions.${action}PaperHint`) : undefined
+}
+
 function strokeLabel(element: ZineElement) {
   return element.type === 'rect' || element.type === 'circle'
     ? { label: t('editor.inspector.border'), group: t('editor.inspector.borderLabel') }
@@ -258,26 +264,6 @@ function strokeLabel(element: ZineElement) {
           <span class="file-size"> · {{ selectedElement.naturalWidth }} × {{ selectedElement.naturalHeight }} px</span>
         </p>
       </header>
-
-      <div class="group">
-        <h3 class="group-label">
-          {{ t('editor.inspector.fitToPage') }}
-        </h3>
-        <div class="fit">
-          <button type="button" class="fit-action" @click="coverPage">
-            <UIcon name="i-lucide-expand" aria-hidden="true" />
-            {{ t('editor.actions.fill') }}
-          </button>
-          <button type="button" class="fit-action" @click="containPage">
-            <UIcon name="i-lucide-scan" aria-hidden="true" />
-            {{ t('editor.actions.fit') }}
-          </button>
-          <button type="button" class="fit-action" @click="centerOnPage">
-            <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
-            {{ t('editor.actions.center') }}
-          </button>
-        </div>
-      </div>
     </template>
 
     <template v-else-if="selectedElement.type === 'text'">
@@ -475,6 +461,27 @@ function strokeLabel(element: ZineElement) {
     </template>
 
     <template v-if="selectedElement">
+      <!-- Right under the header for a photo; under its own settings for paper. -->
+      <div v-if="canFitToPage(selectedElement)" class="group">
+        <h3 class="group-label">
+          {{ t('editor.inspector.fitToPage') }}
+        </h3>
+        <div class="fit">
+          <button type="button" class="fit-action" :title="fitHint('fill')" @click="coverPage">
+            <UIcon name="i-lucide-expand" aria-hidden="true" />
+            {{ t('editor.actions.fill') }}
+          </button>
+          <button type="button" class="fit-action" :title="fitHint('fit')" @click="containPage">
+            <UIcon name="i-lucide-scan" aria-hidden="true" />
+            {{ t('editor.actions.fit') }}
+          </button>
+          <button type="button" class="fit-action" @click="centerOnPage">
+            <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
+            {{ t('editor.actions.center') }}
+          </button>
+        </div>
+      </div>
+
       <!-- Images, shapes and patterns show their sliders up front; text keeps them under
            "Exact measurements". -->
       <div v-if="selectedElement.type !== 'text'" class="sliders">

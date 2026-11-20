@@ -33,7 +33,7 @@ import { useZineStore } from '~/composables/useZineStore'
 import { useZineImageImport, type ImageInputMethod } from '~/composables/useZineImageImport.client'
 import { useZineDragState } from '~/composables/useZineDragState.client'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
-import { useZineElementActions } from '~/composables/useZineElementActions.client'
+import { canFitToPage, useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { isLayoutDrag, usePageLayouts, type LayoutDropTarget } from '~/composables/usePageLayouts.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
@@ -1139,12 +1139,22 @@ defineExpose({
             :aria-label="t('editor.actions.label')"
             :style="toolbarStyle"
           >
-            <template v-if="selectedElement.type === 'image'">
-              <button type="button" class="tool has-label" @click="coverPage">
+            <template v-if="canFitToPage(selectedElement)">
+              <button
+                type="button"
+                class="tool has-label"
+                :title="selectedElement.type === 'pattern' ? t('editor.actions.fillPaperHint') : undefined"
+                @click="coverPage"
+              >
                 <UIcon name="i-lucide-expand" aria-hidden="true" />
                 {{ t('editor.actions.fill') }}
               </button>
-              <button type="button" class="tool has-label" @click="containPage">
+              <button
+                type="button"
+                class="tool has-label"
+                :title="selectedElement.type === 'pattern' ? t('editor.actions.fitPaperHint') : undefined"
+                @click="containPage"
+              >
                 <UIcon name="i-lucide-scan" aria-hidden="true" />
                 {{ t('editor.actions.fit') }}
               </button>

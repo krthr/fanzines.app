@@ -197,6 +197,8 @@
       "label": "Acciones de la selección",
       "fill": "Rellenar",
       "fit": "Encajar",
+      "fillPaperHint": "Cubre toda la página, de borde a borde",
+      "fitPaperHint": "Encaja dentro del margen seguro de 5 mm",
       "center": "Centrar",
       "forward": "Al frente",
       "backward": "Atrás",

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { ShapeKind } from '~/types/zine'
 import { PANEL_SIZE_LABEL, formatElementSize } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
-import { useZineElementActions } from '~/composables/useZineElementActions.client'
+import { canFitToPage, useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import AddShapeMenu from '~/components/zine/AddShapeMenu.vue'
 
@@ -48,7 +48,7 @@ const sizeLabel = computed(() => selectedElement.value
     </div>
 
     <div v-if="selectedElement" class="actions">
-      <template v-if="selectedElement.type === 'image'">
+      <template v-if="canFitToPage(selectedElement)">
         <button type="button" class="action" @click="coverPage">
           <UIcon name="i-lucide-expand" aria-hidden="true" />
           {{ t('editor.actions.fill') }}

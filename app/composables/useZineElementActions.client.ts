@@ -1,5 +1,5 @@
 import type { ImageElement, ZineElement } from '~/types/zine'
-import { PAGE_H, PAGE_W, getRotatedBounds } from '~/utils/zineLayout'
+import { PAGE_H, PAGE_W, SAFE_MARGIN, getRotatedBounds } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
@@ -62,6 +62,24 @@ function centeredImageBounds(element: ImageElement, fit: 'contain' | 'cover') {
   }
 }
 
+// Paper isn't cropped like a photo: "Fill" runs it edge to edge, and "Fit" keeps it
+// inside the 5 mm safe margin, where the printer can't cut it off.
+const PAPER_BOUNDS = {
+  cover: { x: 0, y: 0, width: PAGE_W, height: PAGE_H },
+  contain: { x: SAFE_MARGIN, y: SAFE_MARGIN, width: PAGE_W - SAFE_MARGIN * 2, height: PAGE_H - SAFE_MARGIN * 2 }
+}
+
+function pageFitBounds(element: ZineElement, fit: 'contain' | 'cover') {
+  if (element.type === 'image') return centeredImageBounds(element, fit)
+  if (element.type === 'pattern') return PAPER_BOUNDS[fit]
+  return null
+}
+
+// Photos and paper have "Fill" and "Fit".
+export function canFitToPage(element: ZineElement) {
+  return element.type === 'image' || element.type === 'pattern'
+}
+
 // Every action on the selected element, shared by the inspector, the floating
 // toolbar, the mobile bar and the keyboard.
 export function useZineElementActions() {
@@ -75,20 +93,18 @@ export function useZineElementActions() {
   } = useZineStore()
   const { trackZineEvent } = useZineAnalytics()
 
-  // "Rellenar": the image covers the whole page.
+  // "Rellenar": the image covers the whole page, and so does paper.
   function coverPage() {
     const element = selectedElement.value
-    if (element?.type !== 'image') return
-
-    updateElement(element.id, { ...centeredImageBounds(element, 'cover'), rotation: 0 })
+    const bounds = element && pageFitBounds(element, 'cover')
+    if (element && bounds) updateElement(element.id, { ...bounds, rotation: 0 })
   }
 
-  // "Encajar": the whole image fits inside the page.
+  // "Encajar": the whole image fits inside the page; paper, inside the safe margin.
   function containPage() {
     const element = selectedElement.value
-    if (element?.type !== 'image') return
-
-    updateElement(element.id, { ...centeredImageBounds(element, 'contain'), rotation: 0 })
+    const bounds = element && pageFitBounds(element, 'contain')
+    if (element && bounds) updateElement(element.id, { ...bounds, rotation: 0 })
   }
 
   function centerOnPage() {

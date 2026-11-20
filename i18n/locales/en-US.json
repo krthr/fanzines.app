@@ -197,6 +197,8 @@
       "label": "Selection actions",
       "fill": "Fill",
       "fit": "Fit",
+      "fillPaperHint": "Cover the whole page, edge to edge",
+      "fitPaperHint": "Fit inside the 5 mm safe margin",
       "center": "Center",
       "forward": "Forward",
       "backward": "Backward",
