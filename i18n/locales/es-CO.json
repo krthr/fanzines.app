@@ -93,7 +93,7 @@
     },
     "faq": {
       "title": "Antes de\nempezar.",
-      "sticker": "4 dudas, 4 respuestas",
+      "sticker": "5 dudas, 5 respuestas",
       "items": {
         "need": {
           "question": "¿Qué necesito?",
@@ -110,6 +110,10 @@
         "fold": {
           "question": "¿Cómo se dobla?",
           "answer": "El PDF trae guías de corte y doblez. Doblas a lo largo, cortas la línea central y cierras como un libro."
+        },
+        "origin": {
+          "question": "¿De dónde viene este doblez?",
+          "answer": "Es un doblez tradicional, más viejo que cualquier app, y la gente que hace fanzines se lo pasa de mano en mano desde hace rato. {pocketmod} ya lo hacía en internet mucho antes que esta página, y {bookbinder} también lo trae, entre muchos otros formatos. Lo difícil es lo que los impresores llaman imposición: acomodar las páginas en la hoja, algunas de cabeza, para que queden en orden al doblarla. Esa parte la hace Fanzines por ti."
         }
       }
     },
