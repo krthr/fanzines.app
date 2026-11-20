@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
@@ -6,7 +6,18 @@ import { defineConfig, devices } from '@playwright/test'
 const rootDir = dirname(fileURLToPath(import.meta.url))
 const port = Number(process.env.PLAYWRIGHT_PORT || 4173)
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${port}`
-const hasBuildOutput = existsSync(resolve(rootDir, '.output/nitro.json'))
+
+function hasNodePreviewBuild(): boolean {
+  const nitroMetaPath = resolve(rootDir, '.output/nitro.json')
+  if (!existsSync(nitroMetaPath)) return false
+
+  try {
+    const meta = JSON.parse(readFileSync(nitroMetaPath, 'utf8')) as { preset?: string }
+    return meta.preset === 'node-server'
+  } catch {
+    return false
+  }
+}
 
 export default defineConfig({
   testDir: './test/e2e',
@@ -42,14 +53,15 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: hasBuildOutput ? 'npm run preview' : 'npm run build && npm run preview',
+        command: hasNodePreviewBuild() ? 'npm run preview' : 'npm run build && npm run preview',
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         env: {
-          ...process.env,
           HOST: '127.0.0.1',
-          PORT: String(port)
+          PORT: String(port),
+          NITRO_HOST: '127.0.0.1',
+          NITRO_PORT: String(port)
         }
       }
 })
