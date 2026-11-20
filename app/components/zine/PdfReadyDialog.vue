@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLocalizedImage } from '~/composables/useLocalizedImage'
+import FoldGuide from '~/components/zine/FoldGuide.vue'
 import { useZineExport } from '~/composables/useZineExport.client'
 
 // Shown after a successful export: how to print and fold the sheet.
@@ -11,7 +11,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const localizedImage = useLocalizedImage()
 const { isExporting, exportError } = useZineExport()
 </script>
 
@@ -28,12 +27,7 @@ const { isExporting, exportError } = useZineExport()
     <template #content>
       <div class="ready">
         <div class="preview">
-          <img
-            :src="localizedImage('/images/fold-guide.webp')"
-            :alt="t('editor.ready.guideAlt')"
-            width="392"
-            height="294"
-          >
+          <FoldGuide class="guide" />
           <p class="file">
             <UIcon name="i-lucide-file-text" aria-hidden="true" />
             fanzine-a4.pdf
@@ -123,10 +117,9 @@ const { isExporting, exportError } = useZineExport()
   background: #fff;
 }
 
-.preview img {
+.guide {
   width: 100%;
   max-width: 392px;
-  height: auto;
 }
 
 .file {
@@ -322,7 +315,7 @@ const { isExporting, exportError } = useZineExport()
     border-bottom: 2px solid var(--ink-dark);
   }
 
-  .preview img {
+  .guide {
     max-width: 260px;
   }
 

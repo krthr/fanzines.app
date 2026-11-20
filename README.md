@@ -24,7 +24,7 @@ Fanzines is a web app for designing an **eight-panel** zine on a single foldable
   </tr>
   <tr>
     <td width="50%" align="center"><img src="public/images/making-table.webp" alt="A worktable with printed photos, a craft knife, a ruler and scissors"><br><sub>Worktable</sub></td>
-    <td width="50%" align="center"><img src="public/images/fold-guide-en.webp" alt="Hand-drawn instructions for folding, cutting and opening a zine"><br><sub>Folding guide</sub></td>
+    <td width="50%" align="center"><img src=".github/assets/fold-guide-en.webp" alt="Hand-drawn instructions for folding, cutting and opening a zine"><br><sub>Folding guide</sub></td>
   </tr>
 </table>
 
@@ -122,6 +122,7 @@ fanzines/
 │   │   ├── SheetPreview.vue        # Imposed A4 sheet (sidebar and review)
 │   │   ├── ReviewPanel.vue         # Review and PDF options
 │   │   ├── PdfReadyDialog.vue      # "Your zine is ready" dialog
+│   │   ├── FoldGuide.vue           # Folding guide, its template labelled from the imposition
 │   │   ├── FlowSteps.vue           # Design → Review → Print and fold steps
 │   │   └── ZineToggle.vue          # Toggle switch
 │   ├── composables/
@@ -156,7 +157,7 @@ fanzines/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
 │   └── images/                     # Photos and guides (webp); the ones with text have an -en twin
-├── .github/                        # CI, issue and PR templates, Dependabot
+├── .github/                        # CI, issue and PR templates, Dependabot, README images
 ├── nuxt.config.ts                  # Modules, SEO, languages, fonts, icons, routeRules
 ├── wrangler.jsonc                  # Cloudflare Workers config (domains)
 ├── DESIGN.md                       # Design system: colours, type, components
@@ -186,6 +187,8 @@ Anything that only affects how the editor looks (Design or Review mode, single p
 └─────┴─────┴─────┴─────┘
 ```
 
+The folding guide in the "Your zine is ready" dialog reads the same table: the drawing leaves its template empty and [`FoldGuide`](app/components/zine/FoldGuide.vue) writes the labels on it. Some copies of this order are still made by hand, so update them if it ever changes: this diagram, the sheet on the landing page (`sheetPanels` in [`index.vue`](app/pages/index.vue) and the `home.how.sheetAlt` message), and the guide in this README ([`.github/assets/fold-guide-en.webp`](.github/assets/fold-guide-en.webp)), which is a capture of `FoldGuide` on `/en`.
+
 ### Rendering
 
 The editor canvas uses **Konva** through `vue-konva`. Thumbnails and the facing page are drawn by [`renderPage.client.ts`](app/utils/renderPage.client.ts), which uses the same nodes as the sheet and the PDF. To export, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) mounts an offscreen `Stage` with every panel imposed and returns a canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) embeds it in a landscape A4 PDF with **jsPDF** at 300 DPI, adding the cut/fold guides and the safe margins when they're turned on.
@@ -197,7 +200,7 @@ The app is in Colombian Spanish (`es-CO`, the default) and US English (`en-US`),
 - **Text.** Everything users read is in [`i18n/locales/es-CO.json`](i18n/locales/es-CO.json) and [`i18n/locales/en-US.json`](i18n/locales/en-US.json), under the same keys. Components use `t('key')`. A message with `|` has a singular and a plural (`"Drop the photo | Drop the {count} photos"`), so a message can't contain a literal bar. A title over several lines is a single message with line breaks (`\n`), split by [`toLines`](app/utils/textLines.ts).
 - **Page names.** "Front cover", "Page 1" or "the back cover" come from [`useZinePageLabels`](app/composables/useZinePageLabels.ts), not from constants.
 - **Links.** Internal links use `<NuxtLinkLocale>` (or `useLocalePath`) to stay in the current language. [`LocaleSwitch`](app/components/LocaleSwitch.vue) goes to the same page in the other language; in the editor the zine is kept, because its state lives in `useState`.
-- **Images with text.** The editor screenshot, the folding guide and the social image have an English twin with an `-en` suffix (`fold-guide.webp` and `fold-guide-en.webp`). [`useLocalizedImage`](app/composables/useLocalizedImage.ts) picks the right one.
+- **Images with text.** The editor screenshot, the folding guide and the social image have an English twin with an `-en` suffix (`fold-guide.webp` and `fold-guide-en.webp`). [`useLocalizedImage`](app/composables/useLocalizedImage.ts) picks the right one. The folding guide's page labels aren't in the images (see [Geometry and imposition](#geometry-and-imposition)).
 - **No redirect based on the browser language.** Pages are prerendered and served before the Worker runs, so a redirect could only happen on the client, after the Spanish page has already painted, and Googlebot (which renders as `en-US`) would end up locked out of the Spanish pages. Search engines pick a version through `hreflang`, and people through the language link.
 
 To add a language: a new file in `i18n/locales/`, its entry in `i18n.locales`, its routes in `routeRules` and `nitro.prerender.routes` in [`nuxt.config.ts`](nuxt.config.ts), and the twin images. `LocaleSwitch` and `useLocalizedImage` assume there are two languages.

@@ -51,7 +51,7 @@ Text in a zine can take five colours, the swatches in `TEXT_COLOR_OPTIONS`: `#0b
 | Body | `--font-body` | `Outfit, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
 | Typewriter | `--font-type` | `"Special Elite", "Courier New", monospace` |
 
-Anton, Outfit and Special Elite are loaded through `@nuxt/fonts`. The fonts a zine can use are a separate list, `FONT_OPTIONS` (system fonts), and the editor shows each name in its own face.
+Anton, Outfit and Special Elite are loaded through `@nuxt/fonts`. The fonts a zine can use are a separate list, `FONT_OPTIONS` (system fonts), and the editor shows each name in its own face. Coming Soon is loaded as well, but it isn't a UI font: it is the handwriting of the folding guide, used only for the page labels `FoldGuide` writes on the drawing, in the drawing's ink.
 
 ### Scale
 
