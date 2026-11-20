@@ -5,241 +5,241 @@
 [![Vue](https://img.shields.io/badge/Vue-3-42b883?logo=vue.js&logoColor=white)](https://vuejs.org)
 [![Node](https://img.shields.io/badge/Node-26-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
-[![Licencia](https://img.shields.io/badge/Licencia-MIT-blue)](#licencia)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 
-> Editor en el navegador para crear, imprimir y exportar fanzines A4 plegables.
+> A browser-based editor to make, print and export foldable A4 zines.
 
-Fanzines es una aplicación web para diseñar un fanzine de **ocho paneles** sobre una hoja **A4** plegable: colocas textos e imágenes en cada panel, revisas el pliego completo y exportas un **PDF listo para imprimir, cortar y doblar**. Todo ocurre en el navegador; no se sube nada a ningún servidor.
+Fanzines is a web app for designing an **eight-panel** zine on a single foldable **A4** sheet: you place text and images on each panel, review the whole sheet and export a **PDF ready to print, cut and fold**. Everything happens in the browser; nothing is uploaded to a server.
 
-- **Web:** [fanzines.app](https://fanzines.app) · en inglés: [fanzines.app/en](https://fanzines.app/en)
-- **Editor:** [fanzines.app/editor](https://fanzines.app/editor) · en inglés: [fanzines.app/en/editor](https://fanzines.app/en/editor)
-- **Autor:** [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)
+- **Website:** [fanzines.app/en](https://fanzines.app/en) in English · [fanzines.app](https://fanzines.app) in Spanish
+- **Editor:** [fanzines.app/en/editor](https://fanzines.app/en/editor) in English · [fanzines.app/editor](https://fanzines.app/editor) in Spanish
+- **Author:** [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)
 
-## Capturas
+## Screenshots
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="public/images/folded-zine.webp" alt="Fanzine desplegado sobre una mesa"><br><sub>Fanzine desplegado</sub></td>
-    <td width="50%" align="center"><img src="public/images/hand-zine.webp" alt="Fanzine pequeño abierto en una mano"><br><sub>Fanzine en la mano</sub></td>
+    <td width="50%" align="center"><img src="public/images/folded-zine.webp" alt="An unfolded zine on a table"><br><sub>Unfolded zine</sub></td>
+    <td width="50%" align="center"><img src="public/images/hand-zine.webp" alt="A small zine held open in one hand"><br><sub>Zine in hand</sub></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="public/images/making-table.webp" alt="Mesa de trabajo con fotos impresas, cutter, regla y tijeras"><br><sub>Mesa de trabajo</sub></td>
-    <td width="50%" align="center"><img src="public/images/fold-guide.webp" alt="Instrucciones dibujadas a mano para doblar, cortar y abrir un fanzine"><br><sub>Guía de plegado</sub></td>
+    <td width="50%" align="center"><img src="public/images/making-table.webp" alt="A worktable with printed photos, a craft knife, a ruler and scissors"><br><sub>Worktable</sub></td>
+    <td width="50%" align="center"><img src="public/images/fold-guide-en.webp" alt="Hand-drawn instructions for folding, cutting and opening a zine"><br><sub>Folding guide</sub></td>
   </tr>
 </table>
 
-## Características
+## Features
 
-- **Editor de 8 paneles con imposición A4.** Portada, contraportada y 6 páginas interiores, colocadas automáticamente en la rejilla de impresión (4 columnas × 2 filas) con las rotaciones correctas para el plegado.
-- **Texto e imágenes.** Sube fotos (una a una o por lotes) **arrastrándolas al lienzo, a una miniatura de página o a la ventana**, o desde el botón de carga, y escribe directamente sobre el lienzo. Cada elemento se puede **mover, girar, escalar, ajustar opacidad, reordenar (z-order) y alinear** dentro del panel.
-- **Edición de texto en línea.** Haz clic en un cuadro de texto y escribe sobre el lienzo.
-- **Carga por lotes con auto-optimización.** Al importar varias imágenes, se reparten entre las páginas disponibles y se reducen automáticamente si superan los 2400 px en el lado mayor.
-- **Páginas en orden de lectura.** La barra lateral muestra miniaturas en vivo agrupadas como se leen (Portada, 1|2, 3|4, 5|6, Contraportada) y el lienzo puede enseñar la página enfrentada.
-- **Revisión del pliego.** Antes de descargar, el paso «Revisar» muestra la hoja A4 completa con los 8 paneles y las opciones del PDF.
-- **Exportación PDF a 300 DPI.** El PDF sale impuesto para una hoja A4 horizontal, con **guías de corte y doblez** opcionales y **márgenes de seguridad**.
-- **Guías de previsualización.** Activa/desactiva el margen seguro de 5 mm sobre el lienzo mientras diseñas.
-- **En español e inglés.** Español (Colombia) en `/` y `/editor`; inglés (Estados Unidos) en `/en` y `/en/editor`. Cada página enlaza a su versión en el otro idioma y el fanzine que estés haciendo se conserva al cambiar.
-- **Analítica opcional con PostHog.** Solo se activa si se define la clave de API; captura eventos de uso y errores, sin grabación de sesión.
-- **SEO listo.** Sitemap, robots, metadatos Open Graph/Twitter, `hreflang` por idioma y JSON-LD `WebApplication` mediante `@nuxtjs/seo` y `@nuxtjs/i18n`.
-- **Accesible y responsive.** Skip link, foco visible, `prefers-reduced-motion` y diseño adaptado a móvil.
+- **8-panel editor with A4 imposition.** Front cover, back cover and 6 inner pages, placed automatically on the print grid (4 columns × 2 rows) with the right rotations for folding.
+- **Text and images.** Upload photos (one at a time or in batches) by **dragging them onto the canvas, a page thumbnail or the window**, or with the upload button, and type right on the canvas. Every element can be **moved, rotated, scaled, faded, reordered (z-order) and aligned** within its panel.
+- **Inline text editing.** Click a text box and type on the canvas.
+- **Batch upload with auto-optimization.** When you import several images, they're spread across the free pages and scaled down automatically if their longest side is over 2400 px.
+- **Pages in reading order.** The sidebar shows live thumbnails grouped the way they're read (Front cover, 1|2, 3|4, 5|6, Back cover), and the canvas can show the facing page.
+- **Sheet review.** Before you download, the Review step shows the whole A4 sheet with all 8 panels and the PDF options.
+- **300 DPI PDF export.** The PDF comes out imposed on a landscape A4 sheet, with optional **cut and fold guides** and **safe margins**.
+- **Preview guides.** Turn the 5 mm safe margin on the canvas on or off while you design.
+- **In Spanish and English.** Colombian Spanish at `/` and `/editor`; US English at `/en` and `/en/editor`. Every page links to its version in the other language, and the zine you're working on is kept when you switch.
+- **Optional PostHog analytics.** Only turned on when the API key is set; it captures usage events and errors, with no session recording.
+- **SEO ready.** Sitemap, robots, Open Graph/Twitter metadata, `hreflang` per language and `WebApplication` JSON-LD through `@nuxtjs/seo` and `@nuxtjs/i18n`.
+- **Accessible and responsive.** Skip link, visible focus, `prefers-reduced-motion` and a mobile layout.
 
-## Tecnologías
+## Tech stack
 
-| Área | Herramienta |
+| Area | Tool |
 | --- | --- |
 | Framework | [Nuxt 4](https://nuxt.com) · [Vue 3](https://vuejs.org) |
 | UI | [@nuxt/ui](https://ui.nuxt.com) v4 · [Tailwind CSS](https://tailwindcss.com) v4 · [Iconify (lucide)](https://iconify.design) |
-| Lienzo / editor | [Konva](https://konvajs.org) · [vue-konva](https://github.com/konvajs/vue-konva) |
-| Exportación PDF | [jsPDF](https://github.com/parallax/jsPDF) |
-| Animaciones | [GSAP](https://gsap.com) + ScrollTrigger |
-| Imágenes / fuentes | [@nuxt/image](https://image.nuxt.com) · [@nuxt/fonts](https://fonts.nuxt.com) |
+| Canvas / editor | [Konva](https://konvajs.org) · [vue-konva](https://github.com/konvajs/vue-konva) |
+| PDF export | [jsPDF](https://github.com/parallax/jsPDF) |
+| Animation | [GSAP](https://gsap.com) + ScrollTrigger |
+| Images / fonts | [@nuxt/image](https://image.nuxt.com) · [@nuxt/fonts](https://fonts.nuxt.com) |
 | SEO | [@nuxtjs/seo](https://nuxtseo.com) |
-| Idiomas | [@nuxtjs/i18n](https://i18n.nuxtjs.org) |
-| Scripts / analítica | [@nuxt/scripts](https://scripts.nuxt.com) · [PostHog](https://posthog.com) |
-| Despliegue | [Cloudflare Workers](https://workers.cloudflare.com) · [Wrangler](https://developers.cloudflare.com/workers/wrangler/) |
+| Languages | [@nuxtjs/i18n](https://i18n.nuxtjs.org) |
+| Scripts / analytics | [@nuxt/scripts](https://scripts.nuxt.com) · [PostHog](https://posthog.com) |
+| Deployment | [Cloudflare Workers](https://workers.cloudflare.com) · [Wrangler](https://developers.cloudflare.com/workers/wrangler/) |
 
-## Requisitos
+## Requirements
 
-- **Node.js 26** (versión fijada en [`.nvmrc`](./.nvmrc)). Si usas `nvm`:
+- **Node.js 26** (pinned in [`.nvmrc`](./.nvmrc)). If you use `nvm`:
 
   ```bash
   nvm use
   ```
 
-## Instalación y desarrollo
+## Install and run
 
 ```bash
 npm ci
 npm run dev
 ```
 
-El servidor de desarrollo arranca en **http://localhost:3000**. El editor está en `/editor`.
+The dev server starts at **http://localhost:3000**. The editor is at `/editor`.
 
-### Variables de entorno
+### Environment variables
 
-PostHog es **opcional** y para desarrollar no hace falta. Para activar la analítica, copia [`.env.example`](.env.example) a `.env` y pon la clave pública:
+PostHog is **optional** and not needed for development. To turn analytics on, copy [`.env.example`](.env.example) to `.env` and set the public key:
 
 ```bash
-NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY=tu_clave_publica
+NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY=your_public_key
 ```
 
-Sin esta variable, la analítica permanece desactivada.
+Without this variable, analytics stay off.
 
 ## Scripts
 
-| Comando | Descripción |
+| Command | Description |
 | --- | --- |
-| `npm run dev` | Servidor de desarrollo en `http://localhost:3000` |
-| `npm run build` | Compila la app para producción (salida en `.output/`) |
-| `npm run generate` | Genera el sitio estático |
-| `npm run preview` | Previsualiza localmente el build de producción |
-| `npm run typecheck` | Comprueba los tipos con `vue-tsc` |
-| `npm run analyze` | Analiza el bundle de la app sin servir |
-| `npm run postinstall` | Prepara tipos de Nuxt (`nuxt prepare`, se ejecuta tras `npm install`) |
+| `npm run dev` | Dev server at `http://localhost:3000` |
+| `npm run build` | Builds the app for production (output in `.output/`) |
+| `npm run generate` | Generates the static site |
+| `npm run preview` | Previews the production build locally |
+| `npm run typecheck` | Type-checks with `vue-tsc` |
+| `npm run analyze` | Analyzes the app bundle without serving it |
+| `npm run postinstall` | Prepares Nuxt types (`nuxt prepare`, runs after `npm install`) |
 
-## Estructura del proyecto
+## Project structure
 
 ```
 fanzines/
 ├── app/
-│   ├── app.vue                     # Raíz: UApp + JSON-LD WebApplication
-│   ├── app.config.ts               # Tema @nuxt/ui (colores y estilo de los avisos)
-│   ├── error.vue                   # Página de error
-│   ├── assets/css/main.css         # Tokens de marca (landing, error y editor) y piezas base del editor
+│   ├── app.vue                     # Root: UApp + WebApplication JSON-LD
+│   ├── app.config.ts               # @nuxt/ui theme (colours and toast style)
+│   ├── error.vue                   # Error page
+│   ├── assets/css/main.css         # Brand tokens (landing, error and editor) and base editor pieces
 │   ├── components/
-│   │   └── LocaleSwitch.vue        # Enlace a la misma página en el otro idioma
+│   │   └── LocaleSwitch.vue        # Link to the same page in the other language
 │   ├── components/zine/
-│   │   ├── ZineEditor.client.vue   # Editor: barra superior, modos Diseñar y Revisar, versión móvil
-│   │   ├── EditorBrand.vue         # Marca y H1, compartidos con el fallback prerenderizado
-│   │   ├── PagesSidebar.vue        # Barra de páginas: pliegos de lectura o vista del pliego
-│   │   ├── PageStrip.vue           # Tira de páginas (móvil)
-│   │   ├── PageMini.vue            # Miniatura de una página
-│   │   ├── ZinePageRender.vue      # Render en vivo de una página (miniaturas y página enfrentada)
-│   │   ├── PageCanvas.vue          # Lienzo Konva: página activa, página enfrentada y barra flotante
-│   │   ├── DropOverlay.vue         # Aviso al arrastrar archivos sobre el editor
-│   │   ├── ElementInspector.vue    # Panel de propiedades del elemento
-│   │   ├── MobileBar.vue           # Barra de acciones (móvil)
-│   │   ├── SheetPreview.vue        # Pliego A4 impuesto (barra lateral y revisión)
-│   │   ├── ReviewPanel.vue         # Revisión y opciones del PDF
-│   │   ├── PdfReadyDialog.vue      # Diálogo «Tu fanzine está listo»
-│   │   ├── FlowSteps.vue           # Pasos Diseñar → Revisar → Imprimir y doblar
-│   │   └── ZineToggle.vue          # Interruptor
+│   │   ├── ZineEditor.client.vue   # Editor: top bar, Design and Review modes, mobile layout
+│   │   ├── EditorBrand.vue         # Brand and H1, shared with the prerendered fallback
+│   │   ├── PagesSidebar.vue        # Pages sidebar: reading spreads or the sheet view
+│   │   ├── PageStrip.vue           # Page strip (mobile)
+│   │   ├── PageMini.vue            # Page thumbnail
+│   │   ├── ZinePageRender.vue      # Live render of one page (thumbnails and facing page)
+│   │   ├── PageCanvas.vue          # Konva canvas: active page, facing page and floating toolbar
+│   │   ├── DropOverlay.vue         # Notice shown while files are dragged over the editor
+│   │   ├── ElementInspector.vue    # Element properties panel
+│   │   ├── MobileBar.vue           # Action bar (mobile)
+│   │   ├── SheetPreview.vue        # Imposed A4 sheet (sidebar and review)
+│   │   ├── ReviewPanel.vue         # Review and PDF options
+│   │   ├── PdfReadyDialog.vue      # "Your zine is ready" dialog
+│   │   ├── FlowSteps.vue           # Design → Review → Print and fold steps
+│   │   └── ZineToggle.vue          # Toggle switch
 │   ├── composables/
-│   │   ├── useZineStore.ts                  # Estado del fanzine (useState)
-│   │   ├── useZineEditorView.client.ts      # Estado de la vista: modo, página enfrentada, páginas con contenido
-│   │   ├── useZineElementActions.client.ts  # Acciones sobre el elemento seleccionado
-│   │   ├── useZineExport.client.ts          # Exportación del PDF y su estado
-│   │   ├── useZineImageImport.client.ts     # Importación de imágenes
-│   │   ├── usePageTileDrop.client.ts        # Soltar archivos sobre una miniatura
-│   │   ├── useZineDragState.client.ts       # Estado de arrastre
-│   │   ├── useZineAnalytics.client.ts       # Eventos PostHog
+│   │   ├── useZineStore.ts                  # Zine state (useState)
+│   │   ├── useZineEditorView.client.ts      # View state: mode, facing page, pages with content
+│   │   ├── useZineElementActions.client.ts  # Actions on the selected element
+│   │   ├── useZineExport.client.ts          # PDF export and its state
+│   │   ├── useZineImageImport.client.ts     # Image import
+│   │   ├── usePageTileDrop.client.ts        # Dropping files on a thumbnail
+│   │   ├── useZineDragState.client.ts       # Drag state
+│   │   ├── useZineAnalytics.client.ts       # PostHog events
 │   │   ├── useTrackedZinePageSelection.client.ts
-│   │   ├── useZinePageLabels.ts             # Nombres de las páginas en el idioma actual
-│   │   └── useLocalizedImage.ts             # Imágenes con texto: la versión del idioma actual
+│   │   ├── useZinePageLabels.ts             # Page names in the current language
+│   │   └── useLocalizedImage.ts             # Images with text: the current language's version
 │   ├── utils/
-│   │   ├── zineLayout.ts            # Geometría A4, imposición, orden de lectura y conversión a mm y pt
-│   │   ├── renderZine.client.ts     # Render de elementos a Konva
-│   │   ├── renderPage.client.ts     # Render de una página a canvas
-│   │   ├── renderSheet.client.ts    # Render del pliego completo a canvas
-│   │   ├── exportPdf.client.ts      # Generación del PDF con jsPDF
-│   │   ├── zineImageCache.ts        # Caché de imágenes HTML
-│   │   └── textLines.ts             # Títulos de varias líneas a partir de un mensaje
-│   ├── types/zine.ts               # Tipos: PageId, ZineElement, ZineState…
+│   │   ├── zineLayout.ts            # A4 geometry, imposition, reading order and conversion to mm and pt
+│   │   ├── renderZine.client.ts     # Renders elements to Konva
+│   │   ├── renderPage.client.ts     # Renders one page to a canvas
+│   │   ├── renderSheet.client.ts    # Renders the whole sheet to a canvas
+│   │   ├── exportPdf.client.ts      # PDF generation with jsPDF
+│   │   ├── zineImageCache.ts        # HTML image cache
+│   │   └── textLines.ts             # Multi-line titles from a single message
+│   ├── types/zine.ts               # Types: PageId, ZineElement, ZineState…
 │   ├── plugins/posthog-errors.client.ts
 │   └── pages/
 │       ├── index.vue               # Landing
-│       └── editor.vue              # Página del editor y su fallback prerenderizado
+│       └── editor.vue              # Editor page and its prerendered fallback
 ├── i18n/locales/
-│   ├── es-CO.json                  # Textos en español (idioma por defecto)
-│   └── en-US.json                  # Textos en inglés
+│   ├── es-CO.json                  # Spanish strings (default language)
+│   └── en-US.json                  # English strings
 ├── public/
 │   ├── favicon.ico · favicon.svg
 │   ├── _robots.txt
-│   └── images/                     # Fotos y guías (webp); las que llevan texto tienen gemela -en
-├── .github/                        # CI, plantillas de issues y PR, Dependabot
-├── nuxt.config.ts                  # Módulos, SEO, idiomas, fuentes, iconos, routeRules
-├── wrangler.jsonc                  # Configuración de Cloudflare Workers (dominios)
-├── DESIGN.md                       # Sistema de diseño: colores, tipografía, componentes
-├── CONTRIBUTING.md                 # Guía para contribuir (en inglés)
-├── .env.example                    # Variables de entorno (todas opcionales)
+│   └── images/                     # Photos and guides (webp); the ones with text have an -en twin
+├── .github/                        # CI, issue and PR templates, Dependabot
+├── nuxt.config.ts                  # Modules, SEO, languages, fonts, icons, routeRules
+├── wrangler.jsonc                  # Cloudflare Workers config (domains)
+├── DESIGN.md                       # Design system: colours, type, components
+├── CONTRIBUTING.md                 # Contributor guide
+├── .env.example                    # Environment variables (all optional)
 ├── .nvmrc                          # Node 26
 └── package.json
 ```
 
-## Arquitectura
+## Architecture
 
-### Estado del fanzine
+### Zine state
 
-El estado vive en `useState<ZineState>` a través de [`useZineStore`](app/composables/useZineStore.ts). Contiene la página seleccionada, el elemento seleccionado, el mapa de elementos y el orden por página. Las imágenes se guardan como `blob:` URLs y se liberan (`URL.revokeObjectURL`) al eliminarlas o reiniciar.
+State lives in `useState<ZineState>` through [`useZineStore`](app/composables/useZineStore.ts). It holds the selected page, the selected element, the element map and the order on each page. Images are stored as `blob:` URLs and released (`URL.revokeObjectURL`) when they're deleted or the zine is reset.
 
-Lo que solo afecta a cómo se ve el editor (modo Diseñar o Revisar, página sola o doble, pestaña de la barra lateral, diálogo del PDF) vive aparte, en [`useZineEditorView`](app/composables/useZineEditorView.client.ts), y no forma parte del fanzine. «Revisar» es un modo dentro de `/editor`, no otra ruta, porque el fanzine solo existe en memoria.
+Anything that only affects how the editor looks (Design or Review mode, single page or spread, the sidebar tab, the PDF dialog) lives separately, in [`useZineEditorView`](app/composables/useZineEditorView.client.ts), and isn't part of the zine. Review is a mode inside `/editor`, not a separate route, because the zine only exists in memory.
 
-### Geometría e imposición
+### Geometry and imposition
 
-[`zineLayout.ts`](app/utils/zineLayout.ts) define el formato A4 (297 × 210 mm) y el mapeo de las 8 páginas a una rejilla de 4 columnas × 2 filas. Un panel mide 74,25 × 105 mm; el estado trabaja en unidades de página (`PAGE_W` = 1000) y la interfaz siempre muestra milímetros (y puntos para el tamaño del texto). Los paneles superiores van rotados 180° para que, tras imprimir por una cara, cortar la línea central y plegar, el fanzine se lea en orden:
+[`zineLayout.ts`](app/utils/zineLayout.ts) defines the A4 format (297 × 210 mm) and maps the 8 pages onto a grid of 4 columns × 2 rows. A panel is 74.25 × 105 mm; state works in page units (`PAGE_W` = 1000) and the interface always shows millimetres (and points for type size). The top panels are rotated 180° so that, after printing on one side, cutting the center line and folding, the zine reads in order:
 
 ```
 ┌─────┬─────┬─────┬─────┐
-│  6  │  5  │  4  │  3  │   ← rotados 180°
+│  6  │  5  │  4  │  3  │   ← rotated 180°
 ├─────┼─────┼─────┼─────┤
-│Contra│Port.│  1  │  2 │   ← sin rotar
+│Back │Front│  1  │  2  │   ← upright
 └─────┴─────┴─────┴─────┘
 ```
 
-### Renderizado
+### Rendering
 
-El lienzo del editor usa **Konva** vía `vue-konva`. Las miniaturas y la página enfrentada se dibujan con [`renderPage.client.ts`](app/utils/renderPage.client.ts), que usa los mismos nodos que el pliego y el PDF. Para exportar, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) monta un `Stage` fuera de pantalla con todos los paneles impuestos y devuelve un canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) lo incrusta en un PDF A4 horizontal con **jsPDF** a 300 DPI, añadiendo las guías de corte/doblez y los márgenes de seguridad si están activados.
+The editor canvas uses **Konva** through `vue-konva`. Thumbnails and the facing page are drawn by [`renderPage.client.ts`](app/utils/renderPage.client.ts), which uses the same nodes as the sheet and the PDF. To export, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) mounts an offscreen `Stage` with every panel imposed and returns a canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) embeds it in a landscape A4 PDF with **jsPDF** at 300 DPI, adding the cut/fold guides and the safe margins when they're turned on.
 
-### Idiomas
+### Languages
 
-La app está en español de Colombia (`es-CO`, el idioma por defecto) y en inglés de Estados Unidos (`en-US`), con [`@nuxtjs/i18n`](https://i18n.nuxtjs.org). El idioma es parte de la URL: el español conserva las rutas de siempre (`/`, `/editor`) y el inglés vive bajo `/en` (`/en`, `/en/editor`).
+The app is in Colombian Spanish (`es-CO`, the default) and US English (`en-US`), with [`@nuxtjs/i18n`](https://i18n.nuxtjs.org). The language is part of the URL: Spanish keeps the original routes (`/`, `/editor`) and English lives under `/en` (`/en`, `/en/editor`).
 
-- **Textos.** Todo lo que se lee está en [`i18n/locales/es-CO.json`](i18n/locales/es-CO.json) y [`i18n/locales/en-US.json`](i18n/locales/en-US.json), con las mismas claves. En los componentes se usa `t('clave')`. Un texto con `|` tiene singular y plural (`"Suelta la foto | Suelta las {count} fotos"`), así que una barra literal no puede ir en un mensaje. Un título de varias líneas es un solo mensaje con saltos de línea (`\n`), que [`toLines`](app/utils/textLines.ts) reparte.
-- **Nombres de las páginas.** «Portada», «Página 1» o «la contraportada» salen de [`useZinePageLabels`](app/composables/useZinePageLabels.ts), no de constantes.
-- **Enlaces.** Los enlaces internos usan `<NuxtLinkLocale>` (o `useLocalePath`) para quedarse en el idioma actual. [`LocaleSwitch`](app/components/LocaleSwitch.vue) lleva a la misma página en el otro idioma; en el editor el fanzine se conserva, porque el estado vive en `useState`.
-- **Imágenes con texto.** La captura del editor, la guía de plegado y la imagen para redes tienen una gemela en inglés con el sufijo `-en` (`fold-guide.webp` y `fold-guide-en.webp`). [`useLocalizedImage`](app/composables/useLocalizedImage.ts) elige la que toca.
-- **Sin redirección por idioma del navegador.** Las páginas están prerenderizadas y se sirven antes de que se ejecute el Worker, así que solo se podría redirigir en el cliente, con la página en español ya pintada, y Googlebot (que renderiza como `en-US`) acabaría fuera de las páginas en español. Los buscadores eligen la versión con `hreflang` y las personas con el enlace de idioma.
+- **Text.** Everything users read is in [`i18n/locales/es-CO.json`](i18n/locales/es-CO.json) and [`i18n/locales/en-US.json`](i18n/locales/en-US.json), under the same keys. Components use `t('key')`. A message with `|` has a singular and a plural (`"Drop the photo | Drop the {count} photos"`), so a message can't contain a literal bar. A title over several lines is a single message with line breaks (`\n`), split by [`toLines`](app/utils/textLines.ts).
+- **Page names.** "Front cover", "Page 1" or "the back cover" come from [`useZinePageLabels`](app/composables/useZinePageLabels.ts), not from constants.
+- **Links.** Internal links use `<NuxtLinkLocale>` (or `useLocalePath`) to stay in the current language. [`LocaleSwitch`](app/components/LocaleSwitch.vue) goes to the same page in the other language; in the editor the zine is kept, because its state lives in `useState`.
+- **Images with text.** The editor screenshot, the folding guide and the social image have an English twin with an `-en` suffix (`fold-guide.webp` and `fold-guide-en.webp`). [`useLocalizedImage`](app/composables/useLocalizedImage.ts) picks the right one.
+- **No redirect based on the browser language.** Pages are prerendered and served before the Worker runs, so a redirect could only happen on the client, after the Spanish page has already painted, and Googlebot (which renders as `en-US`) would end up locked out of the Spanish pages. Search engines pick a version through `hreflang`, and people through the language link.
 
-Para añadir un idioma: un archivo nuevo en `i18n/locales/`, su entrada en `i18n.locales` y sus rutas en `routeRules` y `nitro.prerender.routes` de [`nuxt.config.ts`](nuxt.config.ts), y las imágenes gemelas. `LocaleSwitch` y `useLocalizedImage` dan por hecho que hay dos idiomas.
+To add a language: a new file in `i18n/locales/`, its entry in `i18n.locales`, its routes in `routeRules` and `nitro.prerender.routes` in [`nuxt.config.ts`](nuxt.config.ts), and the twin images. `LocaleSwitch` and `useLocalizedImage` assume there are two languages.
 
-### SEO y rutas
+### SEO and routes
 
-`@nuxtjs/seo` gestiona sitemap, robots y metadatos. En [`nuxt.config.ts`](nuxt.config.ts), `routeRules` prerenderiza `/`, `/editor`, `/en` y `/en/editor`, y `site` define la URL canónica `https://fanzines.app`. Cada página declara su idioma (`<html lang>`), su URL canónica, `og:locale` y un `hreflang` por idioma desde [`app.vue`](app/app.vue), que también inyecta el JSON-LD `WebApplication`. `sitemap.xml` es uno solo, con las cuatro URL y sus alternativas.
+`@nuxtjs/seo` handles the sitemap, robots and metadata. In [`nuxt.config.ts`](nuxt.config.ts), `routeRules` prerenders `/`, `/editor`, `/en` and `/en/editor`, and `site` sets the canonical URL `https://fanzines.app`. Each page declares its language (`<html lang>`), its canonical URL, `og:locale` and one `hreflang` per language from [`app.vue`](app/app.vue), which also injects the `WebApplication` JSON-LD. There's a single `sitemap.xml`, with the four URLs and their alternates.
 
-### Analítica
+### Analytics
 
-Los eventos se capturan solo si `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` está definida. [`useZineAnalytics.client.ts`](app/composables/useZineAnalytics.client.ts) envía eventos como `zine_pdf_export_started`, `zine_images_uploaded`, etc., cada uno con el idioma (`locale`), y [`posthog-errors.client.ts`](app/plugins/posthog-errors.client.ts) captura excepciones no controladas.
+Events are only captured when `NUXT_PUBLIC_SCRIPTS_POSTHOG_API_KEY` is set. [`useZineAnalytics.client.ts`](app/composables/useZineAnalytics.client.ts) sends events such as `zine_pdf_export_started` and `zine_images_uploaded`, each with the language (`locale`), and [`posthog-errors.client.ts`](app/plugins/posthog-errors.client.ts) captures unhandled exceptions.
 
-## Despliegue
+## Deployment
 
-El proyecto se despliega en **Cloudflare Workers** con [`wrangler.jsonc`](wrangler.jsonc) (dominios personalizados `fanzines.app` y `www.fanzines.app`, flag `nodejs_compat`, observabilidad activada).
+The project is deployed to **Cloudflare Workers** with [`wrangler.jsonc`](wrangler.jsonc) (custom domains `fanzines.app` and `www.fanzines.app`, the `nodejs_compat` flag, observability on).
 
-El Worker de producción es `fanzines-app` y lo despliega **Workers Builds** en cada push a `main` (las demás ramas de este repositorio suben versiones de preview; los PR desde forks no, y por eso el [CI](.github/workflows/ci.yml) compila el Worker en cada PR). El `name` de `wrangler.jsonc` tiene que coincidir con ese nombre: si no, un `wrangler deploy` manual crearía otro Worker y le movería los dominios.
+The production Worker is `fanzines-app`, and **Workers Builds** deploys it on every push to `main` (other branches in this repository upload preview versions; pull requests from forks don't, which is why [CI](.github/workflows/ci.yml) builds the Worker on every pull request). The `name` in `wrangler.jsonc` has to match that name: otherwise a manual `wrangler deploy` would create a second Worker and move the domains to it.
 
-La URL canónica es `https://fanzines.app`. Las redirecciones se configuran en la zona de Cloudflare, no en el código, porque las páginas prerenderizadas y los archivos estáticos se sirven antes de que se ejecute el Worker:
+The canonical URL is `https://fanzines.app`. Redirects are set up in the Cloudflare zone, not in code, because prerendered pages and static files are served before the Worker runs:
 
-- **Redirect Rule** (Rules → Redirect Rules): `www.fanzines.app` y `http://fanzines.app` → `https://fanzines.app` + ruta, 301, conservando la query string, en un solo salto.
-- **Always Use HTTPS** y **HSTS** (SSL/TLS → Edge Certificates).
+- **Redirect Rule** (Rules → Redirect Rules): `www.fanzines.app` and `http://fanzines.app` → `https://fanzines.app` + path, 301, keeping the query string, in a single hop.
+- **Always Use HTTPS** and **HSTS** (SSL/TLS → Edge Certificates).
 
-En local, `npm run build` usa el preset de Node. Para compilar exactamente lo que despliega Workers Builds (el preset `cloudflare_module` y la configuración de Wrangler que genera Nitro, con el binding `ASSETS`), define `WORKERS_CI`:
+Locally, `npm run build` uses the Node preset. To build exactly what Workers Builds deploys (the `cloudflare_module` preset and the Wrangler config Nitro generates, with the `ASSETS` binding), set `WORKERS_CI`:
 
 ```bash
 WORKERS_CI=1 npm run build
-npx wrangler dev      # probar el Worker en local
-npx wrangler deploy   # despliegue manual; normalmente no hace falta
+npx wrangler dev      # try the Worker locally
+npx wrangler deploy   # manual deploy; usually not needed
 ```
 
-Sin `WORKERS_CI`, `npx wrangler deploy` falla con «Missing entry-point», y pasarle la ruta del Worker a mano despliega sin el binding `ASSETS` ni los flags que añade Nitro.
+Without `WORKERS_CI`, `npx wrangler deploy` fails with "Missing entry-point", and passing it the Worker path by hand deploys without the `ASSETS` binding or the flags Nitro adds.
 
-Consulta la [documentación de despliegue de Nuxt](https://nuxt.com/docs/getting-started/deployment) para otros destinos.
+See the [Nuxt deployment docs](https://nuxt.com/docs/getting-started/deployment) for other targets.
 
-## Contribuir
+## Contributing
 
-Las contribuciones son bienvenidas, en español o en inglés. La guía está en [`CONTRIBUTING.md`](CONTRIBUTING.md) (en inglés): cómo preparar el entorno, las convenciones de código, textos y diseño, cómo comprobar un cambio y cómo abrir un PR. Para cambios grandes, abre antes un issue.
+Contributions are welcome, in English or Spanish. [`CONTRIBUTING.md`](CONTRIBUTING.md) covers setting up, the code, text and design conventions, how to check a change and how to open a pull request. For big changes, open an issue first.
 
-- [Código de conducta](CODE_OF_CONDUCT.md)
-- [Política de seguridad](SECURITY.md): los problemas de seguridad se reportan en privado, no en un issue.
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security policy](SECURITY.md): report security problems privately, not in an issue.
 
-## Licencia
+## License
 
 [MIT](./LICENSE) © 2026 [Wilson Tovar](https://krthr.co) · [Instagram @wilson__tovar](https://www.instagram.com/wilson__tovar/)

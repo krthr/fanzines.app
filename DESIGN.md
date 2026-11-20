@@ -6,6 +6,8 @@ Fanzines feels like a handmade print table translated into a browser: a near-bla
 
 The landing, the error page and the editor share one palette and one set of fonts. The landing is the loud poster; the editor is the same table with the volume turned down so the page being designed is the brightest thing on screen.
 
+Interface labels in this document are quoted from the English UI (`i18n/locales/en-US.json`). The Spanish UI, the default, has the same keys in `es-CO.json`.
+
 ## 2. Color
 
 ### Palette
@@ -35,7 +37,7 @@ Text in a zine can take five colours, the swatches in `TEXT_COLOR_OPTIONS`: `#0b
 ### Rules
 
 - Cream paper and near-black ink carry the contrast. Orange and acid are functional: actions, selection, the current page, focus.
-- One orange action per screen: "Revisar e imprimir" while designing, "Descargar PDF" in review.
+- One orange action per screen: "Review and print" while designing, "Download PDF" in review.
 - Acid marks where you are (current page, current step, selected font, a switch that is on). It is never used for plain decoration in the editor.
 - Colours stay flat. No gradients, no texture overlays.
 
@@ -56,8 +58,8 @@ Anton, Outfit and Special Elite are loaded through `@nuxt/fonts`. The fonts a zi
 | Level | Size | Weight | Line Height | Usage |
 | --- | --- | --- | --- | --- |
 | Display (landing) | `clamp()` from `2.25rem` to `6.5rem` | 400 (Anton) | 0.95 | Hero and section headlines, uppercase |
-| Display (dialog) | `52px` | 400 (Anton) | 0.95 | "Tu fanzine está listo." |
-| Panel heading | `18px`, tracking `1px` | 400 (Anton) | `27px` | PÁGINAS, IMAGEN, TEXTO, REVISIÓN, uppercase |
+| Display (dialog) | `52px` | 400 (Anton) | 0.95 | "Your zine is ready." |
+| Panel heading | `18px`, tracking `1px` | 400 (Anton) | `27px` | PAGES, IMAGE, TEXT, REVIEW, uppercase |
 | Title | `16px` | 700 | `20px` | Editor name, page name |
 | Body (landing) | `15px` to `22px` | 400 to 700 | 1.5 | Landing copy |
 | Control | `13px` to `15px` | 600 to 700 | `16px` to `19px` | Buttons, switches, labels |
@@ -67,8 +69,8 @@ Anton, Outfit and Special Elite are loaded through `@nuxt/fonts`. The fonts a zi
 ### Rules
 
 - Display type is uppercase Anton. In markup it is written in sentence case and uppercased in CSS.
-- Interface text does not go below `12px` (the labels in the mobile bars). The only smaller text is the annotation on the sheet: the "corte" tag and the panel labels.
-- Measurements are shown in millimetres (positions and sizes) and points (type size), never in the store's page units. They are the page's nominal size, 74.25 × 105 mm per panel: with "Margen seguro de 5 mm" on, the PDF scales the sheet to about 95%, so everything prints that much smaller.
+- Interface text does not go below `12px` (the labels in the mobile bars). The only smaller text is the annotation on the sheet: the "cut" tag and the panel labels.
+- Measurements are shown in millimetres (positions and sizes) and points (type size), never in the store's page units. They are the page's nominal size, 74.25 × 105 mm per panel: with "5 mm safe margin" on, the PDF scales the sheet to about 95%, so everything prints that much smaller.
 
 ## 4. Spacing & Layout
 
@@ -103,7 +105,7 @@ Desktop, from `1024px`:
 
 Below `1024px` the editor shows one page at a time: top bar `56px`, page header `44px`, the page, the context bar, and the page strip. From `768px` the guides switch sits in the top bar.
 
-A panel is 74.25 × 105 mm. On the canvas a single page ("Página") is 440 × 622 px at 1440 × 900, and a spread ("Doble") is two pages of 372 × 526 px with a 2px gutter; both scale with the window.
+A panel is 74.25 × 105 mm. On the canvas a single page ("Page") is 440 × 622 px at 1440 × 900, and a spread ("Spread") is two pages of 372 × 526 px with a 2px gutter; both scale with the window.
 
 ### Rules
 
@@ -115,7 +117,7 @@ A panel is 74.25 × 105 mm. On the canvas a single page ("Página") is 440 × 62
 
 ### Landing
 
-- **Site header**: brand link with the scissors icon, section links, and "Abrir editor".
+- **Site header**: brand link with the scissors icon, section links, and "Open editor".
 - **Button**: primary is orange with a 4px `--orange-deep` shadow and lifts on hover; dark is `--ink-dark` with a cream border; a text link carries an arrow.
 - **Photo**: bordered in cream, rotated a few degrees, zooms slightly on hover.
 - **Sticker**: acid background, typewriter face, rotated, with a small hard shadow.
@@ -124,19 +126,19 @@ A panel is 74.25 × 105 mm. On the canvas a single page ("Página") is 440 × 62
 
 ### Editor
 
-- **Top bar**: brand block (`EditorBrand`, shared with the prerendered fallback), "+ Texto" and "+ Imagen", eight progress ticks in reading order, and the orange action. In review the add buttons give way to the stepper Diseñar → Revisar → Imprimir y doblar.
-- **Pages sidebar**: "Lectura" lists the reading spreads (Portada alone on the right, 1|2, 3|4, 5|6, Contraportada alone on the left) with live miniatures; "Pliego" shows the imposed sheet. The current page has a 3px acid frame and its spread a raised background. The reset button is an icon in the header.
-- **Canvas**: the page on white with a 10px `--orange-deep` shadow. "Doble" adds the facing page at 68% opacity, read-only; clicking it selects it. The covers have no facing page. "Guías" draws the 5 mm safe margin.
-- **Selection**: 2px orange frame, white handles with an orange stroke (12px, 18px on touch), a round handle to rotate. A paper toolbar floats above (Rellenar, Encajar, Al frente, Atrás, Eliminar; text has the last three) and hides while dragging, transforming or editing text. An orange tag below gives width × height in mm.
-- **Empty page**: a paper card with "Suelta tus fotos", "Elegir fotos" and a link to start with text.
-- **Inspector**: cream panel. An image has Ajustar a la página (Rellenar, Encajar, Centrar), Opacidad, Giro and order. Text has the font list, size in points, style, alignment, five colour swatches, order and delete. "Medidas exactas" is a disclosure, closed by default, with X, Y, Ancho and Alto in mm and the page alignment buttons (and, for text, Opacidad and Giro).
+- **Top bar**: brand block (`EditorBrand`, shared with the prerendered fallback), "+ Text" and "+ Image", eight progress ticks in reading order, and the orange action. In review the add buttons give way to the stepper Design → Review → Print and fold.
+- **Pages sidebar**: "Reading" lists the reading spreads (Front cover alone on the right, 1|2, 3|4, 5|6, Back cover alone on the left) with live miniatures; "Sheet" shows the imposed sheet. The current page has a 3px acid frame and its spread a raised background. The reset button is an icon in the header.
+- **Canvas**: the page on white with a 10px `--orange-deep` shadow. "Spread" adds the facing page at 68% opacity, read-only; clicking it selects it. The covers have no facing page. "Guides" draws the 5 mm safe margin.
+- **Selection**: 2px orange frame, white handles with an orange stroke (12px, 18px on touch), a round handle to rotate. A paper toolbar floats above (Fill, Fit, Forward, Backward, Delete; text has the last three) and hides while dragging, transforming or editing text. An orange tag below gives width × height in mm.
+- **Empty page**: a paper card with "Drop your photos", "Choose photos" and a link to start with text.
+- **Inspector**: cream panel. An image has Fit to the page (Fill, Fit, Center), Opacity, Rotation and order. Text has the font list, size in points, style, alignment, five colour swatches, order and delete. "Exact measurements" is a disclosure, closed by default, with X, Y, Width and Height in mm and the page alignment buttons (and, for text, Opacity and Rotation).
 - **Controls**: segmented switch (cream segment on a hairline box), toggle (acid track, dark knob), slider (3px track, square acid knob), field (grey label left, value right, white box), bordered action (1px `--ink-dark`, inverts on hover).
 - **Shortcut hints**: typewriter keys under the canvas, only for shortcuts that exist in the current state.
 - **Review**: the sheet large, with its fold and cut guides when the PDF will carry them; on the right, the page count, and the two PDF switches. The export error appears in the same panel.
-- **PDF listo**: a dialog after a successful export, with the fold guide, the print-at-100% callout, "Descargar otra vez" and "Volver al editor".
+- **PDF ready**: a dialog after a successful export, with the fold guide, the print-at-100% callout, "Download again" and "Back to the editor".
 - **Drop overlay**: covers the canvas while files are dragged over the editor, states the one-image-per-page rule, and the miniatures that will receive a photo light up in acid. If none of the files is an image it says so and promises nothing.
 - **Toast**: cream paper, 2px dark border, 6px orange shadow, bottom right. Every toast looks the same whatever its severity.
-- **Mobile**: a context bar with the selection's actions (or "+ Texto" and "+ Foto"), "Ajustes" opening the inspector in a drawer, and a strip of page miniatures.
+- **Mobile**: a context bar with the selection's actions (or "+ Text" and "+ Photo"), "Settings" opening the inspector in a drawer, and a strip of page miniatures.
 
 ## 6. Motion & Interaction
 
