@@ -69,7 +69,9 @@ export default defineNuxtConfig({
     families: [
       { name: 'Anton', weights: [400] },
       { name: 'Outfit', weights: [400, 500, 600, 700, 800, 900] },
-      { name: 'Special Elite', weights: [400] }
+      { name: 'Special Elite', weights: [400] },
+      // The labels FoldGuide writes on the drawing. Only the PDF dialog uses it.
+      { name: 'Coming Soon', weights: [400], preload: false }
     ]
   },
   ogImage: {

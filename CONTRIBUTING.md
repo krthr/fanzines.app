@@ -65,7 +65,7 @@ The site is in Colombian Spanish (`es-CO`, the default, at `/` and `/editor`) an
 - `|` separates singular and plural (`"Suelta la foto | Suelta las {count} fotos"`), so a message can't contain a literal `|`. A title over several lines is one message with `\n` line breaks, split by [`toLines`](app/utils/textLines.ts).
 - Internal links use `<NuxtLinkLocale>` (or `useLocalePath`) so they stay in the current language.
 - Page names ("Front cover", "Page 1", "the back cover", and their Spanish versions) come from [`useZinePageLabels`](app/composables/useZinePageLabels.ts).
-- An image with text in it has an English twin with an `-en` suffix (`fold-guide.webp`, `fold-guide-en.webp`); [`useLocalizedImage`](app/composables/useLocalizedImage.ts) picks the right one.
+- An image with text in it has an English twin with an `-en` suffix (`fold-guide.webp`, `fold-guide-en.webp`); [`useLocalizedImage`](app/composables/useLocalizedImage.ts) picks the right one. The folding guide's template is drawn empty in both: [`FoldGuide`](app/components/zine/FoldGuide.vue) writes the page labels from the imposition, so don't letter them into the images.
 
 If you only write one of the two languages, add your best attempt at the other and say so in the pull request; it will get reviewed.
 
