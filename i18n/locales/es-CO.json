@@ -51,7 +51,7 @@
     "hero": {
       "tag": "Gratis · Sin registro · 1 hoja A4",
       "title": "Una hoja.\nOcho páginas.\nTu fanzine.",
-      "lede": "Diseña cada panel en el navegador y descarga un PDF ya impuesto. Imprime, corta una línea, dobla. Listo para repartir en 10 minutos.",
+      "lede": "Diseña las ocho páginas en el navegador y exporta un PDF listo para imprimir. Haz un solo corte en el centro, dobla la hoja y ya tienes un fanzine de bolsillo.",
       "cta": "Crear mi fanzine",
       "more": "Ver cómo se imprime",
       "foldedAlt": "Fanzine desplegado sobre una mesa",
@@ -60,9 +60,9 @@
     },
     "how": {
       "title": "Del navegador\na la mesa.",
-      "intro": "Nada de calcular el orden de las páginas. El editor monta el pliego por ti.",
+      "intro": "El editor acomoda las páginas en la hoja A4 automáticamente, incluida la fila superior al revés.",
       "sheetLabel": "Pliego A4 · se imprime así",
-      "sheetAlt": "Pliego A4: arriba, las páginas 6, 5, 4 y 3 boca abajo; abajo, contraportada, portada, 1 y 2.",
+      "sheetAlt": "Pliego A4: arriba, las páginas 6, 5, 4 y 3 al revés; abajo, contraportada, portada, 1 y 2.",
       "sheetNote": "la fila de arriba se imprime al revés · corta solo la línea central",
       "steps": {
         "design": {
@@ -75,13 +75,13 @@
         },
         "print": {
           "title": "Imprime, corta, dobla",
-          "text": "Una impresora casera basta. En dos minutos tienes un fanzine para regalar o vender."
+          "text": "Sirve cualquier impresora A4. Imprime al 100%, corta la línea central y dobla la hoja como un cuadernillo."
         }
       }
     },
     "feature": {
       "eyebrow": "El editor",
-      "title": "Diseña en pantalla.\nTermina con papel\ny tijeras.",
+      "title": "Pensado para una\nsola hoja A4.",
       "intro": "Las ocho páginas a la vista, medidas en milímetros y una revisión del pliego antes de descargar.",
       "shotAlt": "Editor de Fanzines: las ocho páginas en miniatura a la izquierda, la portada en el lienzo y los paneles de imagen y capas a la derecha",
       "list": {
@@ -97,7 +97,7 @@
       "items": {
         "need": {
           "question": "¿Qué necesito?",
-          "answer": "Una impresora A4 (la de casa o la de la copistería), unas tijeras y una hoja. Nada más."
+          "answer": "Una impresora A4 (en casa o en un centro de impresión), una hoja y unas tijeras."
         },
         "account": {
           "question": "¿Tengo que crear una cuenta?",
@@ -105,7 +105,7 @@
         },
         "blackAndWhite": {
           "question": "¿Se puede imprimir en blanco y negro?",
-          "answer": "Sí. El PDF se imprime igual en color o en blanco y negro, como los fanzines de toda la vida."
+          "answer": "Sí. El PDF se imprime bien tanto en color como en blanco y negro."
         },
         "fold": {
           "question": "¿Cómo se dobla?",
@@ -113,14 +113,14 @@
         },
         "origin": {
           "question": "¿De dónde viene este doblez?",
-          "answer": "Es un doblez tradicional, más viejo que cualquier app, y la gente que hace fanzines se lo pasa de mano en mano desde hace rato. {pocketmod} ya lo hacía en internet mucho antes que esta página, y {bookbinder} también lo trae, entre muchos otros formatos. Lo difícil es lo que los impresores llaman imposición: acomodar las páginas en la hoja, algunas de cabeza, para que queden en orden al doblarla. Esa parte la hace Fanzines por ti."
+          "answer": "Es un doblez tradicional de una sola hoja que se usa en fanzines desde hace décadas. {pocketmod} lo llevó a la web hace años y {bookbinder} también lo incluye entre otros formatos. Para que las páginas queden en orden al doblar la hoja, la mitad debe colocarse al revés en el pliego (lo que en imprenta se llama imposición), y Fanzines lo hace automáticamente."
         }
       }
     },
     "cta": {
       "title": "Empieza con una portada\ny una imagen.",
       "button": "Crear fanzine gratis",
-      "note": "Tarda menos que ir a la copistería.",
+      "note": "Gratis, en el navegador y sin crear cuenta.",
       "photoAlt": "Mesa de trabajo con fotos impresas, cutter, regla y tijeras"
     },
     "footer": {
@@ -166,13 +166,13 @@
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",
       "facing": "Junto a {page}",
-      "frontCoverAlone": "La tapa va sola",
-      "backCoverAlone": "La contratapa va sola",
+      "frontCoverAlone": "La portada va sola",
+      "backCoverAlone": "La contraportada va sola",
       "position": "{current} de {total}",
       "viewLabel": "Vista del lienzo",
       "viewPage": "Página",
       "viewSpread": "Doble",
-      "noSpread": "Las tapas no tienen página enfrentada",
+      "noSpread": "Las portadas no tienen página enfrentada",
       "editPage": "Editar {page}",
       "editing": "editando",
       "clickToEdit": "clic para editarla",
@@ -232,15 +232,15 @@
       "title": "Suelta la foto | Suelta las {count} fotos",
       "titleUnknown": "Suelta tus fotos",
       "ruleTitle": "Una en cada página",
-      "ruleUnknown": "Empiezan en {start} y siguen en orden de lectura. La miniatura marca dónde empiezan.",
-      "ruleOne": "Va en {start}. La miniatura te lo muestra.",
-      "ruleMany": "Empiezan en {start} y siguen en orden: {order}. Las miniaturas te lo muestran.",
+      "ruleUnknown": "Empiezan en {start} y siguen en orden de lectura.",
+      "ruleOne": "Se colocará en {start}.",
+      "ruleMany": "Empiezan en {start} y siguen en orden: {order}.",
       "ruleOverflow": "Empiezan en {start} y siguen en orden: {order}. {fit}; el resto no se añade.",
       "fit": "Solo cabe 1 | Solo caben {count}",
       "hint": "Suéltala sobre otra miniatura para ponerla en esa página. | Suéltalas sobre otra miniatura para empezar desde esa página."
     },
     "inspector": {
-      "empty": "Toca una foto, un texto o una forma de la página y aquí verás sus opciones.",
+      "empty": "Selecciona una foto, texto o forma en la página para ver sus opciones aquí.",
       "image": "Imagen",
       "text": "Texto",
       "selected": "seleccionado",
@@ -322,7 +322,7 @@
       "introTouch": "Toca uno para añadirlo a {page}.",
       "add": "Añadir {layout} a {page}",
       "added": "Diseño añadido",
-      "addedTo": "«{layout}» en {page}, encima de lo que había.",
+      "addedTo": "Se añadió «{layout}» a {page}.",
       "undo": "Deshacer",
       "remove": "Quitar «{layout}»",
       "categories": {
@@ -360,7 +360,7 @@
           "issue": "N.º 01",
           "date": "{month}",
           "title": "NOTAS DE\nBOLSILLO",
-          "deck": "Historias, bocetos y\nfragmentos de la semana.",
+          "deck": "Notas, dibujos y\ntextos breves.",
           "footer": "GRATIS · IMPRIME Y DOBLA"
         },
         "cover-framed": {
@@ -379,7 +379,7 @@
         },
         "title-body": {
           "title": "Título del capítulo",
-          "body": "Escribe aquí un cuento, un ensayo, una receta o una nota de campo. Haz doble clic en cualquier texto para editarlo, y cambia el tamaño o el estilo de lo que quieras.\n\nAñade otro párrafo o pon una foto al lado.",
+          "body": "Haz doble clic para editar este texto. Puedes cambiar el tamaño, la fuente o moverlo a cualquier parte de la página.\n\nAñade otro párrafo o coloca una foto al lado.",
           "folio": "01"
         },
         "pull-quote": {
@@ -388,9 +388,9 @@
         },
         "two-part": {
           "firstTitle": "01 · Primer tema",
-          "firstBody": "Un párrafo corto, una pregunta, una lista de ingredientes o un verso para la mitad de arriba.",
+          "firstBody": "Escribe aquí el contenido para la mitad superior de la página.",
           "secondTitle": "02 · Segundo tema",
-          "secondBody": "Otra sección abajo, con los mismos márgenes y espacio para respirar."
+          "secondBody": "Usa la mitad inferior para un segundo tema, notas o continuación."
         },
         "colophon": {
           "title": "GRACIAS POR LEER",
@@ -461,14 +461,14 @@
       "overflowTitle": "No caben todas las imágenes",
       "overflowText": "{skipped} porque no quedaban páginas disponibles.",
       "largeTitle": "Imagen grande | Imágenes grandes",
-      "largeText": "La imagen es grande; si notas lentitud, conviene usar una versión reducida. | {count} imágenes son grandes; si notas lentitud, conviene usar versiones reducidas."
+      "largeText": "La imagen es grande; si el editor va lento, prueba con una versión más pequeña. | {count} imágenes son grandes; si el editor va lento, prueba con versiones más pequeñas."
     }
   },
   "error": {
     "notFound": {
       "tag": "Error 404 · página perdida",
       "title": "Esta página\nno existe.",
-      "text": "Quizá el enlace está mal escrito o la página se quedó fuera del pliego. Vuelve al inicio o empieza tu propio fanzine.",
+      "text": "Revisa la dirección, vuelve al inicio o abre el editor para empezar un fanzine.",
       "headTitle": "Página no encontrada"
     },
     "generic": {
