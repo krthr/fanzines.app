@@ -124,7 +124,7 @@ watch(renderKey, schedulePreviewRender, { flush: 'post' })
 </script>
 
 <template>
-  <div class="sheet" :class="{ 'is-review': review }">
+  <div class="sheet" :class="{ 'is-review': review }" data-testid="sheet-preview">
     <img
       v-if="previewImageUrl && !renderFailed"
       :src="previewImageUrl"

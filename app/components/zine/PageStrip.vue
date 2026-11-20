@@ -61,6 +61,7 @@ function choosePage(pageId: PageId) {
           class="page"
           :aria-label="pageLabel(pageId)"
           :aria-current="isActive(pageId) ? 'page' : undefined"
+          :data-testid="`page-tile-${pageId}`"
           @click="choosePage(pageId)"
           @dragover="onTileDragOver($event, pageId)"
           @dragleave="onTileDragLeave($event, pageId)"
