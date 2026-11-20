@@ -9,6 +9,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "typecheck": "nuxt typecheck"
   },
   "engines": {
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "typescript": "^6.0.3",
+    "vitest": "^5.1.1",
     "vue-tsc": "^3.3.14"
   }
 }

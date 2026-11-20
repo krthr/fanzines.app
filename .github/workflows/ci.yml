@@ -31,6 +31,8 @@ jobs:
 
       - run: npm run typecheck
 
+      - run: npm run test:unit
+
       # Production runs on Cloudflare Workers. A plain local build uses the Node
       # preset; this builds what Workers Builds deploys, so fork PRs (which Workers
       # Builds doesn't build) are checked against the real target too.
