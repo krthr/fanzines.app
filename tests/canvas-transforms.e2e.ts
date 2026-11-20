@@ -36,7 +36,8 @@ function measuresToUnitsBox(measures: Awaited<ReturnType<typeof readMeasures>>):
 }
 
 test.describe('canvas drag, resize, and rotate', { requires: ['browser'] }, () => {
-  test('drags an element on canvas and updates exact-measure inspector x/y (mm)', async ({ editor }) => {
+  test('drags an element on canvas and updates exact-measure inspector x/y (mm)', async ({ openEditor }) => {
+    const editor = await openEditor()
     await addShape(editor, 'Rectangle')
     await setShapeFill(editor, 'Orange')
 
@@ -66,7 +67,8 @@ test.describe('canvas drag, resize, and rotate', { requires: ['browser'] }, () =
     await expect.poll(async () => isPixelCloseTo(await readCanvasPixel(editor, newCenterX, newCenterY), ORANGE_HEX)).toBe(true)
   })
 
-  test('drags the Konva rotation handle (rotater) and updates rotation degrees in the inspector', async ({ editor }) => {
+  test('drags the Konva rotation handle (rotater) and updates rotation degrees in the inspector', async ({ openEditor }) => {
+    const editor = await openEditor()
     await addShape(editor, 'Rectangle')
     await setShapeFill(editor, 'Orange')
 
@@ -94,7 +96,8 @@ test.describe('canvas drag, resize, and rotate', { requires: ['browser'] }, () =
     expect(Number.parseFloat(await slider.inputValue())).toBeLessThan(125)
   })
 
-  test('keeps circle round on corner drag and turns it into an ellipse on side drag', async ({ editor }) => {
+  test('keeps circle round on corner drag and turns it into an ellipse on side drag', async ({ openEditor }) => {
+    const editor = await openEditor()
     await addShape(editor, 'Circle')
     const before = await readMeasures(editor)
     expect(before.width).toBeCloseTo(30, 0)
@@ -123,11 +126,12 @@ test.describe('canvas drag, resize, and rotate', { requires: ['browser'] }, () =
   })
 
   test.describe('resize handle constraints (desktop)', () => {
-    test.beforeEach(async ({ editor }) => {
-      test.skip(!editor.desktop, 'Desktop resize handle matrix')
+    test.beforeEach(async ({ desktop }) => {
+      test.skip(!desktop, 'Desktop resize handle matrix')
     })
 
-    test('keeps image aspect ratio on corner drag and omits side handles', async ({ editor }) => {
+    test('keeps image aspect ratio on corner drag and omits side handles', async ({ openEditor }) => {
+      const editor = await openEditor()
       // 600x300 -> 2:1 aspect ratio, fits inside the 10% margin without downscaling.
       await uploadBluePhoto(editor)
 
@@ -160,7 +164,8 @@ test.describe('canvas drag, resize, and rotate', { requires: ['browser'] }, () =
       expect(afterSide.x).toBeGreaterThan(afterCorner.x + 2)
     })
 
-    test('resizes text and lines width-only via side handles and omits corner handles', async ({ editor }) => {
+    test('resizes text and lines width-only via side handles and omits corner handles', async ({ openEditor }) => {
+      const editor = await openEditor()
       // Short single-line text so narrowing does not wrap onto a second line.
       await addTextAndCommit(editor, 'Zine')
       const textBefore = await readMeasures(editor)

@@ -34,7 +34,8 @@ function expectMmCloseTo(actual: number, expected: number, tolerance = 0.15) {
 }
 
 test.describe('z-order, fit/fill, and page alignment', { requires: ['browser'] }, () => {
-  test('flips painted center pixel colors with Send Backward and Bring Forward', async ({ editor, screen }) => {
+  test('flips painted center pixel colors with Send Backward and Bring Forward', async ({ openEditor, screen }) => {
+    const editor = await openEditor()
     // Stack two identical centered rectangles: Orange underneath, Blue on top.
     await addShape(editor, 'Rectangle')
     await setShapeFill(editor, 'Orange')
@@ -63,11 +64,12 @@ test.describe('z-order, fit/fill, and page alignment', { requires: ['browser'] }
   })
 
   test.describe('fit/fill and rotated painted-bounds alignment (desktop)', () => {
-    test.beforeEach(async ({ editor }) => {
-      test.skip(!editor.desktop, 'Desktop inspector alignment suite')
+    test.beforeEach(async ({ desktop }) => {
+      test.skip(!desktop, 'Desktop inspector alignment suite')
     })
 
-    test('applies Fill, Fit, and Position on the page to photos and paper patterns', async ({ editor, screen, browser }) => {
+    test('applies Fill, Fit, and Position on the page to photos and paper patterns', async ({ openEditor, screen, browser }) => {
+      const editor = await openEditor()
       const inspector = await getInspectorRoot(editor)
 
       // 600x300 landscape photo (2:1 aspect ratio)
@@ -140,7 +142,8 @@ test.describe('z-order, fit/fill, and page alignment', { requires: ['browser'] }
       await expect(inspector.getByRole('button', 'Snap to the left of the page')).toBeEnabled()
     })
 
-    test('aligns stroked shapes using painted bounds at 0°, 90°, and 45° rotations', async ({ editor, browser }) => {
+    test('aligns stroked shapes using painted bounds at 0°, 90°, and 45° rotations', async ({ openEditor, browser }) => {
+      const editor = await openEditor()
       const inspector = await getInspectorRoot(editor)
 
       // Default rectangle is 40 x 30 mm. Give it a thick 4 mm border (half-stroke = 2 mm)

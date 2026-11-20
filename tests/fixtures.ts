@@ -14,6 +14,7 @@ export const test = base.extend<{ browserChecks: void }>({
     // Keep earlier errors when a locale link loads a new document in the same tab.
     const storageKey = 'e2e:page-errors'
     await browser.addInitScript((key) => {
+      if (window.origin === 'null') return
       const record = (message: string) => {
         const errors: string[] = JSON.parse(sessionStorage.getItem(key) ?? '[]')
         errors.push(message)
@@ -35,7 +36,7 @@ export const test = base.extend<{ browserChecks: void }>({
 
     await use()
     const errors = await browser.evaluate((key): string[] => {
-      if (location.origin === 'null') return []
+      if (window.origin === 'null') return []
       return JSON.parse(sessionStorage.getItem(key) ?? '[]')
     }, storageKey)
     expect(errors, 'Unexpected console or page errors').toEqual([])

@@ -4,11 +4,12 @@ import { waitForKonvaFrame } from './helpers/canvas'
 
 test.describe('keyboard shortcut isolation and desktop spread mode', { requires: ['browser'] }, () => {
   test.describe('desktop keyboard isolation and spread clicks', () => {
-    test.beforeEach(async ({ editor }) => {
-      test.skip(!editor.desktop, 'Desktop layout only')
+    test.beforeEach(async ({ desktop }) => {
+      test.skip(!desktop, 'Desktop layout only')
     })
 
-    test('deletes selected canvas elements with Backspace/Delete but isolates textarea, number fields, and + Shape menu', async ({ editor, screen, browser }) => {
+    test('deletes selected canvas elements with Backspace/Delete but isolates textarea, number fields, and + Shape menu', async ({ openEditor, screen, browser }) => {
+      const editor = await openEditor()
       const header = browser.locator('header.ed-topbar')
       const inspector = await getInspectorRoot(editor)
 
@@ -75,7 +76,8 @@ test.describe('keyboard shortcut isolation and desktop spread mode', { requires:
       await expect(inspector.getByRole('heading', /^Layouts$/i, { level: 2 })).toBeVisible()
     })
 
-    test('switches focus to the facing page in Spread mode, including inside the overhanging stagePad', async ({ screen, browser }) => {
+    test('switches focus to the facing page in Spread mode, including inside the overhanging stagePad', async ({ openEditor, screen, browser }) => {
+      await openEditor()
       // Navigate to p1 (left side of the p1/p2 spread).
       await screen.getByTestId('page-tile-p1').tap()
       await expect(screen.getByTestId('page-tile-p1')).toHaveAttribute('aria-current', 'page')
@@ -134,11 +136,12 @@ test.describe('keyboard shortcut isolation and desktop spread mode', { requires:
   })
 
   test.describe('mobile keyboard isolation with UDrawer and inline textarea', () => {
-    test.beforeEach(async ({ editor }) => {
-      test.skip(editor.desktop, 'Mobile layout only')
+    test.beforeEach(async ({ desktop }) => {
+      test.skip(desktop, 'Mobile layout only')
     })
 
-    test('closes mobile UDrawer with Esc without dropping selection and isolates Backspace in drawer/textarea', async ({ editor, screen, browser }) => {
+    test('closes mobile UDrawer with Esc without dropping selection and isolates Backspace in drawer/textarea', async ({ openEditor, screen, browser }) => {
+      const editor = await openEditor()
       // Add a Rectangle on mobile and open the Settings UDrawer.
       await addShape(editor, 'Rectangle')
       await expect(screen.getByRole('button', 'Settings')).toBeVisible()

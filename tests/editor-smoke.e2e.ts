@@ -48,14 +48,16 @@ async function openTwoPageReview(editor: Editor, screen: Screen, browser: Browse
 }
 
 test.describe('Editor smoke flow', { requires: ['browser'] }, () => {
-  test('opens on an empty front cover', async ({ editor, screen }) => {
+  test('opens on an empty front cover', async ({ openEditor, screen }) => {
+    const editor = await openEditor()
     await expect(editor.pages).toBeVisible()
     await expect(editor.pages.getByTestId('page-tile-front-cover')).toHaveAttribute('aria-current', 'page')
     if (editor.desktop) await expect(screen.getByRole('image', '0 of 8 pages have content')).toBeVisible()
     await expect(screen.getByText(/Drop your photos/i)).toBeVisible()
   })
 
-  test('selects Page 1 from the page list', async ({ editor, screen }) => {
+  test('selects Page 1 from the page list', async ({ openEditor, screen }) => {
+    const editor = await openEditor()
     const pageOne = editor.pages.getByTestId('page-tile-p1')
     await pageOne.tap()
 
@@ -64,7 +66,8 @@ test.describe('Editor smoke flow', { requires: ['browser'] }, () => {
     if (editor.desktop) await expect(screen.getByRole('heading', /^Layouts$/i, { level: 2 })).toBeVisible()
   })
 
-  test('renders the populated two-page zine on the A4 review sheet', async ({ editor, screen, browser }) => {
+  test('renders the populated two-page zine on the A4 review sheet', async ({ openEditor, screen, browser }) => {
+    const editor = await openEditor()
     const review = await openTwoPageReview(editor, screen, browser)
     const preview = review.getByTestId('sheet-preview')
 
@@ -77,7 +80,8 @@ test.describe('Editor smoke flow', { requires: ['browser'] }, () => {
     await expect(screen.getByText('2 of 8 pages have content')).toBeVisible()
   })
 
-  test('returns to an empty front cover after reviewing a populated zine', async ({ editor, screen, browser }) => {
+  test('returns to an empty front cover after reviewing a populated zine', async ({ openEditor, screen, browser }) => {
+    const editor = await openEditor()
     const review = await openTwoPageReview(editor, screen, browser)
     const preview = review.getByTestId('sheet-preview')
     await preview.getByRole('image', "Preview of the zine's A4 sheet").waitFor()

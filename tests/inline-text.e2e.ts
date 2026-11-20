@@ -3,7 +3,8 @@ import { PAGE_H, PAGE_W, pagePoint, tapCanvas, waitForKonvaFrame } from './helpe
 import { addTextAndCommit, blurActiveControl, editSelectedText, readMeasures, selectedTextCenter, test } from './helpers/editor'
 
 test.describe('Inline text editing', { requires: ['browser'] }, () => {
-  test('reopens a blurred draft, cancels changes with Escape and saves with the keyboard shortcut', async ({ editor, screen, browser }) => {
+  test('reopens a blurred draft, cancels changes with Escape and saves with the keyboard shortcut', async ({ openEditor, screen, browser }) => {
+    const editor = await openEditor()
     await editor.addText.tap()
     const field = screen.getByRole('textbox', 'Edit the zine text')
     await expect(field).toHaveValue('Type here')
@@ -28,7 +29,8 @@ test.describe('Inline text editing', { requires: ['browser'] }, () => {
     await expect(field).toHaveValue('Committed headline')
   })
 
-  test('grows the inline editor and saved text box when text wraps', async ({ editor, screen, browser }) => {
+  test('grows the inline editor and saved text box when text wraps', async ({ openEditor, screen, browser }) => {
+    const editor = await openEditor()
     await addTextAndCommit(editor, 'One line')
     const initial = await readMeasures(editor)
     await editSelectedText(editor)
@@ -52,7 +54,8 @@ test.describe('Inline text editing', { requires: ['browser'] }, () => {
   })
 
   for (const trigger of ['deselect', 'page switch'] as const) {
-    test(`removes cleared text on ${trigger}`, async ({ editor, screen }) => {
+    test(`removes cleared text on ${trigger}`, async ({ openEditor, screen }) => {
+      const editor = await openEditor()
       await addTextAndCommit(editor, 'Temporary text')
       await editSelectedText(editor)
       const field = screen.getByRole('textbox', 'Edit the zine text')

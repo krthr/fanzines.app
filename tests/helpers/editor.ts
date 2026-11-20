@@ -13,21 +13,27 @@ export interface Editor {
   review: Locator
 }
 
-export const test = base.extend<{ editor: Editor }>({
-  editor: async ({ app, browser, screen }, use) => {
-    await app.open('/en/editor')
-    await screen.getByTestId('active-page').waitFor()
-    const desktop = await browser.evaluate(() => window.matchMedia('(min-width: 1024px)').matches)
-    const header = browser.locator('header.ed-topbar')
-    const tools = desktop ? header : screen
-    await use({
-      browser,
-      screen,
-      desktop,
-      pages: screen.getByRole(desktop ? 'complementary' : 'navigation', 'Zine pages'),
-      addText: tools.getByRole('button', desktop ? 'Text' : '+ Text'),
-      addShape: tools.getByRole('button', desktop ? 'Shape' : '+ Shape'),
-      review: header.getByRole('button', desktop ? 'Review and print' : 'Review')
+export const test = base.extend<{ desktop: boolean, openEditor: () => Promise<Editor> }>({
+  desktop: async ({ browser }, use) => {
+    // A fresh attempt has a browser context but no tab to measure yet.
+    await browser.newTab()
+    await use(await browser.evaluate(() => window.matchMedia('(min-width: 1024px)').matches))
+  },
+  openEditor: async ({ app, browser, screen, desktop }, use) => {
+    await use(async () => {
+      await app.open('/en/editor')
+      await screen.getByTestId('active-page').waitFor()
+      const header = browser.locator('header.ed-topbar')
+      const tools = desktop ? header : screen
+      return {
+        browser,
+        screen,
+        desktop,
+        pages: screen.getByRole(desktop ? 'complementary' : 'navigation', 'Zine pages'),
+        addText: tools.getByRole('button', desktop ? 'Text' : '+ Text'),
+        addShape: tools.getByRole('button', desktop ? 'Shape' : '+ Shape'),
+        review: header.getByRole('button', desktop ? 'Review and print' : 'Review')
+      }
     })
   }
 })
