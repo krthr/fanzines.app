@@ -25,6 +25,7 @@ import { useZineElementActions } from '~/composables/useZineElementActions.clien
 import { useZineExport, type ExportInputMethod } from '~/composables/useZineExport.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
+import { usePageLayouts } from '~/composables/usePageLayouts.client'
 
 type TextInputMethod = 'top_bar' | 'empty_state_link' | 'mobile_bar'
 type ShapeInputMethod = 'top_bar' | 'mobile_bar'
@@ -47,6 +48,7 @@ const { isDragActive, markDragEnter, markDragLeave, resetDrag } = useZineDragSta
 const { removeSelected } = useZineElementActions()
 const { isExporting, exportError, exportPdf } = useZineExport()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+const { forgetLayouts } = usePageLayouts()
 const {
   mode,
   prefersSpread,
@@ -215,6 +217,7 @@ function confirmReset() {
     const previousElementCount = elementCount.value
 
     resetZine()
+    forgetLayouts()
     trackZineEvent('zine_reset_confirmed', {
       previous_element_count: previousElementCount,
       element_count: elementCount.value

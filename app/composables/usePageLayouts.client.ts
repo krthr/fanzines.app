@@ -87,15 +87,27 @@ export function usePageLayouts() {
     })
   }
 
+  // Only what is still on the page is taken back, and only that counts as a removal.
   function removeStamp(stamp: LayoutStamp, inputMethod: LayoutRemoveMethod) {
-    deleteElements(stamp.elementIds)
+    const remaining = stamp.elementIds.filter((id) => state.value.elements[id])
+
+    deleteElements(remaining)
     stamps.value = stamps.value.filter((item) => item.key !== stamp.key)
 
     if (inputMethod !== 'toast' && stamp.toastId !== undefined) {
       toast.remove(stamp.toastId)
     }
 
-    trackRemoval(stamp, inputMethod)
+    if (remaining.length > 0) trackRemoval(stamp, inputMethod)
+  }
+
+  // A reset leaves nothing to take back: the history and its toasts go with the zine.
+  function forgetLayouts() {
+    for (const stamp of stamps.value) {
+      if (stamp.toastId !== undefined) toast.remove(stamp.toastId)
+    }
+
+    stamps.value = []
   }
 
   // Appends the layout on top of what the page has, so a text layout lands over a photo
@@ -196,6 +208,7 @@ export function usePageLayouts() {
     buildLayout,
     applyLayout,
     removeStamp,
+    forgetLayouts,
     startLayoutDrag,
     endLayoutDrag,
     onLayoutDragOver,

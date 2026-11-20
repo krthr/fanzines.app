@@ -25,6 +25,7 @@ import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Tran
 import {
   PAGE_IDS,
   type ImageElement,
+  type PageId,
   type TextElement,
   type ZineElement
 } from '~/types/zine'
@@ -34,7 +35,7 @@ import { useZineDragState } from '~/composables/useZineDragState.client'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
-import { usePageLayouts } from '~/composables/usePageLayouts.client'
+import { isLayoutDrag, usePageLayouts, type LayoutDropTarget } from '~/composables/usePageLayouts.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import {
   PAGE_H,
@@ -125,6 +126,8 @@ const { t } = useI18n()
 const { pageLabel, pageName } = useZinePageLabels()
 
 const containerRef = ref<HTMLElement | null>(null)
+const activePageRef = ref<HTMLElement | null>(null)
+const facingPageRef = ref<HTMLElement | null>(null)
 const stageRef = ref<{ getNode: () => KonvaStage } | null>(null)
 const transformerRef = ref<{ getNode: () => KonvaTransformer } | null>(null)
 const toolbarRef = ref<HTMLElement | null>(null)
@@ -598,6 +601,42 @@ function handleCanvasDrop(event: DragEvent) {
   void processImageFiles(files, { inputMethod: 'drag_drop', dropTarget: 'canvas' })
 }
 
+// The stage overhangs the open page by its padding, over the facing page and the
+// canvas around it. A layout dragged over the stage goes where the pointer is: on one
+// of the two pages, or nowhere.
+function layoutDropAt(event: DragEvent): { pageId: PageId, dropTarget: LayoutDropTarget } | null {
+  const isUnder = (element: HTMLElement | null) => {
+    const rect = element?.getBoundingClientRect()
+    return Boolean(rect
+      && event.clientX >= rect.left && event.clientX <= rect.right
+      && event.clientY >= rect.top && event.clientY <= rect.bottom)
+  }
+
+  if (isUnder(activePageRef.value)) return { pageId: activePageId.value, dropTarget: 'canvas' }
+  if (facingId.value && isUnder(facingPageRef.value)) return { pageId: facingId.value, dropTarget: 'facing_page' }
+  return null
+}
+
+function handleStageAreaDragOver(event: DragEvent) {
+  if (!isLayoutDrag(event)) return
+
+  const target = layoutDropAt(event)
+  if (target) {
+    onLayoutDragOver(event, target.pageId)
+  } else {
+    layoutDropPageId.value = null
+  }
+}
+
+function handleStageAreaDragLeave(event: DragEvent) {
+  if (layoutDropPageId.value) onLayoutDragLeave(event, layoutDropPageId.value)
+}
+
+function handleStageAreaDrop(event: DragEvent) {
+  const target = isLayoutDrag(event) ? layoutDropAt(event) : null
+  if (target) onLayoutDrop(event, target.pageId, target.dropTarget)
+}
+
 function handleElementPointer(element: ZineElement, event: KonvaEvent) {
   event.cancelBubble = true
   if (editingTextId.value !== element.id) {
@@ -948,13 +987,14 @@ watch(
 )
 
 // A text box only draws the lines that fit its height. When the selected text gets
-// more lines (typed, a bigger size, a narrower box), its box grows to show them. It
-// never shrinks, so nothing moves under a text that gets shorter.
+// more lines (typed, a bigger size, a narrower box) or a smaller height than its lines
+// need, its box grows to show them all. It never shrinks, so nothing moves under a text
+// that gets shorter.
 watch(
   () => {
     const element = selectedElement.value
     return element?.type === 'text'
-      ? [element.id, element.text, element.width, element.fontSize, element.fontFamily, element.fontStyle, element.lineHeight].join('|')
+      ? [element.id, element.text, element.width, element.height, element.fontSize, element.fontFamily, element.fontStyle, element.lineHeight].join('|')
       : null
   },
   () => {
@@ -963,7 +1003,8 @@ watch(
 
     const height = fitTextHeight(element)
     if (height > element.height) updateElement(element.id, { height })
-  }
+  },
+  { immediate: true }
 )
 
 // The toolbar is clamped to the stage area, which needs its real width.
@@ -993,6 +1034,7 @@ defineExpose({
       <div class="spread">
         <button
           v-if="facingId && activeSide === 'right'"
+          ref="facingPageRef"
           type="button"
           class="page page-facing"
           :class="{ 'is-layout-target': layoutDropPageId === facingId }"
@@ -1007,12 +1049,13 @@ defineExpose({
         </button>
 
         <div
+          ref="activePageRef"
           class="page page-active"
           :class="{ 'is-layout-target': layoutDropPageId === activePageId }"
           :style="pageStyle"
-          @dragover="onLayoutDragOver($event, activePageId)"
-          @dragleave="onLayoutDragLeave($event, activePageId)"
-          @drop="onLayoutDrop($event, activePageId, 'canvas')"
+          @dragover="handleStageAreaDragOver"
+          @dragleave="handleStageAreaDragLeave"
+          @drop="handleStageAreaDrop"
         >
           <VStage
             ref="stageRef"
@@ -1144,6 +1187,7 @@ defineExpose({
 
         <button
           v-if="facingId && activeSide === 'left'"
+          ref="facingPageRef"
           type="button"
           class="page page-facing"
           :class="{ 'is-layout-target': layoutDropPageId === facingId }"
