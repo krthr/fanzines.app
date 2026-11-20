@@ -162,18 +162,19 @@ const rigStyle = computed<CSSProperties>(() => ({
 }))
 
 // ── Exact kinematic hinge tree rooted at `front-cover` ──────────────────────
-// IMPORTANT: every `translateZ` is applied BEFORE its `rotateX`/`rotateY` so
-// separation happens in the parent's unrotated frame and all 16 faces (8 printed
-// + 8 blank) stay strictly Z-ordered from +0.4px to -18.2px with zero overlap.
+// Every `translateZ` is applied BEFORE its `rotateX`/`rotateY` so separation
+// happens in the parent's unrotated frame. All 16 faces (8 printed + 8 blank)
+// sit tightly pressed in a realistic ~5.1px paper stack (+0.18px to -5.28px)
+// with guaranteed clearance and zero overlap.
 
 const rootPivotStyle = computed<CSSProperties>(() => ({
   transform: `rotateY(${(-alphaDeg.value + betaDeg.value).toFixed(2)}deg)`
 }))
 
-// p1: right child of front-cover (50% fore-edge) -> folds +2α behind front-cover (-2.2px in parent frame)
+// p1: right child of front-cover (50% fore-edge) -> folds +2α behind front-cover (-0.6px)
 const hingeP1 = computed<CSSProperties>(() => {
   const angle = 2 * alphaDeg.value
-  const z = -2.2 * tPush.value
+  const z = -0.6 * tPush.value
   return {
     transform: `translateZ(${z.toFixed(2)}px) rotateY(${angle.toFixed(2)}deg)`
   }
@@ -183,16 +184,16 @@ const hingeP1 = computed<CSSProperties>(() => {
 // +Z in p1's local frame points toward WORLD -Z (deeper into the closed stack).
 const hingeP2 = computed<CSSProperties>(() => {
   const angle = -alphaDeg.value - betaDeg.value
-  const z = 3.0 * tClose.value
+  const z = 0.9 * tClose.value
   return {
     transform: `translateZ(${z.toFixed(2)}px) rotateY(${angle.toFixed(2)}deg)`
   }
 })
 
-// p3: top child of p2 (horizontal fold 75..100%) -> shifts -2.2px behind p2, then folds 180°
+// p3: top child of p2 (horizontal fold 75..100%) -> shifts -0.6px behind p2, then folds 180°
 const hingeP3 = computed<CSSProperties>(() => {
   const angle = 180 * tHalf.value
-  const z = -2.2 * tHalf.value
+  const z = -0.6 * tHalf.value
   return {
     transform: `translateZ(${z.toFixed(2)}px) rotateX(${angle.toFixed(2)}deg)`
   }
@@ -202,27 +203,27 @@ const hingeP3 = computed<CSSProperties>(() => {
 // +Z in p3's local frame points toward WORLD -Z (deeper into the stack).
 const hingeP4 = computed<CSSProperties>(() => {
   const angle = alphaDeg.value + betaDeg.value
-  const zPre = 3.0 * tClose.value
+  const zPre = 0.9 * tClose.value
   // Slight separation from p5 while they sit back-to-back in the `+` cross wing
-  const zCross = 1.1 * Math.sin(tPush.value * Math.PI * 0.5) * (1 - tClose.value)
+  const zCross = 0.6 * Math.sin(tPush.value * Math.PI * 0.5) * (1 - tClose.value)
   return {
     transform: `translateZ(${zPre.toFixed(2)}px) rotateY(${angle.toFixed(2)}deg) translateZ(${zCross.toFixed(2)}px)`
   }
 })
 
-// back-cover: left child of front-cover (25% outer spine) -> wraps behind all 4 leaves (-17.8px)
+// back-cover: left child of front-cover (25% outer spine) -> wraps tightly behind all 4 leaves (-5.1px)
 const hingeBackCover = computed<CSSProperties>(() => {
   const angle = alphaDeg.value - 3 * betaDeg.value
-  const z = -17.8 * tClose.value
+  const z = -5.1 * tClose.value
   return {
     transform: `translateZ(${z.toFixed(2)}px) rotateY(${angle.toFixed(2)}deg)`
   }
 })
 
-// p6: top child of back-cover (horizontal fold 0..25%) -> shifts -2.2px in back-cover's frame, then folds 180°
+// p6: top child of back-cover (horizontal fold 0..25%) -> shifts -0.6px in back-cover's frame, then folds 180°
 const hingeP6 = computed<CSSProperties>(() => {
   const angle = 180 * tHalf.value
-  const z = -2.2 * tHalf.value
+  const z = -0.6 * tHalf.value
   return {
     transform: `translateZ(${z.toFixed(2)}px) rotateX(${angle.toFixed(2)}deg)`
   }
@@ -231,12 +232,17 @@ const hingeP6 = computed<CSSProperties>(() => {
 // p5: right child of p6 (25% top inner spine). At close, p6's local +Z points toward WORLD +Z (inside the book).
 const hingeP5 = computed<CSSProperties>(() => {
   const angle = -alphaDeg.value - betaDeg.value
-  const zPre = 3.0 * tClose.value
-  const zCross = 1.1 * Math.sin(tPush.value * Math.PI * 0.5) * (1 - tClose.value)
+  const zPre = 0.9 * tClose.value
+  const zCross = 0.6 * Math.sin(tPush.value * Math.PI * 0.5) * (1 - tClose.value)
   return {
     transform: `translateZ(${zPre.toFixed(2)}px) rotateY(${angle.toFixed(2)}deg) translateZ(${zCross.toFixed(2)}px)`
   }
 })
+
+// Closed folded spine strip along x = 0 so the left edge reads as one crisp folded booklet
+const closedSpineStyle = computed<CSSProperties>(() => ({
+  opacity: clamp((tClose.value - 0.72) / 0.28, 0, 1).toFixed(3)
+}))
 
 // Subtle dynamic shade as panels swing away from the overhead light
 const backHalfShade = computed(() => (0.14 * Math.sin(tHalf.value * Math.PI)).toFixed(3))
@@ -349,6 +355,8 @@ onBeforeUnmount(() => {
       <div class="sheet-rig" :style="rigStyle">
         <!-- Root pivot rotates front-cover around its left edge (25% outer spine) -->
         <div class="root-pivot" :style="rootPivotStyle">
+          <!-- Closed booklet folded spine edge -->
+          <div class="closed-spine" :style="closedSpineStyle" aria-hidden="true" />
           <!-- Root panel: front-cover (col 1, row 1) -->
           <div class="panel is-root">
             <div class="p-face is-printed">
@@ -577,14 +585,25 @@ onBeforeUnmount(() => {
   border: 1px solid rgb(11 10 9 / 18%);
 }
 
+.closed-spine {
+  position: absolute;
+  top: 0;
+  left: -2.8px;
+  width: 5.6px;
+  height: 100%;
+  background: linear-gradient(to right, #d6d0c4, #f4f0e8 45%, #cbc4b7);
+  transform: translateZ(-2.55px) rotateY(90deg);
+  pointer-events: none;
+}
+
 .p-face.is-printed {
   background: #faf8f4;
-  transform: translateZ(0.4px);
+  transform: translateZ(0.18px);
 }
 
 .p-face.is-blank {
   background: #e9e4d9;
-  transform: rotateY(180deg) translateZ(0.4px);
+  transform: rotateY(180deg) translateZ(0.18px);
 }
 
 .p-face.is-printed img {
