@@ -28,7 +28,8 @@ export const FONT_OPTIONS = [
   'system-ui'
 ] as const
 
-// Text colour is one of these five swatches; the first is the default for new text.
+// The five swatches offered for text colour; the first is the default for new text.
+// Any other '#rrggbb' can be picked as a custom colour.
 export const TEXT_COLOR_OPTIONS = [
   '#0b0a09',
   '#ffffff',
