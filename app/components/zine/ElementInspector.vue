@@ -510,8 +510,9 @@ function strokeLabel(element: ZineElement) {
         </label>
       </div>
 
-      <!-- Hidden for an element as big as the page: every button would leave it where it is. -->
-      <div v-if="canAlignHorizontal() || canAlignVertical()" class="group">
+      <!-- Always shown, so the panel doesn't jump when a page-sized element is nudged and
+           snapped back; a row that can't move its element is disabled. -->
+      <div class="group">
         <h3 class="group-label">
           {{ t('editor.inspector.position') }}
         </h3>
