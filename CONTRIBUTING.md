@@ -35,7 +35,7 @@ No environment variables are needed. [`.env.example`](.env.example) lists the on
 
 ## Where things live
 
-The [README](README.md#estructura-del-proyecto) (in Spanish) has the full file tree and architecture notes. The short version:
+The [README](README.md#project-structure) has the full file tree and architecture notes. The short version:
 
 | Path | What it is |
 | --- | --- |
