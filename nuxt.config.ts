@@ -156,5 +156,13 @@ export default defineNuxtConfig({
   ui: {
     colorMode: false,
     fonts: false
+  },
+  typescript: {
+    tsConfig: {
+      include: ['../test/unit/**/*']
+    },
+    nodeTsConfig: {
+      include: ['../vitest.config.ts']
+    }
   }
 })
