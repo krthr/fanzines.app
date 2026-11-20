@@ -93,7 +93,7 @@
     },
     "faq": {
       "title": "Before\nyou start.",
-      "sticker": "4 questions, 4 answers",
+      "sticker": "5 questions, 5 answers",
       "items": {
         "need": {
           "question": "What do I need?",
@@ -110,6 +110,10 @@
         "fold": {
           "question": "How do I fold it?",
           "answer": "The PDF comes with cut and fold guides. Fold it lengthwise, cut the center line and close it like a book."
+        },
+        "origin": {
+          "question": "Where does this fold come from?",
+          "answer": "It's a traditional fold, older than any app, and zine makers have been passing it along for ages. {pocketmod} was doing it on the web long before this site, and {bookbinder} has it too, among lots of other layouts. The tricky part is what printers call imposition: placing the pages on the sheet, some of them upside down, so they read in order once it's folded. That's the part Fanzines does for you."
         }
       }
     },

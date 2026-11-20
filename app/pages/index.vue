@@ -61,7 +61,7 @@ const features = [
   { key: 'noAccount', icon: 'i-lucide-user-x' }
 ] as const
 
-const faqs = ['need', 'account', 'blackAndWhite', 'fold'] as const
+const faqs = ['need', 'account', 'blackAndWhite', 'fold', 'origin'] as const
 
 let animationContext: { revert: () => void } | null = null
 
@@ -292,7 +292,21 @@ onBeforeUnmount(() => {
         <dl class="faq-list">
           <div v-for="faq in faqs" :key="faq" class="faq-item reveal">
             <dt class="faq-question">{{ t(`home.faq.items.${faq}.question`) }}</dt>
-            <dd class="faq-answer">{{ t(`home.faq.items.${faq}.answer`) }}</dd>
+            <dd class="faq-answer">
+              <!-- Only the `origin` answer has these placeholders; the rest render as plain text. -->
+              <i18n-t :keypath="`home.faq.items.${faq}.answer`" scope="global">
+                <template #pocketmod>
+                  <a href="https://pocketmod.com/" target="_blank" rel="noopener">PocketMod</a>
+                </template>
+                <template #bookbinder>
+                  <a
+                    href="https://momijizukamori.github.io/bookbinder-js/"
+                    target="_blank"
+                    rel="noopener"
+                  >Bookbinder JS</a>
+                </template>
+              </i18n-t>
+            </dd>
           </div>
         </dl>
       </section>
@@ -954,6 +968,25 @@ onBeforeUnmount(() => {
   color: var(--text-dark);
   font-size: 18px;
   line-height: 1.5;
+}
+
+.faq-answer a {
+  color: var(--ink-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 180ms ease;
+}
+
+.faq-answer a:hover {
+  color: var(--orange-deep);
+}
+
+/* Acid disappears on the cream band, and a tighter ring keeps the next words readable. */
+.faq-answer a:focus-visible {
+  outline-color: var(--ink-dark);
+  outline-offset: 2px;
 }
 
 /* Final CTA */
