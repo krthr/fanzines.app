@@ -96,8 +96,13 @@ Without this variable, analytics stay off.
 | `npm run generate` | Generates the static site |
 | `npm run preview` | Previews the production build locally |
 | `npm run typecheck` | Type-checks with `vue-tsc` |
+| `npm run test:unit` | Runs the Vitest unit tests |
+| `npm run test:coverage` | Writes the unit coverage report to `coverage/` |
+| `npm run test:e2e` | Runs the Chromium and mobile-sized WebKit tests against the Nuxt preview |
 | `npm run analyze` | Analyzes the app bundle without serving it |
 | `npm run postinstall` | Prepares Nuxt types (`nuxt prepare`, runs after `npm install`) |
+
+The browser tests start a preview on port 4173. Set `E2E_PORT` to change the port or `E2E_BASE_URL` to test an existing server.
 
 ## Project structure
 

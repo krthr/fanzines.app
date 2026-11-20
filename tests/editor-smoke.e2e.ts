@@ -1,36 +1,6 @@
 import type { Browser } from '@e2e-dev/web'
-import { expect, type Locator, type Screen } from 'e2e'
-import { test as base } from './fixtures'
-
-interface Editor {
-  desktop: boolean
-  pages: Locator
-  addText: Locator
-  addShape: Locator
-  review: Locator
-}
-
-const test = base.extend<{ editor: Editor }>({
-  editor: async ({ app, browser, screen }, use) => {
-    await app.open('/en/editor')
-    await screen.getByTestId('active-page').waitFor()
-    const desktop = await browser.evaluate(() => window.matchMedia('(min-width: 1024px)').matches)
-    const header = browser.locator('header.ed-topbar')
-    const tools = desktop ? header : screen
-    await use({
-      desktop,
-      pages: screen.getByRole(desktop ? 'complementary' : 'navigation', 'Zine pages'),
-      addText: tools.getByRole('button', desktop ? 'Text' : '+ Text'),
-      addShape: tools.getByRole('button', desktop ? 'Shape' : '+ Shape'),
-      review: header.getByRole('button', desktop ? 'Review and print' : 'Review')
-    })
-  }
-})
-
-async function addShape(editor: Editor, screen: Screen, name: 'Rectangle' | 'Circle' | 'Line') {
-  await editor.addShape.tap()
-  await screen.getByRole('menuitem', name).tap()
-}
+import { expect, type Screen } from 'e2e'
+import { addShape, test, type Editor } from './helpers/editor'
 
 async function openTwoPageReview(editor: Editor, screen: Screen, browser: Browser) {
   await editor.addText.tap()
@@ -47,7 +17,7 @@ async function openTwoPageReview(editor: Editor, screen: Screen, browser: Browse
   if (editor.desktop) {
     await screen.getByRole('heading', /^Text$/i, { level: 2 }).waitFor()
     await screen.getByRole('image', '1 of 8 pages have content').waitFor()
-    await addShape(editor, screen, 'Rectangle')
+    await addShape(editor, 'Rectangle')
     await screen.getByRole('heading', /^Rectangle$/i, { level: 2 }).waitFor()
   } else {
     await screen.getByRole('button', 'Settings').tap()
@@ -65,11 +35,11 @@ async function openTwoPageReview(editor: Editor, screen: Screen, browser: Browse
     await facingPage.waitFor({ state: 'hidden' })
     await screen.getByRole('button', 'Spread').tap()
     await facingPage.waitFor()
-    await addShape(editor, screen, 'Circle')
+    await addShape(editor, 'Circle')
     await screen.getByRole('heading', /^Circle$/i, { level: 2 }).waitFor()
     await screen.getByRole('image', '2 of 8 pages have content').waitFor()
   } else {
-    await addShape(editor, screen, 'Rectangle')
+    await addShape(editor, 'Rectangle')
     await screen.getByRole('button', 'Delete').waitFor()
   }
 
@@ -123,7 +93,7 @@ test.describe('Editor smoke flow', { requires: ['browser'] }, () => {
       })
       await editor.pages.getByRole('button', 'Reset zine').tap()
     } else {
-      await addShape(editor, screen, 'Line')
+      await addShape(editor, 'Line')
       await screen.getByRole('button', 'Delete').tap()
       await screen.getByRole('button', 'Layouts').tap()
       const drawer = screen.getByRole('dialog')

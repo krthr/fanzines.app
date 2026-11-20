@@ -24,15 +24,8 @@ logs
 # Screenshots and other output from local browser checks
 /output
 
-# Playwright
-playwright-report/
-test-results/
-blob-report/
-playwright/.cache/
-
 # Coverage
 /coverage/
-/.coverage/
 
 # Personal AI agent skills (install them locally, don't commit them)
 /.agents

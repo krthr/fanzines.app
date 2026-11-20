@@ -1,8 +1,8 @@
 import { test as base } from '@e2e-dev/web'
 import { expect } from 'e2e'
 
-export const test = base.extend({
-  browser: async ({ browser }, use) => {
+export const test = base.extend<{ browserChecks: void }>({
+  browserChecks: [async ({ browser }, use) => {
     await browser.route(/^https?:\/\/([^/]+\.)?posthog\.com(\/|$)/i, async (route) => {
       if (new URL(route.request.url).pathname.endsWith('.js')) {
         await route.fulfill({ contentType: 'application/javascript', body: '' })
@@ -33,10 +33,11 @@ export const test = base.extend({
       window.addEventListener('unhandledrejection', (event) => record('pageerror: ' + event.reason))
     }, storageKey)
 
-    await use(browser)
+    await use()
     const errors = await browser.evaluate((key): string[] => {
+      if (location.origin === 'null') return []
       return JSON.parse(sessionStorage.getItem(key) ?? '[]')
     }, storageKey)
     expect(errors, 'Unexpected console or page errors').toEqual([])
-  }
+  }, { auto: true }]
 })
