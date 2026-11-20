@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from '#imports'
 import LocaleSwitch from '~/components/LocaleSwitch.vue'
 import DropOverlay from '~/components/zine/DropOverlay.vue'
 import EditorBrand from '~/components/zine/EditorBrand.vue'
@@ -14,7 +15,12 @@ import ReviewPanel from '~/components/zine/ReviewPanel.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
 import ZineToggle from '~/components/zine/ZineToggle.vue'
 import AddShapeMenu from '~/components/zine/AddShapeMenu.vue'
-import { PAGE_IDS, type ShapeKind } from '~/types/zine'
+import PrototypeSwitcher, { type PrototypeVariantKey } from '~/components/zine/prototype/PrototypeSwitcher.client.vue'
+import VariantACanvas3D from '~/components/zine/prototype/VariantACanvas3D.client.vue'
+import VariantBReviewFold from '~/components/zine/prototype/VariantBReviewFold.client.vue'
+import VariantCTactileReader from '~/components/zine/prototype/VariantCTactileReader.client.vue'
+import { populateSampleZine } from '~/utils/zinePrototypeSample.client'
+import { PAGE_IDS, type PageId, type ShapeKind } from '~/types/zine'
 import { PANEL_SIZE_LABEL } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
@@ -37,8 +43,22 @@ const {
   addTextElement,
   addShapeElement,
   selectElement,
+  selectPage,
   resetZine
 } = useZineStore()
+
+// PROTOTYPE: Three variants of the 3D fanzine view, switchable via `?variant=A|B|C` on `/editor` (dev only).
+const isDev = import.meta.dev
+const route = useRoute()
+const prototypeVariant = computed<PrototypeVariantKey | null>(() => {
+  if (!isDev) return null
+  const raw = route.query.variant
+  const val = Array.isArray(raw) ? raw[0] : raw
+  if (val === 'A' || val === 'B' || val === 'C') return val
+  return null
+})
+const protoAView3D = ref(false)
+const protoCReaderOpen = ref(false)
 
 const { t } = useI18n()
 const { pageLabel, pagePlace } = useZinePageLabels()
@@ -247,8 +267,46 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
+function syncPrototypeVariant(variant: PrototypeVariantKey | null) {
+  if (variant === 'A') {
+    mode.value = 'design'
+    protoAView3D.value = true
+    protoCReaderOpen.value = false
+  } else if (variant === 'B') {
+    selectElement(null)
+    mobileToolsOpen.value = false
+    mode.value = 'review'
+    protoAView3D.value = false
+    protoCReaderOpen.value = false
+  } else if (variant === 'C') {
+    mode.value = 'design'
+    protoAView3D.value = false
+    protoCReaderOpen.value = true
+  } else {
+    protoAView3D.value = false
+    protoCReaderOpen.value = false
+  }
+}
+
+function handleVariantASwitchTo2D(viewMode: 'page' | 'spread', pageId?: PageId) {
+  if (pageId) selectPage(pageId)
+  prefersSpread.value = viewMode === 'spread'
+  protoAView3D.value = false
+}
+
+function handleVariantCEditPage(pageId: PageId) {
+  selectPage(pageId)
+  mode.value = 'design'
+  protoCReaderOpen.value = false
+}
+
+watch(prototypeVariant, (variant) => {
+  syncPrototypeVariant(variant)
+})
+
 onMounted(() => {
   resetView()
+  syncPrototypeVariant(prototypeVariant.value)
   desktopMediaQuery = window.matchMedia('(min-width: 1024px)')
   const syncDesktopLayout = () => {
     isDesktopLayout.value = Boolean(desktopMediaQuery?.matches)
@@ -316,6 +374,15 @@ onBeforeUnmount(() => {
               <UIcon name="i-lucide-chevron-down" class="add-caret" aria-hidden="true" />
             </button>
           </AddShapeMenu>
+          <button
+            v-if="prototypeVariant === 'C'"
+            type="button"
+            class="ed-btn-outline proto-c-trigger"
+            @click="protoCReaderOpen = true"
+          >
+            <UIcon name="i-lucide-box" aria-hidden="true" />
+            3D Reader
+          </button>
         </div>
 
         <div class="topbar-right">
@@ -376,10 +443,92 @@ onBeforeUnmount(() => {
     <div class="body">
       <PagesSidebar v-if="isDesktopLayout" class="pages-col" @reset="confirmReset" />
 
-      <!-- Design -->
-      <section v-if="mode === 'design'" class="canvas-area" :aria-label="t('editor.canvas.label')">
-        <div v-if="isDesktopLayout" class="canvas-head">
-          <div class="page-nav">
+      <!-- PROTOTYPE Variant A: 3D view inside the Design tab -->
+      <VariantACanvas3D
+        v-if="prototypeVariant === 'A' && mode === 'design' && protoAView3D"
+        :is-desktop="isDesktopLayout"
+        @switch-to-2-d="handleVariantASwitchTo2D"
+      />
+
+      <!-- PROTOTYPE Variant B: Review & Fold Theater -->
+      <VariantBReviewFold
+        v-else-if="prototypeVariant === 'B' && mode === 'review'"
+        :is-desktop="isDesktopLayout"
+        @back-to-design="backToDesign"
+      />
+
+      <!-- Standard editor Design & Review -->
+      <template v-else>
+        <!-- Design -->
+        <section v-if="mode === 'design'" class="canvas-area" :aria-label="t('editor.canvas.label')">
+          <div v-if="isDesktopLayout" class="canvas-head">
+            <div class="page-nav">
+              <button
+                type="button"
+                class="nav-arrow"
+                :aria-label="t('editor.canvas.previousPage')"
+                :disabled="!previousPageId"
+                @click="goToPage(previousPageId)"
+              >
+                <UIcon name="i-lucide-chevron-left" aria-hidden="true" />
+              </button>
+              <div class="page-title">
+                <h2>{{ pageTitle }}</h2>
+                <p>{{ pageMeta }}</p>
+              </div>
+              <button
+                type="button"
+                class="nav-arrow"
+                :aria-label="t('editor.canvas.nextPage')"
+                :disabled="!nextPageId"
+                @click="goToPage(nextPageId)"
+              >
+                <UIcon name="i-lucide-chevron-right" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div class="view-controls">
+              <div class="ed-segment is-fit" role="group" :aria-label="t('editor.canvas.viewLabel')">
+                <button
+                  type="button"
+                  class="ed-segment-item"
+                  :class="{ 'is-active': !showsSpread }"
+                  :aria-pressed="!showsSpread"
+                  @click="prefersSpread = false"
+                >
+                  <UIcon name="i-lucide-file" aria-hidden="true" />
+                  <span class="view-label">{{ t('editor.canvas.viewPage') }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="ed-segment-item"
+                  :class="{ 'is-active': showsSpread }"
+                  :aria-pressed="showsSpread"
+                  :disabled="!canShowSpread"
+                  :title="canShowSpread ? undefined : t('editor.canvas.noSpread')"
+                  @click="prefersSpread = true"
+                >
+                  <UIcon name="i-lucide-book-open" aria-hidden="true" />
+                  <span class="view-label">{{ t('editor.canvas.viewSpread') }}</span>
+                </button>
+                <button
+                  v-if="prototypeVariant === 'A'"
+                  type="button"
+                  class="ed-segment-item"
+                  :aria-pressed="false"
+                  @click="protoAView3D = true"
+                >
+                  <UIcon name="i-lucide-box" aria-hidden="true" />
+                  <span class="view-label">3D</span>
+                </button>
+              </div>
+              <ZineToggle v-model="state.previewGuides">
+                {{ t('editor.topbar.guides') }}
+              </ZineToggle>
+            </div>
+          </div>
+
+          <div v-else class="page-head">
             <button
               type="button"
               class="nav-arrow"
@@ -391,7 +540,7 @@ onBeforeUnmount(() => {
             </button>
             <div class="page-title">
               <h2>{{ pageTitle }}</h2>
-              <p>{{ pageMeta }}</p>
+              <p>{{ t('editor.canvas.position', { current: pageIndex + 1, total: PAGE_IDS.length }) }}</p>
             </div>
             <button
               type="button"
@@ -404,126 +553,71 @@ onBeforeUnmount(() => {
             </button>
           </div>
 
-          <div class="view-controls">
-            <div class="ed-segment is-fit" role="group" :aria-label="t('editor.canvas.viewLabel')">
-              <button
-                type="button"
-                class="ed-segment-item"
-                :class="{ 'is-active': !showsSpread }"
-                :aria-pressed="!showsSpread"
-                @click="prefersSpread = false"
-              >
-                <UIcon name="i-lucide-file" aria-hidden="true" />
-                <span class="view-label">{{ t('editor.canvas.viewPage') }}</span>
-              </button>
-              <button
-                type="button"
-                class="ed-segment-item"
-                :class="{ 'is-active': showsSpread }"
-                :aria-pressed="showsSpread"
-                :disabled="!canShowSpread"
-                :title="canShowSpread ? undefined : t('editor.canvas.noSpread')"
-                @click="prefersSpread = true"
-              >
-                <UIcon name="i-lucide-book-open" aria-hidden="true" />
-                <span class="view-label">{{ t('editor.canvas.viewSpread') }}</span>
-              </button>
+          <div class="stage">
+            <PageCanvas
+              ref="pageCanvasRef"
+              :spread="isDesktopLayout && showsSpread"
+              :compact="!isDesktopLayout"
+              @request-upload="openFilePicker"
+              @add-text="handleAddTextElement('empty_state_link')"
+            />
+            <DropOverlay v-if="isDragActive" />
+          </div>
+
+          <!-- The row keeps its height when empty so the page does not jump on select. -->
+          <div v-if="isDesktopLayout" class="hints" :class="{ 'is-hidden': isDragActive }">
+            <p v-for="hint in hints" :key="hint.label" class="hint">
+              <kbd class="ed-key">{{ hint.key }}</kbd>
+              {{ hint.label }}
+            </p>
+          </div>
+        </section>
+
+        <!-- Review -->
+        <section v-else class="canvas-area is-review ed-scroll" :aria-label="t('editor.review.label')">
+          <div v-if="!isDesktopLayout" class="review-nav">
+            <button type="button" class="back" @click="backToDesign">
+              <UIcon name="i-lucide-arrow-left" aria-hidden="true" />
+              {{ t('editor.topbar.backToDesign') }}
+            </button>
+            <FlowSteps :current="isPdfReadyOpen ? 3 : 2" />
+          </div>
+
+          <div class="canvas-head">
+            <div class="page-title">
+              <h2>{{ t('editor.review.heading') }}</h2>
+              <p>{{ t('editor.review.format') }}</p>
             </div>
-            <ZineToggle v-model="state.previewGuides">
-              {{ t('editor.topbar.guides') }}
-            </ZineToggle>
           </div>
-        </div>
 
-        <div v-else class="page-head">
-          <button
-            type="button"
-            class="nav-arrow"
-            :aria-label="t('editor.canvas.previousPage')"
-            :disabled="!previousPageId"
-            @click="goToPage(previousPageId)"
-          >
-            <UIcon name="i-lucide-chevron-left" aria-hidden="true" />
-          </button>
-          <div class="page-title">
-            <h2>{{ pageTitle }}</h2>
-            <p>{{ t('editor.canvas.position', { current: pageIndex + 1, total: PAGE_IDS.length }) }}</p>
+          <div class="stage is-sheet">
+            <div class="sheet-wrap">
+              <SheetPreview review @select="backToDesign" />
+            </div>
+            <DropOverlay v-if="isDragActive" />
           </div>
-          <button
-            type="button"
-            class="nav-arrow"
-            :aria-label="t('editor.canvas.nextPage')"
-            :disabled="!nextPageId"
-            @click="goToPage(nextPageId)"
-          >
-            <UIcon name="i-lucide-chevron-right" aria-hidden="true" />
-          </button>
-        </div>
 
-        <div class="stage">
-          <PageCanvas
-            ref="pageCanvasRef"
-            :spread="isDesktopLayout && showsSpread"
-            :compact="!isDesktopLayout"
-            @request-upload="openFilePicker"
-            @add-text="handleAddTextElement('empty_state_link')"
+          <div v-if="!isDesktopLayout" class="review-options ed-light">
+            <ReviewPanel />
+          </div>
+        </section>
+
+        <aside v-if="isDesktopLayout" class="inspector ed-light ed-scroll">
+          <ElementInspector v-if="mode === 'design'" />
+          <ReviewPanel v-else />
+        </aside>
+
+        <template v-else>
+          <MobileBar
+            v-if="mode === 'design'"
+            @add-text="handleAddTextElement('mobile_bar')"
+            @add-image="openFilePicker('mobile_bar')"
+            @add-shape="handleAddShapeElement($event, 'mobile_bar')"
+            @open-settings="mobileToolsOpen = true"
+            @open-layouts="mobileToolsOpen = true"
           />
-          <DropOverlay v-if="isDragActive" />
-        </div>
-
-        <!-- The row keeps its height when empty so the page does not jump on select. -->
-        <div v-if="isDesktopLayout" class="hints" :class="{ 'is-hidden': isDragActive }">
-          <p v-for="hint in hints" :key="hint.label" class="hint">
-            <kbd class="ed-key">{{ hint.key }}</kbd>
-            {{ hint.label }}
-          </p>
-        </div>
-      </section>
-
-      <!-- Review -->
-      <section v-else class="canvas-area is-review ed-scroll" :aria-label="t('editor.review.label')">
-        <div v-if="!isDesktopLayout" class="review-nav">
-          <button type="button" class="back" @click="backToDesign">
-            <UIcon name="i-lucide-arrow-left" aria-hidden="true" />
-            {{ t('editor.topbar.backToDesign') }}
-          </button>
-          <FlowSteps :current="isPdfReadyOpen ? 3 : 2" />
-        </div>
-
-        <div class="canvas-head">
-          <div class="page-title">
-            <h2>{{ t('editor.review.heading') }}</h2>
-            <p>{{ t('editor.review.format') }}</p>
-          </div>
-        </div>
-
-        <div class="stage is-sheet">
-          <div class="sheet-wrap">
-            <SheetPreview review @select="backToDesign" />
-          </div>
-          <DropOverlay v-if="isDragActive" />
-        </div>
-
-        <div v-if="!isDesktopLayout" class="review-options ed-light">
-          <ReviewPanel />
-        </div>
-      </section>
-
-      <aside v-if="isDesktopLayout" class="inspector ed-light ed-scroll">
-        <ElementInspector v-if="mode === 'design'" />
-        <ReviewPanel v-else />
-      </aside>
-
-      <template v-else>
-        <MobileBar
-          v-if="mode === 'design'"
-          @add-text="handleAddTextElement('mobile_bar')"
-          @add-image="openFilePicker('mobile_bar')"
-          @add-shape="handleAddShapeElement($event, 'mobile_bar')"
-          @open-settings="mobileToolsOpen = true"
-          @open-layouts="mobileToolsOpen = true"
-        />
-        <PageStrip />
+          <PageStrip />
+        </template>
       </template>
     </div>
 
@@ -547,6 +641,21 @@ onBeforeUnmount(() => {
       v-model:open="isPdfReadyOpen"
       @download-again="downloadPdf('pdf_ready_dialog')"
       @back-to-editor="backToDesign"
+    />
+
+    <!-- PROTOTYPE Variant C: Full-bleed Tactile 3D Reader overlay -->
+    <VariantCTactileReader
+      v-if="prototypeVariant === 'C' && protoCReaderOpen"
+      @close="protoCReaderOpen = false"
+      @edit-page="handleVariantCEditPage"
+    />
+
+    <!-- PROTOTYPE Floating switcher (dev only) -->
+    <PrototypeSwitcher
+      v-if="isDev"
+      :current="prototypeVariant"
+      :empty="elementCount === 0"
+      @load-sample="populateSampleZine"
     />
   </div>
 </template>
