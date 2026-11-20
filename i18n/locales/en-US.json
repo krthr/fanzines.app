@@ -120,7 +120,8 @@
       "photoAlt": "A worktable with printed photos, a craft knife, a ruler and scissors"
     },
     "footer": {
-      "by": "By Wilson Tovar"
+      "by": "By Wilson Tovar",
+      "repo": "Open source on GitHub"
     }
   },
   "editorPage": {

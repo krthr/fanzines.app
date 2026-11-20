@@ -333,6 +333,15 @@ onBeforeUnmount(() => {
         <a href="https://www.instagram.com/wilson__tovar/" target="_blank" rel="me noopener noreferrer">
           Instagram
         </a>
+        <a
+          class="footer-repo"
+          href="https://github.com/krthr/fanzines.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <UIcon class="footer-repo-icon" name="i-lucide-github" aria-hidden="true" />
+          {{ t('home.footer.repo') }}
+        </a>
         <LocaleSwitch />
       </div>
     </footer>
@@ -1047,6 +1056,18 @@ onBeforeUnmount(() => {
 
 .footer-links a:hover {
   color: var(--ink);
+}
+
+.footer-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-repo-icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
 }
 
 /* Responsive */
