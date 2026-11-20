@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { computed, ref, useId } from 'vue'
 import type { CSSProperties } from 'vue'
-import type { ZineElement } from '~/types/zine'
-import { FONT_OPTIONS } from '~/types/zine'
+import { FONT_OPTIONS, PATTERN_KINDS, type PatternKind, type ZineElement } from '~/types/zine'
 import {
   PAGE_H,
   PAGE_W,
-  formatMmSize,
+  formatElementSize,
   mmToUnits,
   ptToUnits,
   unitsToMm,
   unitsToPt
 } from '~/utils/zineLayout'
+import { MIN_PATTERN_SPACING, PATTERN_PRESETS, hasPaint } from '~/utils/zineShapes'
 import { useZineStore } from '~/composables/useZineStore'
-import TextColorPicker from '~/components/zine/TextColorPicker.vue'
+import ColorPicker from '~/components/zine/ColorPicker.vue'
+import PageLayoutPicker from '~/components/zine/PageLayoutPicker.vue'
 import {
+  canFitToPage,
   useZineElementActions,
   type HorizontalAlignment,
   type VerticalAlignment
@@ -22,9 +24,16 @@ import {
 
 type MeasureKey = 'x' | 'y' | 'width' | 'height'
 
+// A layout added from the catalog; the mobile drawer closes to show it.
+const emit = defineEmits<{ 'layout-applied': [] }>()
+
 const MIN_FONT_SIZE = 12
 const MAX_FONT_SIZE = 220
 const MIN_OPACITY = 10
+// Stroke thickness and pattern spacing, in millimetres.
+const MIN_STROKE_MM = 0.1
+const MAX_STROKE_MM = 5
+const MAX_SPACING_MM = 20
 
 // Every `label` below is a key of the `editor.inspector` messages.
 const styleItems = ['normal', 'bold', 'italic'] as const
@@ -40,6 +49,14 @@ const horizontalAlignItems = [
   { label: 'pageCenter', value: 'center', icon: 'i-lucide-align-horizontal-justify-center' },
   { label: 'pageRight', value: 'right', icon: 'i-lucide-align-horizontal-justify-end' }
 ] satisfies Array<{ label: string, value: HorizontalAlignment, icon: string }>
+
+const lineStyleItems = ['solid', 'dashed', 'dotted'] as const
+
+const patternItems = [
+  { value: 'lined', icon: 'i-lucide-align-justify' },
+  { value: 'dot-grid', icon: 'i-lucide-grip' },
+  { value: 'square-grid', icon: 'i-lucide-grid-3x3' }
+] as const satisfies ReadonlyArray<{ value: PatternKind, icon: string }>
 
 const verticalAlignItems = [
   { label: 'pageTop', value: 'top', icon: 'i-lucide-align-vertical-justify-start' },
@@ -79,8 +96,15 @@ const groupId = useId()
 const measuresOpen = ref(false)
 
 const sizeLabel = computed(() => selectedElement.value
-  ? formatMmSize(selectedElement.value.width, selectedElement.value.height)
+  ? formatElementSize(selectedElement.value.type, selectedElement.value.width, selectedElement.value.height)
   : '')
+
+// A line has a length and no height.
+const visibleMeasureFields = computed(() => selectedElement.value?.type === 'line'
+  ? measureFields.filter((field) => field.key !== 'height')
+  : measureFields)
+
+const isPaintedShape = computed(() => selectedElement.value?.type === 'rect' || selectedElement.value?.type === 'circle')
 
 const opacityPercent = computed(() => Math.round((selectedElement.value?.opacity ?? 1) * 100))
 const rotationDegrees = computed(() => Math.round(selectedElement.value?.rotation ?? 0))
@@ -95,6 +119,10 @@ const rotationFill = computed<CSSProperties>(() => ({
 
 function round1(value: number) {
   return Math.round(value * 10) / 10
+}
+
+function round2(value: number) {
+  return Math.round(value * 100) / 100
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -155,18 +183,72 @@ function setRotation(event: Event) {
   if (value !== null) patch({ rotation: value })
 }
 
-// X and Y are the same in every language.
+// X and Y are the same in every language; a line's width is its length.
 function measureLabel(key: MeasureKey) {
-  return key === 'x' || key === 'y' ? key.toUpperCase() : t(`editor.inspector.${key}`)
+  if (key === 'x' || key === 'y') return key.toUpperCase()
+  if (key === 'width' && selectedElement.value?.type === 'line') return t('editor.inspector.length')
+  return t(`editor.inspector.${key}`)
+}
+
+function strokeMm(element: ZineElement) {
+  return 'strokeWidth' in element ? round2(unitsToMm(element.strokeWidth)) : 0
+}
+
+function setStrokeWidth(event: Event) {
+  const millimetres = readNumber(event)
+
+  if (millimetres !== null) {
+    patch({ strokeWidth: mmToUnits(clamp(millimetres, MIN_STROKE_MM, MAX_STROKE_MM)) })
+  }
+
+  if (selectedElement.value) syncField(event, strokeMm(selectedElement.value))
+}
+
+function spacingMm(element: ZineElement) {
+  return element.type === 'pattern' ? round1(unitsToMm(element.spacing)) : 0
+}
+
+function setSpacing(event: Event) {
+  const millimetres = readNumber(event)
+
+  if (millimetres !== null) {
+    patch({ spacing: clamp(mmToUnits(millimetres), MIN_PATTERN_SPACING, mmToUnits(MAX_SPACING_MM)) })
+  }
+
+  if (selectedElement.value) syncField(event, spacingMm(selectedElement.value))
+}
+
+function lineStyle(element: ZineElement) {
+  return element.type === 'line' ? element.dash ?? 'solid' : 'solid'
+}
+
+function setLineStyle(event: Event) {
+  const value = (event.target as HTMLSelectElement).value
+  patch({ dash: value === 'dashed' || value === 'dotted' ? value : undefined })
+}
+
+// Each kind of paper comes with its own spacing, grey and weight: a dot is thicker
+// than a rule.
+function setPattern(kind: PatternKind) {
+  patch({ pattern: kind, ...PATTERN_PRESETS[kind] })
+}
+
+// On paper, "Fill" and "Fit" don't crop anything, so they say what they do.
+function fitHint(action: 'fill' | 'fit') {
+  return selectedElement.value?.type === 'pattern' ? t(`editor.actions.${action}PaperHint`) : undefined
+}
+
+function strokeLabel(element: ZineElement) {
+  return element.type === 'rect' || element.type === 'circle'
+    ? { label: t('editor.inspector.border'), group: t('editor.inspector.borderLabel') }
+    : { label: t('editor.inspector.color'), group: t(element.type === 'line' ? 'editor.inspector.lineColorLabel' : 'editor.inspector.patternColorLabel') }
 }
 </script>
 
 <template>
-  <section class="insp">
+  <section class="insp" :class="{ 'is-dense': selectedElement && selectedElement.type !== 'image' }">
     <template v-if="!selectedElement">
-      <h2 class="ed-display">
-        {{ t('editor.inspector.title') }}
-      </h2>
+      <PageLayoutPicker @applied="emit('layout-applied')" />
       <p class="note">
         {{ t('editor.inspector.empty') }}
       </p>
@@ -182,29 +264,9 @@ function measureLabel(key: MeasureKey) {
           <span class="file-size"> · {{ selectedElement.naturalWidth }} × {{ selectedElement.naturalHeight }} px</span>
         </p>
       </header>
-
-      <div class="group">
-        <h3 class="group-label">
-          {{ t('editor.inspector.fitToPage') }}
-        </h3>
-        <div class="fit">
-          <button type="button" class="fit-action" @click="coverPage">
-            <UIcon name="i-lucide-expand" aria-hidden="true" />
-            {{ t('editor.actions.fill') }}
-          </button>
-          <button type="button" class="fit-action" @click="containPage">
-            <UIcon name="i-lucide-scan" aria-hidden="true" />
-            {{ t('editor.actions.fit') }}
-          </button>
-          <button type="button" class="fit-action" @click="centerOnPage">
-            <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
-            {{ t('editor.actions.center') }}
-          </button>
-        </div>
-      </div>
     </template>
 
-    <template v-else>
+    <template v-else-if="selectedElement.type === 'text'">
       <header class="head is-row">
         <h2 class="ed-display">
           {{ t('editor.inspector.text') }}
@@ -289,15 +351,140 @@ function measureLabel(key: MeasureKey) {
         </div>
       </div>
 
-      <TextColorPicker
+      <ColorPicker
+        :label="t('editor.inspector.color')"
+        :group-label="t('editor.inspector.colorLabel')"
         :model-value="selectedElement.fill"
         @update:model-value="patch({ fill: $event })"
       />
     </template>
 
+    <template v-else>
+      <header class="head is-row">
+        <h2 class="ed-display">
+          {{ t(`editor.shapes.${selectedElement.type}`) }}
+        </h2>
+        <p class="file">
+          {{ t('editor.inspector.selected') }}
+        </p>
+      </header>
+
+      <div v-if="selectedElement.type === 'pattern'" class="row">
+        <span class="row-label">{{ t('editor.inspector.paper') }}</span>
+        <div class="switch" role="radiogroup" :aria-label="t('editor.inspector.paperLabel')">
+          <label
+            v-for="item in patternItems"
+            :key="item.value"
+            class="switch-item"
+            :class="{ 'is-active': selectedElement.pattern === item.value }"
+            :title="t(`editor.inspector.patterns.${item.value}`)"
+          >
+            <input
+              type="radio"
+              class="sr-only"
+              :name="`${groupId}-pattern`"
+              :aria-label="t(`editor.inspector.patterns.${item.value}`)"
+              :checked="selectedElement.pattern === item.value"
+              @change="setPattern(item.value)"
+            >
+            <UIcon :name="item.icon" aria-hidden="true" />
+          </label>
+        </div>
+      </div>
+
+      <!-- A shape can drop its fill or its border, not both: it would vanish from the page. -->
+      <ColorPicker
+        v-if="selectedElement.type === 'rect' || selectedElement.type === 'circle'"
+        stacked
+        :label="t('editor.inspector.fill')"
+        :group-label="t('editor.inspector.fillLabel')"
+        :none-label="t('editor.inspector.noFill')"
+        :none-disabled="!hasPaint(selectedElement.stroke)"
+        :model-value="selectedElement.fill"
+        @update:model-value="patch({ fill: $event })"
+      />
+
+      <ColorPicker
+        stacked
+        :label="strokeLabel(selectedElement).label"
+        :group-label="strokeLabel(selectedElement).group"
+        :none-label="isPaintedShape ? t('editor.inspector.noBorder') : undefined"
+        :none-disabled="isPaintedShape && 'fill' in selectedElement && !hasPaint(selectedElement.fill)"
+        :model-value="selectedElement.stroke"
+        @update:model-value="patch({ stroke: $event })"
+      />
+
+      <div class="pair">
+        <label class="ed-field">
+          <span class="ed-field-label">{{ t(selectedElement.type === 'pattern' && selectedElement.pattern === 'dot-grid' ? 'editor.inspector.dotSize' : 'editor.inspector.thickness') }}</span>
+          <span class="ed-field-value">
+            <input
+              type="number"
+              inputmode="decimal"
+              step="0.1"
+              :min="MIN_STROKE_MM"
+              :max="MAX_STROKE_MM"
+              :value="strokeMm(selectedElement)"
+              @change="setStrokeWidth"
+            >
+            <span>mm</span>
+          </span>
+        </label>
+
+        <label v-if="selectedElement.type === 'line'" class="ed-field">
+          <span class="ed-field-label">{{ t('editor.inspector.style') }}</span>
+          <span class="ed-field-value">
+            <select :value="lineStyle(selectedElement)" @change="setLineStyle">
+              <option v-for="style in lineStyleItems" :key="style" :value="style">
+                {{ t(`editor.inspector.lineStyles.${style}`) }}
+              </option>
+            </select>
+          </span>
+        </label>
+
+        <label v-else-if="selectedElement.type === 'pattern'" class="ed-field">
+          <span class="ed-field-label">{{ t('editor.inspector.spacing') }}</span>
+          <span class="ed-field-value">
+            <input
+              type="number"
+              inputmode="decimal"
+              step="0.5"
+              :min="round1(unitsToMm(MIN_PATTERN_SPACING))"
+              :max="MAX_SPACING_MM"
+              :value="spacingMm(selectedElement)"
+              @change="setSpacing"
+            >
+            <span>mm</span>
+          </span>
+        </label>
+      </div>
+    </template>
+
     <template v-if="selectedElement">
-      <!-- An image shows its sliders up front; text keeps them under "Medidas exactas". -->
-      <div v-if="selectedElement.type === 'image'" class="sliders">
+      <!-- Right under the header for a photo; under its own settings for paper. -->
+      <div v-if="canFitToPage(selectedElement)" class="group">
+        <h3 class="group-label">
+          {{ t('editor.inspector.fitToPage') }}
+        </h3>
+        <div class="fit">
+          <button type="button" class="fit-action" :title="fitHint('fill')" @click="coverPage">
+            <UIcon name="i-lucide-expand" aria-hidden="true" />
+            {{ t('editor.actions.fill') }}
+          </button>
+          <button type="button" class="fit-action" :title="fitHint('fit')" @click="containPage">
+            <UIcon name="i-lucide-scan" aria-hidden="true" />
+            {{ t('editor.actions.fit') }}
+          </button>
+          <button type="button" class="fit-action" @click="centerOnPage">
+            <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
+            {{ t('editor.actions.center') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Images, shapes and patterns show their sliders up front; text keeps them under
+           "Exact measurements". -->
+      <div v-if="selectedElement.type !== 'text'" class="sliders">
         <label class="slider">
           <span class="slider-label">{{ t('editor.inspector.opacity') }}</span>
           <input
@@ -338,7 +525,7 @@ function measureLabel(key: MeasureKey) {
           {{ t('editor.actions.backward') }}
         </button>
         <button
-          v-if="selectedElement.type === 'text'"
+          v-if="selectedElement.type !== 'image'"
           type="button"
           class="ed-btn-line is-danger is-icon"
           :aria-label="t('editor.actions.delete')"
@@ -366,7 +553,7 @@ function measureLabel(key: MeasureKey) {
 
         <div v-if="measuresOpen" id="ed-measures" class="measures-body">
           <div class="pair is-grid">
-            <label v-for="field in measureFields" :key="field.key" class="ed-field">
+            <label v-for="field in visibleMeasureFields" :key="field.key" class="ed-field">
               <span class="ed-field-label">{{ measureLabel(field.key) }}</span>
               <span class="ed-field-value">
                 <input
@@ -465,8 +652,8 @@ function measureLabel(key: MeasureKey) {
   color: var(--ink-dark);
 }
 
-/* The text panel is denser than the image one. */
-.insp:has(.fonts) {
+/* The text and shape panels are denser than the image one. */
+.insp.is-dense {
   gap: 14px;
 }
 

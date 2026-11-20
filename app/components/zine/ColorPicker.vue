@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from 'vue'
-import { TEXT_COLOR_OPTIONS } from '~/types/zine'
+import { NO_PAINT, TEXT_COLOR_OPTIONS } from '~/types/zine'
 
 type PresetColor = typeof TEXT_COLOR_OPTIONS[number]
 
@@ -17,8 +17,24 @@ const colorNames: Record<PresetColor, string> = {
 // down, cream contrasts more than ink with the colour behind it.
 const DARK_COLOR_LUMINANCE = 0.18
 
-// The text's fill. Colours are stored as lowercase '#rrggbb', like the presets.
+// A text's colour, a shape's fill or stroke. Colours are stored as lowercase '#rrggbb',
+// like the presets, and 'transparent' when "None" is picked.
 const color = defineModel<string>({ required: true })
+
+const props = defineProps<{
+  // The row label ("Colour", "Fill") and the name of the swatch group for screen readers.
+  label: string
+  groupLabel: string
+  // Offers a "None" swatch first, named by this label ("No fill").
+  noneLabel?: string
+  // "None" can't be picked: a shape with neither fill nor stroke would vanish.
+  noneDisabled?: boolean
+  // The label sits above the swatches, which then take the whole width.
+  stacked?: boolean
+}>()
+
+// The custom picker opens on ink when no colour is set.
+const FALLBACK_HEX = TEXT_COLOR_OPTIONS[0]
 
 const { t } = useI18n()
 const id = useId()
@@ -45,8 +61,10 @@ function luminance(hex: string) {
 }
 
 const currentHex = computed(() => parseHex(color.value))
-const isCustom = computed(() => !TEXT_COLOR_OPTIONS.some(preset => preset === color.value.toLowerCase()))
-const hexLabel = computed(() => currentHex.value?.toUpperCase() ?? color.value)
+const isNone = computed(() => color.value === NO_PAINT)
+const isCustom = computed(() => !isNone.value && !TEXT_COLOR_OPTIONS.some(preset => preset === color.value.toLowerCase()))
+const hexLabel = computed(() => currentHex.value?.toUpperCase() ?? (isNone.value ? '' : color.value))
+const swatchCount = computed(() => TEXT_COLOR_OPTIONS.length + (props.noneLabel ? 2 : 1))
 
 const customLabel = computed(() => isCustom.value
   ? t('editor.inspector.colors.customSelected', { hex: hexLabel.value })
@@ -99,7 +117,7 @@ function onHexChange(event: Event) {
   const hex = parseHex(input.value)
 
   if (hex) choose(hex)
-  input.value = (hex ?? currentHex.value ?? color.value).toUpperCase()
+  input.value = hex?.toUpperCase() ?? hexLabel.value
 }
 
 async function toggleCustom() {
@@ -122,11 +140,32 @@ function closeCustom(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="text-color">
+  <div class="color" :class="{ 'is-stacked': stacked }">
     <div class="row">
-      <span class="row-label">{{ t('editor.inspector.color') }}</span>
-      <div class="swatches">
-        <div class="presets" role="radiogroup" :aria-label="t('editor.inspector.colorLabel')">
+      <span class="row-label">{{ label }}</span>
+      <div class="swatches" :style="{ '--swatches': swatchCount }">
+        <div class="presets" role="radiogroup" :aria-label="groupLabel">
+          <label
+            v-if="noneLabel"
+            class="swatch is-none"
+            :class="{ 'is-active': isNone, 'is-disabled': noneDisabled && !isNone }"
+            :title="noneLabel"
+          >
+            <input
+              type="radio"
+              class="sr-only"
+              :name="`${id}-color`"
+              :aria-label="noneLabel"
+              :checked="isNone"
+              :disabled="noneDisabled && !isNone"
+              @change="choose(NO_PAINT)"
+            >
+            <span>
+              <svg viewBox="0 0 10 10" preserveAspectRatio="none" aria-hidden="true">
+                <line x1="0" y1="10" x2="10" y2="0" />
+              </svg>
+            </span>
+          </label>
           <label
             v-for="preset in TEXT_COLOR_OPTIONS"
             :key="preset"
@@ -180,7 +219,7 @@ function closeCustom(event: KeyboardEvent) {
       <UColorPicker
         :key="pickerKey"
         class="picker"
-        :model-value="currentHex ?? color"
+        :model-value="currentHex ?? FALLBACK_HEX"
         @update:model-value="pick"
       />
 
@@ -204,7 +243,7 @@ function closeCustom(event: KeyboardEvent) {
 </template>
 
 <style scoped>
-.text-color {
+.color {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -223,19 +262,25 @@ function closeCustom(event: KeyboardEvent) {
   font-weight: 700;
 }
 
-/* Six equal squares: 34px in the desktop inspector, up to 40px on a phone. The presets
-   keep their own radiogroup box and line up with the custom swatch through subgrid. */
+/* Six equal squares (seven with "None"): 34px in the desktop inspector, up to 40px on a
+   phone. The presets keep their own radiogroup box and line up with the custom swatch
+   through subgrid. */
 .swatches {
   display: grid;
   flex: 1;
-  grid-template-columns: repeat(6, minmax(0, 40px));
+  grid-template-columns: repeat(var(--swatches), minmax(0, 40px));
   gap: 6px;
 }
 
 .presets {
   display: grid;
-  grid-column: span 5;
+  grid-column: span calc(var(--swatches) - 1);
   grid-template-columns: subgrid;
+}
+
+.color.is-stacked .row {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .swatch {
@@ -267,6 +312,28 @@ function closeCustom(event: KeyboardEvent) {
 .swatch.is-active {
   padding: 1px;
   border-color: var(--ink-dark);
+}
+
+/* "None": paper crossed out. */
+.swatch.is-none span {
+  background: #fff;
+}
+
+.swatch.is-none svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.swatch.is-none line {
+  stroke: var(--ink-dark);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.swatch.is-none.is-disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 /* Before a custom colour is chosen, the swatch is an empty slot with a palette. */

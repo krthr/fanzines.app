@@ -7,12 +7,15 @@ import {
   type ImageBatchSkippedFile,
   type ImageElement,
   type PageId,
+  type ShapeKind,
   type TextElement,
   type ZineElement,
+  type ZineElementDraft,
   type ZineState
 } from '~/types/zine'
 import { clearCachedHtmlImages, forgetCachedHtmlImage } from '~/utils/zineImageCache'
 import { PAGE_H, PAGE_W } from '~/utils/zineLayout'
+import { createShapeDraft } from '~/utils/zineShapes'
 
 const MAX_WARN_SIZE = 8 * 1024 * 1024
 const MAX_IMAGE_LONG_EDGE = 2400
@@ -300,6 +303,35 @@ export function useZineStore() {
     return element.id
   }
 
+  function addShapeElement(kind: ShapeKind) {
+    const element = {
+      ...createShapeDraft(kind),
+      id: createId(),
+      pageId: state.value.selectedPageId
+    } as ZineElement
+
+    insertElement(element)
+    return element.id
+  }
+
+  // Appends the drafts on top of what the page already has, in order, and opens that
+  // page with nothing selected. Returns the new ids, so the caller can take them back.
+  function addElementDrafts(pageId: PageId, drafts: ZineElementDraft[]) {
+    deleteSelectedEmptyTextElement()
+
+    const ids = drafts.map((draft) => {
+      const element = { ...draft, id: createId(), pageId } as ZineElement
+      state.value.elements[element.id] = element
+      state.value.pageElementIds[pageId].push(element.id)
+      return element.id
+    })
+
+    state.value.selectedPageId = pageId
+    state.value.selectedElementId = null
+
+    return ids
+  }
+
   function updateElement(id: string, patch: Partial<ZineElement>) {
     const current = state.value.elements[id]
     if (!current) return
@@ -324,6 +356,10 @@ export function useZineStore() {
     if (state.value.selectedElementId === id) {
       state.value.selectedElementId = null
     }
+  }
+
+  function deleteElements(ids: string[]) {
+    ids.forEach(deleteElement)
   }
 
   function moveElementForward(id: string) {
@@ -366,8 +402,11 @@ export function useZineStore() {
     addImageElement,
     addImageElements,
     addTextElement,
+    addShapeElement,
+    addElementDrafts,
     updateElement,
     deleteElement,
+    deleteElements,
     moveElementForward,
     moveElementBackward,
     resetZine

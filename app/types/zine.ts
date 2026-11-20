@@ -70,7 +70,70 @@ export type TextElement = BaseElement & {
   lineHeight: number
 }
 
-export type ZineElement = ImageElement | TextElement
+// A fill or stroke: '#rrggbb', or 'transparent' for none (an empty frame, a checkbox).
+export type ShapePaint = string
+
+export const NO_PAINT = 'transparent'
+
+// x/y is the top-left corner of the box the shape is drawn in, like every element.
+export type RectElement = BaseElement & {
+  type: 'rect'
+  fill: ShapePaint
+  stroke: ShapePaint
+  // In page units.
+  strokeWidth: number
+}
+
+export type CircleElement = BaseElement & {
+  type: 'circle'
+  fill: ShapePaint
+  stroke: ShapePaint
+  strokeWidth: number
+}
+
+// A straight line: x/y is where it starts, `width` its length and `rotation` its angle.
+// It has no height of its own.
+export type LineElement = BaseElement & {
+  type: 'line'
+  stroke: string
+  strokeWidth: number
+  dash?: 'dashed' | 'dotted'
+}
+
+export const PATTERN_KINDS = ['lined', 'dot-grid', 'square-grid'] as const
+
+export type PatternKind = typeof PATTERN_KINDS[number]
+
+// A block of ruled lines, dots or squares, drawn as one node however many marks it has.
+// The marks keep their spacing when the block is resized: a bigger block has more of them.
+export type PatternElement = BaseElement & {
+  type: 'pattern'
+  pattern: PatternKind
+  // Distance between lines or dots, in page units.
+  spacing: number
+  stroke: string
+  // The thickness of a line, or the diameter of a dot, in page units.
+  strokeWidth: number
+}
+
+export type ShapeElement = RectElement | CircleElement | LineElement
+
+export type ShapeKind = ShapeElement['type']
+
+export const SHAPE_KINDS = ['rect', 'circle', 'line'] as const satisfies readonly ShapeKind[]
+
+export type ZineElement = ImageElement | TextElement | ShapeElement | PatternElement
+
+export type ZineElementType = ZineElement['type']
+
+export function isShapeElement(element: ZineElement): element is ShapeElement {
+  return element.type === 'rect' || element.type === 'circle' || element.type === 'line'
+}
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
+
+// An element before it is placed on a page: what a page layout produces.
+export type ZineElementDraft = DistributiveOmit<ZineElement, 'id' | 'pageId'>
 
 export type ZineState = {
   selectedPageId: PageId

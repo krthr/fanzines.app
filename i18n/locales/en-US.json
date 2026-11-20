@@ -152,6 +152,7 @@
     "topbar": {
       "addText": "Text",
       "addImage": "Image",
+      "addShape": "Shape",
       "progress": "{filled} of {total} pages",
       "progressLabel": "{filled} of {total} pages have content",
       "guides": "Guides",
@@ -196,6 +197,8 @@
       "label": "Selection actions",
       "fill": "Fill",
       "fit": "Fit",
+      "fillPaperHint": "Cover the whole page, edge to edge",
+      "fitPaperHint": "Fit inside the 5 mm safe margin",
       "center": "Center",
       "forward": "Forward",
       "backward": "Backward",
@@ -203,11 +206,14 @@
       "deleteShort": "Delete",
       "settings": "Settings",
       "addText": "+ Text",
-      "addPhoto": "+ Photo"
+      "addPhoto": "+ Photo",
+      "addShape": "+ Shape",
+      "layouts": "Layouts"
     },
     "settings": {
       "title": "Settings",
-      "description": "Options for the selected element"
+      "description": "Options for the selected element",
+      "layoutsDescription": "Page layouts to add to the open page"
     },
     "sidebar": {
       "label": "Zine pages",
@@ -218,7 +224,8 @@
       "reading": "Reading",
       "sheet": "Sheet",
       "empty": "empty",
-      "addPhoto": "+ photo"
+      "addPhoto": "+ photo",
+      "addLayout": "+ layout"
     },
     "drop": {
       "onlyImages": "Only images can be added",
@@ -233,8 +240,7 @@
       "hint": "Drop it on another thumbnail to put it on that page. | Drop them on another thumbnail to start from that page."
     },
     "inspector": {
-      "title": "Properties",
-      "empty": "Tap a photo or a text on the page and its options will show up here.",
+      "empty": "Tap a photo, a text or a shape on the page and its options will show up here.",
       "image": "Image",
       "text": "Text",
       "selected": "selected",
@@ -264,6 +270,30 @@
         "customSelected": "Custom color {hex}, selected"
       },
       "hex": "Hex code",
+      "fill": "Fill",
+      "fillLabel": "Shape fill",
+      "noFill": "No fill",
+      "border": "Border",
+      "borderLabel": "Border color",
+      "noBorder": "No border",
+      "lineColorLabel": "Line color",
+      "patternColorLabel": "Pattern color",
+      "thickness": "Thickness",
+      "dotSize": "Dot size",
+      "length": "Length",
+      "spacing": "Spacing",
+      "paper": "Type",
+      "paperLabel": "Kind of paper",
+      "patterns": {
+        "lined": "Lined",
+        "dot-grid": "Dot grid",
+        "square-grid": "Graph paper"
+      },
+      "lineStyles": {
+        "solid": "Solid",
+        "dashed": "Dashed",
+        "dotted": "Dotted"
+      },
       "opacity": "Opacity",
       "rotation": "Rotation",
       "measures": "Exact measurements",
@@ -279,6 +309,116 @@
       "pageTop": "Snap to the top of the page",
       "pageMiddle": "Center vertically",
       "pageBottom": "Snap to the bottom of the page"
+    },
+    "shapes": {
+      "rect": "Rectangle",
+      "circle": "Circle",
+      "line": "Line",
+      "pattern": "Paper"
+    },
+    "layouts": {
+      "title": "Layouts",
+      "intro": "Click one to add it to {page}, or drag it onto any page.",
+      "introTouch": "Tap one to add it to {page}.",
+      "add": "Add {layout} to {page}",
+      "added": "Layout added",
+      "addedTo": "“{layout}” on {page}, on top of what was there.",
+      "undo": "Undo",
+      "remove": "Remove “{layout}”",
+      "categories": {
+        "covers": "Covers",
+        "editorial": "Text",
+        "structured": "Print and write",
+        "paper": "Paper"
+      },
+      "names": {
+        "cover-classic": "Classic cover",
+        "cover-issue": "Issue cover",
+        "cover-framed": "Framed cover",
+        "cover-notebook": "Notebook cover",
+        "cover-planner": "Planner cover",
+        "title-body": "Title and text",
+        "pull-quote": "Quote",
+        "two-part": "Two sections",
+        "colophon": "Colophon",
+        "story-page": "Story page",
+        "story-back": "Story ending",
+        "checklist": "Checklist",
+        "daily-schedule": "Daily schedule",
+        "priorities-notes": "Top 3 and notes",
+        "tomorrow-back": "Tomorrow",
+        "lined": "Lined",
+        "dot-grid": "Dot grid"
+      },
+      "copy": {
+        "cover-classic": {
+          "title": "ZINE TITLE",
+          "subtitle": "A short subtitle goes here",
+          "byline": "BY YOUR NAME · {year}"
+        },
+        "cover-issue": {
+          "issue": "NO. 01",
+          "date": "{month}",
+          "title": "POCKET\nNOTES",
+          "deck": "Stories, sketches and\nfragments from the week.",
+          "footer": "FREE COPY · PRINT & FOLD"
+        },
+        "cover-framed": {
+          "title": "MY STORY",
+          "by": "By"
+        },
+        "cover-notebook": {
+          "title": "NOTES",
+          "edition": "POCKET EDITION"
+        },
+        "cover-planner": {
+          "kicker": "POCKET PLANNER",
+          "title": "DAILY",
+          "date": "DATE",
+          "focus": "MAIN FOCUS"
+        },
+        "title-body": {
+          "title": "Chapter title",
+          "body": "Write a short story, an essay, a recipe or a field note here. Double-click any text to edit it, and resize or restyle anything on the page.\n\nAdd a second paragraph, or drop a photo beside it.",
+          "folio": "01"
+        },
+        "pull-quote": {
+          "quote": "Make things on\none sheet of paper\nand hand them to\nyour friends.",
+          "credit": "— WHO SAID IT"
+        },
+        "two-part": {
+          "firstTitle": "01 · First topic",
+          "firstBody": "A short paragraph, a question, an ingredient list or a verse for the top half.",
+          "secondTitle": "02 · Second topic",
+          "secondBody": "Another section below, with the same margins and room to breathe."
+        },
+        "colophon": {
+          "title": "THANKS FOR READING",
+          "credits": "Printed & folded on 1 A4 sheet\nEdition of 20 · Your city\n{'@'}yourhandle"
+        },
+        "story-back": {
+          "title": "THE END",
+          "about": "ABOUT THE AUTHOR"
+        },
+        "checklist": {
+          "title": "TO DO"
+        },
+        "daily-schedule": {
+          "title": "TODAY",
+          "date": "___ / ___",
+          "morning": "MORNING",
+          "afternoon": "AFTERNOON",
+          "evening": "EVENING"
+        },
+        "priorities-notes": {
+          "title": "TOP 3",
+          "notes": "NOTES"
+        },
+        "tomorrow-back": {
+          "title": "TOMORROW",
+          "later": "PARKING LOT"
+        }
+      }
     },
     "review": {
       "label": "Sheet review",

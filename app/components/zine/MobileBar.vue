@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PANEL_SIZE_LABEL, formatMmSize } from '~/utils/zineLayout'
+import type { ShapeKind } from '~/types/zine'
+import { PANEL_SIZE_LABEL, formatElementSize } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
-import { useZineElementActions } from '~/composables/useZineElementActions.client'
+import { canFitToPage, useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
+import AddShapeMenu from '~/components/zine/AddShapeMenu.vue'
 
-// The mobile context bar: the selection's actions, or the two ways to add
-// something when nothing is selected.
+// The mobile context bar: the selection's actions, or the ways to add something when
+// nothing is selected. "Layouts" opens the drawer, where the catalog shows while
+// nothing is selected.
 const emit = defineEmits<{
   'add-text': []
   'add-image': []
+  'add-shape': [kind: ShapeKind]
   'open-settings': []
+  'open-layouts': []
 }>()
 
 const { t } = useI18n()
@@ -19,12 +24,15 @@ const { pageLabel } = useZinePageLabels()
 const { coverPage, containPage, bringForward, sendBackward, removeSelected } = useZineElementActions()
 
 const title = computed(() => {
-  if (!selectedElement.value) return pageLabel(state.value.selectedPageId)
-  return selectedElement.value.type === 'image' ? t('editor.inspector.image') : t('editor.inspector.text')
+  const element = selectedElement.value
+  if (!element) return pageLabel(state.value.selectedPageId)
+  if (element.type === 'image') return t('editor.inspector.image')
+  if (element.type === 'text') return t('editor.inspector.text')
+  return t(`editor.shapes.${element.type}`)
 })
 
 const sizeLabel = computed(() => selectedElement.value
-  ? formatMmSize(selectedElement.value.width, selectedElement.value.height)
+  ? formatElementSize(selectedElement.value.type, selectedElement.value.width, selectedElement.value.height)
   : PANEL_SIZE_LABEL)
 </script>
 
@@ -40,7 +48,7 @@ const sizeLabel = computed(() => selectedElement.value
     </div>
 
     <div v-if="selectedElement" class="actions">
-      <template v-if="selectedElement.type === 'image'">
+      <template v-if="canFitToPage(selectedElement)">
         <button type="button" class="action" @click="coverPage">
           <UIcon name="i-lucide-expand" aria-hidden="true" />
           {{ t('editor.actions.fill') }}
@@ -76,6 +84,16 @@ const sizeLabel = computed(() => selectedElement.value
       <button type="button" class="action" @click="emit('add-image')">
         <UIcon name="i-lucide-image-plus" aria-hidden="true" />
         {{ t('editor.actions.addPhoto') }}
+      </button>
+      <AddShapeMenu side="top" @add="emit('add-shape', $event)">
+        <button type="button" class="action">
+          <UIcon name="i-lucide-shapes" aria-hidden="true" />
+          {{ t('editor.actions.addShape') }}
+        </button>
+      </AddShapeMenu>
+      <button type="button" class="action" @click="emit('open-layouts')">
+        <UIcon name="i-lucide-layout-template" aria-hidden="true" />
+        {{ t('editor.actions.layouts') }}
       </button>
     </div>
   </div>

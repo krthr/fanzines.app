@@ -6,6 +6,7 @@ import { useZineStore } from '~/composables/useZineStore'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { usePageTileDrop } from '~/composables/usePageTileDrop.client'
+import { useLayoutDragState } from '~/composables/usePageLayouts.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import PageMini from '~/components/zine/PageMini.vue'
 
@@ -18,6 +19,7 @@ const { pageLabel, pageShortLabel } = useZinePageLabels()
 const { mode, dropTargetPageIds } = useZineEditorView()
 const { selectTrackedPage } = useTrackedZinePageSelection()
 const { onTileDragOver, onTileDragLeave, onTileDrop } = usePageTileDrop()
+const { layoutDropPageId } = useLayoutDragState()
 
 const groups = computed(() => READING_SPREADS.map((spread) => {
   const pageIds = spread.filter((pageId): pageId is PageId => pageId !== null)
@@ -68,7 +70,7 @@ function choosePage(pageId: PageId) {
             :page-id="pageId"
             :width="MINI_WIDTH"
             :active="isActive(pageId)"
-            :drop-target="dropTargetPageIds.includes(pageId)"
+            :drop-target="dropTargetPageIds.includes(pageId) || layoutDropPageId === pageId"
           />
         </button>
       </div>
