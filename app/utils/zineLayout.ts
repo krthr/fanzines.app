@@ -106,6 +106,11 @@ export function formatMmSize(widthUnits: number, heightUnits: number) {
   return `${Math.round(unitsToMm(widthUnits))} × ${Math.round(unitsToMm(heightUnits))} mm`
 }
 
+// A line has a length and no height: "50 mm".
+export function formatElementSize(type: string, widthUnits: number, heightUnits: number) {
+  return type === 'line' ? `${Math.round(unitsToMm(widthUnits))} mm` : formatMmSize(widthUnits, heightUnits)
+}
+
 export const PANEL_SIZE_LABEL = formatMmSize(PAGE_W, PAGE_H)
 
 // Reading order as spreads: pages that touch face each other in the folded zine.

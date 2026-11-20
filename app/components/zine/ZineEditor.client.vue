@@ -13,7 +13,8 @@ import PdfReadyDialog from '~/components/zine/PdfReadyDialog.vue'
 import ReviewPanel from '~/components/zine/ReviewPanel.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
 import ZineToggle from '~/components/zine/ZineToggle.vue'
-import { PAGE_IDS } from '~/types/zine'
+import AddShapeMenu from '~/components/zine/AddShapeMenu.vue'
+import { PAGE_IDS, type ShapeKind } from '~/types/zine'
 import { PANEL_SIZE_LABEL } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
@@ -26,12 +27,14 @@ import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSel
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 
 type TextInputMethod = 'top_bar' | 'empty_state_link' | 'mobile_bar'
+type ShapeInputMethod = 'top_bar' | 'mobile_bar'
 
 const {
   state,
   elementCount,
   selectedElement,
   addTextElement,
+  addShapeElement,
   selectElement,
   resetZine
 } = useZineStore()
@@ -135,6 +138,18 @@ async function handleAddTextElement(inputMethod: TextInputMethod) {
 
   await nextTick()
   await pageCanvasRef.value?.startTextEditing(elementId, { selectAll: true })
+}
+
+function handleAddShapeElement(kind: ShapeKind, inputMethod: ShapeInputMethod) {
+  const pageId = state.value.selectedPageId
+
+  addShapeElement(kind)
+  trackZineEvent('zine_shape_element_added', {
+    page_id: pageId,
+    shape: kind,
+    element_count: elementCount.value,
+    input_method: inputMethod
+  })
 }
 
 function goToPage(pageId: typeof PAGE_IDS[number] | null) {
@@ -288,6 +303,13 @@ onBeforeUnmount(() => {
             <UIcon name="i-lucide-plus" aria-hidden="true" />
             {{ t('editor.topbar.addImage') }}
           </button>
+          <AddShapeMenu @add="handleAddShapeElement($event, 'top_bar')">
+            <button type="button" class="ed-btn-outline">
+              <UIcon name="i-lucide-plus" aria-hidden="true" />
+              {{ t('editor.topbar.addShape') }}
+              <UIcon name="i-lucide-chevron-down" class="add-caret" aria-hidden="true" />
+            </button>
+          </AddShapeMenu>
         </div>
 
         <div class="topbar-right">
@@ -491,7 +513,9 @@ onBeforeUnmount(() => {
           v-if="mode === 'design'"
           @add-text="handleAddTextElement('mobile_bar')"
           @add-image="openFilePicker('mobile_bar')"
+          @add-shape="handleAddShapeElement($event, 'mobile_bar')"
           @open-settings="mobileToolsOpen = true"
+          @open-layouts="mobileToolsOpen = true"
         />
         <PageStrip />
       </template>
@@ -499,8 +523,8 @@ onBeforeUnmount(() => {
 
     <UDrawer
       v-model:open="mobileToolsOpen"
-      :title="t('editor.settings.title')"
-      :description="t('editor.settings.description')"
+      :title="selectedElement ? t('editor.settings.title') : t('editor.layouts.title')"
+      :description="selectedElement ? t('editor.settings.description') : t('editor.settings.layoutsDescription')"
       :ui="{
         overlay: 'ed-drawer-overlay',
         content: 'ed-drawer ed-light max-h-[88dvh]',
@@ -509,7 +533,7 @@ onBeforeUnmount(() => {
       }"
     >
       <template #body>
-        <ElementInspector />
+        <ElementInspector @layout-applied="mobileToolsOpen = false" />
       </template>
     </UDrawer>
 
@@ -528,6 +552,12 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.add .ed-btn-outline .add-caret {
+  width: 14px;
+  height: 14px;
+  margin-left: -2px;
 }
 
 .topbar-right {

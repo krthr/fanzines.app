@@ -152,6 +152,7 @@
     "topbar": {
       "addText": "Texto",
       "addImage": "Imagen",
+      "addShape": "Forma",
       "progress": "{filled} de {total} páginas",
       "progressLabel": "{filled} de {total} páginas con contenido",
       "guides": "Guías",
@@ -203,11 +204,14 @@
       "deleteShort": "Borrar",
       "settings": "Ajustes",
       "addText": "+ Texto",
-      "addPhoto": "+ Foto"
+      "addPhoto": "+ Foto",
+      "addShape": "+ Forma",
+      "layouts": "Diseños"
     },
     "settings": {
       "title": "Ajustes",
-      "description": "Opciones del elemento seleccionado"
+      "description": "Opciones del elemento seleccionado",
+      "layoutsDescription": "Diseños de página para añadir a la página abierta"
     },
     "sidebar": {
       "label": "Páginas del fanzine",
@@ -218,7 +222,8 @@
       "reading": "Lectura",
       "sheet": "Pliego",
       "empty": "vacía",
-      "addPhoto": "+ foto"
+      "addPhoto": "+ foto",
+      "addLayout": "+ diseño"
     },
     "drop": {
       "onlyImages": "Solo se pueden añadir imágenes",
@@ -233,8 +238,7 @@
       "hint": "Suéltala sobre otra miniatura para ponerla en esa página. | Suéltalas sobre otra miniatura para empezar desde esa página."
     },
     "inspector": {
-      "title": "Propiedades",
-      "empty": "Toca una foto o un texto de la página y aquí verás sus opciones.",
+      "empty": "Toca una foto, un texto o una forma de la página y aquí verás sus opciones.",
       "image": "Imagen",
       "text": "Texto",
       "selected": "seleccionado",
@@ -264,6 +268,30 @@
         "customSelected": "Color personalizado {hex}, seleccionado"
       },
       "hex": "Código hex",
+      "fill": "Relleno",
+      "fillLabel": "Relleno de la forma",
+      "noFill": "Sin relleno",
+      "border": "Borde",
+      "borderLabel": "Color del borde",
+      "noBorder": "Sin borde",
+      "lineColorLabel": "Color de la línea",
+      "patternColorLabel": "Color del patrón",
+      "thickness": "Grosor",
+      "dotSize": "Punto",
+      "length": "Largo",
+      "spacing": "Espacio",
+      "paper": "Tipo",
+      "paperLabel": "Tipo de papel",
+      "patterns": {
+        "lined": "Rayado",
+        "dot-grid": "Puntos",
+        "square-grid": "Cuadriculado"
+      },
+      "lineStyles": {
+        "solid": "Continua",
+        "dashed": "Discontinua",
+        "dotted": "Punteada"
+      },
       "opacity": "Opacidad",
       "rotation": "Giro",
       "measures": "Medidas exactas",
@@ -279,6 +307,116 @@
       "pageTop": "Pegar arriba de la página",
       "pageMiddle": "Centrar en vertical",
       "pageBottom": "Pegar abajo de la página"
+    },
+    "shapes": {
+      "rect": "Rectángulo",
+      "circle": "Círculo",
+      "line": "Línea",
+      "pattern": "Papel"
+    },
+    "layouts": {
+      "title": "Diseños",
+      "intro": "Un clic lo añade a {page}; también puedes arrastrarlo a cualquier página.",
+      "introTouch": "Toca uno para añadirlo a {page}.",
+      "add": "Añadir {layout} a {page}",
+      "added": "Diseño añadido",
+      "addedTo": "«{layout}» en {page}, encima de lo que había.",
+      "undo": "Deshacer",
+      "remove": "Quitar «{layout}»",
+      "categories": {
+        "covers": "Portadas",
+        "editorial": "Texto",
+        "structured": "Para imprimir y escribir",
+        "paper": "Papel"
+      },
+      "names": {
+        "cover-classic": "Portada clásica",
+        "cover-issue": "Portada de número",
+        "cover-framed": "Portada con marco",
+        "cover-notebook": "Portada de libreta",
+        "cover-planner": "Portada de agenda",
+        "title-body": "Título y texto",
+        "pull-quote": "Cita",
+        "two-part": "Dos secciones",
+        "colophon": "Colofón",
+        "story-page": "Página de cuento",
+        "story-back": "Final del cuento",
+        "checklist": "Lista de tareas",
+        "daily-schedule": "Horario del día",
+        "priorities-notes": "Top 3 y notas",
+        "tomorrow-back": "Para mañana",
+        "lined": "Rayado",
+        "dot-grid": "Puntos"
+      },
+      "copy": {
+        "cover-classic": {
+          "title": "TU TÍTULO",
+          "subtitle": "Un subtítulo corto va aquí",
+          "byline": "POR TU NOMBRE · {year}"
+        },
+        "cover-issue": {
+          "issue": "N.º 01",
+          "date": "{month}",
+          "title": "NOTAS DE\nBOLSILLO",
+          "deck": "Historias, bocetos y\nfragmentos de la semana.",
+          "footer": "GRATIS · IMPRIME Y DOBLA"
+        },
+        "cover-framed": {
+          "title": "MI HISTORIA",
+          "by": "Por"
+        },
+        "cover-notebook": {
+          "title": "NOTAS",
+          "edition": "EDICIÓN DE BOLSILLO"
+        },
+        "cover-planner": {
+          "kicker": "AGENDA DE BOLSILLO",
+          "title": "DÍA A DÍA",
+          "date": "FECHA",
+          "focus": "LO MÁS IMPORTANTE"
+        },
+        "title-body": {
+          "title": "Título del capítulo",
+          "body": "Escribe aquí un cuento, un ensayo, una receta o una nota de campo. Haz doble clic en cualquier texto para editarlo, y cambia el tamaño o el estilo de lo que quieras.\n\nAñade otro párrafo o pon una foto al lado.",
+          "folio": "01"
+        },
+        "pull-quote": {
+          "quote": "Haz cosas en\nuna sola hoja\ny regálaselas\na tus amigos.",
+          "credit": "— QUIÉN LO DIJO"
+        },
+        "two-part": {
+          "firstTitle": "01 · Primer tema",
+          "firstBody": "Un párrafo corto, una pregunta, una lista de ingredientes o un verso para la mitad de arriba.",
+          "secondTitle": "02 · Segundo tema",
+          "secondBody": "Otra sección abajo, con los mismos márgenes y espacio para respirar."
+        },
+        "colophon": {
+          "title": "GRACIAS POR LEER",
+          "credits": "Impreso y doblado en 1 hoja A4\nTiraje de 20 · Tu ciudad\n{'@'}tuusuario"
+        },
+        "story-back": {
+          "title": "FIN",
+          "about": "SOBRE QUIEN ESCRIBE"
+        },
+        "checklist": {
+          "title": "PENDIENTES"
+        },
+        "daily-schedule": {
+          "title": "HOY",
+          "date": "___ / ___",
+          "morning": "MAÑANA",
+          "afternoon": "TARDE",
+          "evening": "NOCHE"
+        },
+        "priorities-notes": {
+          "title": "TOP 3",
+          "notes": "NOTAS"
+        },
+        "tomorrow-back": {
+          "title": "PARA MAÑANA",
+          "later": "IDEAS SUELTAS"
+        }
+      }
     },
     "review": {
       "label": "Revisión del pliego",

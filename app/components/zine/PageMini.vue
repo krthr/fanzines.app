@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { PageId } from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
+import { useLayoutDragState } from '~/composables/usePageLayouts.client'
 import ZinePageRender from '~/components/zine/ZinePageRender.vue'
 
 // The miniature of one page. The parent owns the button, the label and the size.
@@ -9,7 +10,7 @@ const props = defineProps<{
   pageId: PageId
   width: number
   active?: boolean
-  // This page receives a photo if the files being dragged are dropped now.
+  // This page receives a photo (or the layout) being dragged if it is dropped now.
   dropTarget?: boolean
   // Spell out "vacía" / "+ foto" on empty pages (the mobile strip is too small).
   captions?: boolean
@@ -17,7 +18,9 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { state } = useZineStore()
+const { draggedLayoutId } = useLayoutDragState()
 const isEmpty = computed(() => state.value.pageElementIds[props.pageId].length === 0)
+const dropCaption = computed(() => draggedLayoutId.value ? t('editor.sidebar.addLayout') : t('editor.sidebar.addPhoto'))
 </script>
 
 <template>
@@ -30,7 +33,7 @@ const isEmpty = computed(() => state.value.pageElementIds[props.pageId].length =
     }"
   >
     <ZinePageRender v-if="!isEmpty" :page-id="pageId" :width="width" />
-    <span v-else-if="captions" class="mini-caption">{{ dropTarget ? t('editor.sidebar.addPhoto') : t('editor.sidebar.empty') }}</span>
+    <span v-else-if="captions" class="mini-caption">{{ dropTarget ? dropCaption : t('editor.sidebar.empty') }}</span>
   </span>
 </template>
 

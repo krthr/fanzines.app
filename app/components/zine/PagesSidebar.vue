@@ -5,6 +5,7 @@ import { useZineStore } from '~/composables/useZineStore'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
 import { usePageTileDrop } from '~/composables/usePageTileDrop.client'
+import { useLayoutDragState } from '~/composables/usePageLayouts.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import PageMini from '~/components/zine/PageMini.vue'
 import SheetPreview from '~/components/zine/SheetPreview.vue'
@@ -19,14 +20,16 @@ const { pageLabel, pageShortLabel } = useZinePageLabels()
 const { mode, sidebarView, dropTargetPageIds } = useZineEditorView()
 const { selectTrackedPage } = useTrackedZinePageSelection()
 const { onTileDragOver, onTileDragLeave, onTileDrop } = usePageTileDrop()
+const { layoutDropPageId } = useLayoutDragState()
 
 // In review nothing is being edited, so no page is marked as current.
 function isActive(pageId: PageId | null) {
   return pageId !== null && mode.value === 'design' && state.value.selectedPageId === pageId
 }
 
+// Where dragged photos would go, or the page under a dragged layout.
 function isDropTarget(pageId: PageId) {
-  return dropTargetPageIds.value.includes(pageId)
+  return dropTargetPageIds.value.includes(pageId) || layoutDropPageId.value === pageId
 }
 
 function choosePage(pageId: PageId) {

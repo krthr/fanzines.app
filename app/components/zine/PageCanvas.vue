@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import 'konva/lib/shapes/Image'
+import 'konva/lib/shapes/Line'
 import 'konva/lib/shapes/Rect'
 import 'konva/lib/shapes/Text'
 import 'konva/lib/shapes/Transformer'
@@ -9,32 +10,44 @@ import {
   Group as VGroup,
   Image as VImage,
   Layer as VLayer,
+  Line as VLine,
   Rect as VRect,
+  Shape as VShape,
   Stage as VStage,
   Text as VText,
   Transformer as VTransformer
 } from 'vue-konva/core'
 import type { Node as KonvaNode } from 'konva/lib/Node'
 import type { Stage as KonvaStage } from 'konva/lib/Stage'
+import type { Line as KonvaLine } from 'konva/lib/shapes/Line'
 import type { Rect as KonvaRect } from 'konva/lib/shapes/Rect'
 import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
-import { PAGE_IDS, type ImageElement, type TextElement, type ZineElement } from '~/types/zine'
+import {
+  PAGE_IDS,
+  type ImageElement,
+  type TextElement,
+  type ZineElement
+} from '~/types/zine'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineImageImport, type ImageInputMethod } from '~/composables/useZineImageImport.client'
 import { useZineDragState } from '~/composables/useZineDragState.client'
 import { useZineEditorView } from '~/composables/useZineEditorView.client'
 import { useZineElementActions } from '~/composables/useZineElementActions.client'
 import { useTrackedZinePageSelection } from '~/composables/useTrackedZinePageSelection.client'
+import { usePageLayouts } from '~/composables/usePageLayouts.client'
 import { useZinePageLabels } from '~/composables/useZinePageLabels'
 import {
   PAGE_H,
   PAGE_W,
   SAFE_MARGIN,
   clampToPage,
-  formatMmSize,
+  formatElementSize,
   getPageSide,
-  getRotatedBounds
+  getRotatedBounds,
+  mmToUnits
 } from '~/utils/zineLayout'
+import { circleNodeConfig, lineNodeConfig, patternNodeConfig, rectNodeConfig } from '~/utils/zineShapes'
+import { fitTextHeight } from '~/utils/renderZine.client'
 import ZinePageRender from '~/components/zine/ZinePageRender.vue'
 
 type KonvaEvent = {
@@ -78,6 +91,13 @@ const TOOLBAR_GAP = 43
 const TAG_GAP = 10
 const TAG_HEIGHT = 22
 const EDGE = 8
+// Shapes and patterns can be small (a 4 mm checkbox), so they are allowed closer to
+// nothing than photos and text before a resize stops.
+const MIN_SHAPE_BOX_PX = 8
+const MIN_SHAPE_SIZE = mmToUnits(1)
+// How wide, on screen, the band is that picks up a thin line or an empty frame's edge.
+const HIT_BAND_PX = 16
+const HIT_BAND_PX_TOUCH = 26
 
 function cssToken(name: string, fallback: string) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
@@ -99,6 +119,8 @@ const { isDragActive, resetDrag } = useZineDragState()
 const { isEditingText, facingPageId } = useZineEditorView()
 const { coverPage, containPage, bringForward, sendBackward, removeSelected } = useZineElementActions()
 const { selectTrackedPage } = useTrackedZinePageSelection()
+// A layout card can be dropped on the open page, or on the facing one in "Spread".
+const { layoutDropPageId, onLayoutDragOver, onLayoutDragLeave, onLayoutDrop } = usePageLayouts()
 const { t } = useI18n()
 const { pageLabel, pageName } = useZinePageLabels()
 
@@ -232,7 +254,7 @@ const selectionBox = computed(() => {
     right: bounds.right * scale.value,
     top: bounds.top * scale.value,
     bottom: bounds.bottom * scale.value,
-    label: formatMmSize(box.width, box.height)
+    label: formatElementSize(element.type, box.width, box.height)
   }
 })
 
@@ -319,18 +341,39 @@ const textEditorFontStyle = computed<CSSProperties>(() => {
 
 // ── Konva node configs ──────────────────────────────────────────────────────
 
+const CORNER_ANCHORS = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+const SIDE_ANCHORS = ['middle-left', 'middle-right']
+const ALL_ANCHORS = [...CORNER_ANCHORS, 'top-center', 'bottom-center', ...SIDE_ANCHORS]
+
+// Text and lines only get longer or shorter; photos keep their proportions; frames and
+// patterns stretch freely; a circle keeps round from its corners and turns into an
+// ellipse from its sides.
+function transformerShape(element: ZineElement | null) {
+  switch (element?.type) {
+    case 'text':
+    case 'line':
+      return { keepRatio: false, enabledAnchors: SIDE_ANCHORS }
+    case 'rect':
+    case 'pattern':
+      return { keepRatio: false, enabledAnchors: ALL_ANCHORS }
+    case 'circle':
+      return { keepRatio: true, enabledAnchors: ALL_ANCHORS }
+    default:
+      return { keepRatio: true, enabledAnchors: CORNER_ANCHORS }
+  }
+}
+
 const transformerConfig = computed(() => {
   const element = selectedElement.value
-  const isText = element?.type === 'text'
   const anchorSize = props.compact ? 18 : 12
+  const isLine = element?.type === 'line'
+  const minBox = element?.type === 'image' || element?.type === 'text' ? 20 : MIN_SHAPE_BOX_PX
 
   return {
     rotateEnabled: true,
     rotateAnchorOffset: props.compact ? 30 : 24,
-    keepRatio: !isText,
-    enabledAnchors: isText
-      ? ['middle-left', 'middle-right']
-      : ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+    ...transformerShape(element),
+    flipEnabled: false,
     anchorSize,
     anchorCornerRadius: 0,
     borderStroke: ORANGE,
@@ -342,8 +385,9 @@ const transformerConfig = computed(() => {
     anchorStyleFunc: (anchor: KonvaRect) => {
       if (anchor.hasName('rotater')) anchor.cornerRadius(anchorSize / 2)
     },
+    // A line is as tall as its stroke, so only its length has a floor.
     boundBoxFunc: (_oldBox: Box, newBox: Box) => {
-      if (newBox.width < 20 || newBox.height < 20) return _oldBox
+      if (newBox.width < minBox || (!isLine && newBox.height < minBox)) return _oldBox
       return newBox
     }
   }
@@ -406,6 +450,50 @@ function textConfig(element: TextElement) {
     visible: !isEditing,
     listening: !isEditing,
     draggable: !isEditing
+  }
+}
+
+// Lines and empty frames are picked up by a band wider than their stroke.
+const hitBand = computed(() => (props.compact ? HIT_BAND_PX_TOUCH : HIT_BAND_PX) / scale.value)
+
+function interactiveConfig(element: ZineElement) {
+  return {
+    id: element.id,
+    name: 'zine-element',
+    draggable: editingTextId.value !== element.id
+  }
+}
+
+function nodeComponent(element: ZineElement) {
+  switch (element.type) {
+    case 'image':
+      return loadedImages.has(element.src) ? VImage : VRect
+    case 'text':
+      return VText
+    case 'rect':
+      return VRect
+    case 'line':
+      return VLine
+    case 'circle':
+    case 'pattern':
+      return VShape
+  }
+}
+
+function nodeConfig(element: ZineElement) {
+  switch (element.type) {
+    case 'image':
+      return loadedImages.has(element.src) ? imageConfig(element) : imageFallbackConfig(element)
+    case 'text':
+      return textConfig(element)
+    case 'rect':
+      return { ...rectNodeConfig(element), ...interactiveConfig(element), hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value) }
+    case 'circle':
+      return { ...circleNodeConfig(element), ...interactiveConfig(element), hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value) }
+    case 'line':
+      return { ...lineNodeConfig(element), ...interactiveConfig(element), hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value) }
+    case 'pattern':
+      return { ...patternNodeConfig(element), ...interactiveConfig(element) }
   }
 }
 
@@ -564,7 +652,28 @@ function handleTransformStart() {
   isTransforming.value = true
 }
 
-function handleTransform(event: KonvaEvent) {
+// Shapes and patterns are resized as they are dragged, not scaled: a frame keeps its
+// stroke and a pattern its spacing, instead of stretching until the handle is let go.
+function applyLiveResize(element: ZineElement, node: KonvaNode) {
+  const scaleX = node.scaleX()
+  const scaleY = node.scaleY()
+
+  if (element.type === 'line') {
+    (node as KonvaLine).points([0, 0, Math.max(MIN_SHAPE_SIZE, node.width() * scaleX), 0])
+  } else {
+    node.width(Math.max(MIN_SHAPE_SIZE, node.width() * scaleX))
+    node.height(Math.max(MIN_SHAPE_SIZE, node.height() * scaleY))
+  }
+
+  node.scaleX(1)
+  node.scaleY(1)
+}
+
+function handleTransform(element: ZineElement, event: KonvaEvent) {
+  if (element.type !== 'image' && element.type !== 'text') {
+    applyLiveResize(element, event.target)
+  }
+
   liveBox.value = readLiveBox(event.target)
 }
 
@@ -573,20 +682,33 @@ function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
   const scaleX = node.scaleX()
   const scaleY = node.scaleY()
 
+  const position = {
+    x: clampToPage(node.x(), PAGE_W),
+    y: clampToPage(node.y(), PAGE_H),
+    rotation: node.rotation()
+  }
+
   if (element.type === 'image') {
     updateElement(element.id, {
-      x: clampToPage(node.x(), PAGE_W),
-      y: clampToPage(node.y(), PAGE_H),
+      ...position,
       width: Math.max(20, node.width() * scaleX),
-      height: Math.max(20, node.height() * scaleY),
-      rotation: node.rotation()
+      height: Math.max(20, node.height() * scaleY)
+    })
+  } else if (element.type === 'text') {
+    updateElement(element.id, {
+      ...position,
+      width: Math.max(80, node.width() * scaleX)
+    })
+  } else if (element.type === 'line') {
+    updateElement(element.id, {
+      ...position,
+      width: Math.max(MIN_SHAPE_SIZE, node.width() * scaleX)
     })
   } else {
     updateElement(element.id, {
-      x: clampToPage(node.x(), PAGE_W),
-      y: clampToPage(node.y(), PAGE_H),
-      width: Math.max(80, node.width() * scaleX),
-      rotation: node.rotation()
+      ...position,
+      width: Math.max(MIN_SHAPE_SIZE, node.width() * scaleX),
+      height: Math.max(MIN_SHAPE_SIZE, node.height() * scaleY)
     })
   }
 
@@ -682,7 +804,9 @@ function cancelTextEdit() {
   updateTransformer()
 }
 
-function handleTextEditRequest(element: TextElement, event: KonvaEvent) {
+function handleElementDoubleClick(element: ZineElement, event: KonvaEvent) {
+  if (element.type !== 'text') return
+
   event.cancelBubble = true
   startEditingText(element)
 }
@@ -823,6 +947,25 @@ watch(
   { flush: 'post' }
 )
 
+// A text box only draws the lines that fit its height. When the selected text gets
+// more lines (typed, a bigger size, a narrower box), its box grows to show them. It
+// never shrinks, so nothing moves under a text that gets shorter.
+watch(
+  () => {
+    const element = selectedElement.value
+    return element?.type === 'text'
+      ? [element.id, element.text, element.width, element.fontSize, element.fontFamily, element.fontStyle, element.lineHeight].join('|')
+      : null
+  },
+  () => {
+    const element = selectedElement.value
+    if (element?.type !== 'text') return
+
+    const height = fitTextHeight(element)
+    if (height > element.height) updateElement(element.id, { height })
+  }
+)
+
 // The toolbar is clamped to the stage area, which needs its real width.
 watch(
   () => [showToolbar.value, selectedElement.value?.type],
@@ -852,14 +995,25 @@ defineExpose({
           v-if="facingId && activeSide === 'right'"
           type="button"
           class="page page-facing"
+          :class="{ 'is-layout-target': layoutDropPageId === facingId }"
           :style="pageStyle"
           :aria-label="t('editor.canvas.editPage', { page: pageName(facingId) })"
           @click="selectFacingPage"
+          @dragover="onLayoutDragOver($event, facingId)"
+          @dragleave="onLayoutDragLeave($event, facingId)"
+          @drop="onLayoutDrop($event, facingId, 'facing_page')"
         >
           <ZinePageRender :page-id="facingId" :width="pageWidth" />
         </button>
 
-        <div class="page page-active" :style="pageStyle">
+        <div
+          class="page page-active"
+          :class="{ 'is-layout-target': layoutDropPageId === activePageId }"
+          :style="pageStyle"
+          @dragover="onLayoutDragOver($event, activePageId)"
+          @dragleave="onLayoutDragLeave($event, activePageId)"
+          @drop="onLayoutDrop($event, activePageId, 'canvas')"
+        >
           <VStage
             ref="stageRef"
             :config="stageConfig"
@@ -873,52 +1027,24 @@ defineExpose({
               <VRect :config="backgroundConfig" />
 
               <VGroup :config="contentConfig">
-                <template v-for="element in currentPageElements" :key="element.id">
-                  <VImage
-                    v-if="element.type === 'image' && loadedImages.has(element.src)"
-                    :config="imageConfig(element)"
-                    @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
-                    @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-                    @dragstart="handleDragStart"
-                    @dragmove="handleDragMove"
-                    @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-                    @transformstart="handleTransformStart"
-                    @transform="handleTransform"
-                    @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
-                  />
-                  <VRect
-                    v-else-if="element.type === 'image'"
-                    :config="imageFallbackConfig(element)"
-                    @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
-                    @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-                    @dragstart="handleDragStart"
-                    @dragmove="handleDragMove"
-                    @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-                    @transformstart="handleTransformStart"
-                    @transform="handleTransform"
-                    @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
-                  />
-                  <VText
-                    v-else
-                    :config="textConfig(element)"
-                    @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
-                    @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
-                    @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
-                    @dragstart="handleDragStart"
-                    @dragmove="handleDragMove"
-                    @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
-                    @transformstart="handleTransformStart"
-                    @transform="handleTransform"
-                    @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
-                    @dblclick="(event: KonvaEvent) => handleTextEditRequest(element, event)"
-                    @dbltap="(event: KonvaEvent) => handleTextEditRequest(element, event)"
-                  />
-                </template>
+                <component
+                  :is="nodeComponent(element)"
+                  v-for="element in currentPageElements"
+                  :key="element.id"
+                  :config="nodeConfig(element)"
+                  @mousedown="(event: KonvaEvent) => handleElementPointer(element, event)"
+                  @touchstart="(event: KonvaEvent) => handleElementPointer(element, event)"
+                  @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
+                  @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
+                  @dragstart="handleDragStart"
+                  @dragmove="handleDragMove"
+                  @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
+                  @transformstart="handleTransformStart"
+                  @transform="(event: KonvaEvent) => handleTransform(element, event)"
+                  @transformend="(event: KonvaEvent) => handleTransformEnd(element, event)"
+                  @dblclick="(event: KonvaEvent) => handleElementDoubleClick(element, event)"
+                  @dbltap="(event: KonvaEvent) => handleElementDoubleClick(element, event)"
+                />
               </VGroup>
 
               <VRect v-if="state.previewGuides" :config="safeMarginConfig" />
@@ -1020,9 +1146,13 @@ defineExpose({
           v-if="facingId && activeSide === 'left'"
           type="button"
           class="page page-facing"
+          :class="{ 'is-layout-target': layoutDropPageId === facingId }"
           :style="pageStyle"
           :aria-label="t('editor.canvas.editPage', { page: pageName(facingId) })"
           @click="selectFacingPage"
+          @dragover="onLayoutDragOver($event, facingId)"
+          @dragleave="onLayoutDragLeave($event, facingId)"
+          @drop="onLayoutDrop($event, facingId, 'facing_page')"
         >
           <ZinePageRender :page-id="facingId" :width="pageWidth" />
         </button>
@@ -1079,6 +1209,20 @@ defineExpose({
 
 .page-active {
   z-index: 1;
+}
+
+/* A layout card is over this page: the acid frame of a drop target, drawn over the page. */
+.page.is-layout-target::after {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border: 3px solid var(--acid);
+  content: "";
+  pointer-events: none;
+}
+
+.page-facing.is-layout-target {
+  opacity: 1;
 }
 
 .page-facing {

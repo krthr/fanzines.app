@@ -33,6 +33,8 @@ Fanzines is a web app for designing an **eight-panel** zine on a single foldable
 - **8-panel editor with A4 imposition.** Front cover, back cover and 6 inner pages, placed automatically on the print grid (4 columns × 2 rows) with the right rotations for folding.
 - **Text and images.** Upload photos (one at a time or in batches) by **dragging them onto the canvas, a page thumbnail or the window**, or with the upload button, and type right on the canvas. Every element can be **moved, rotated, scaled, faded, reordered (z-order) and aligned** within its panel.
 - **Inline text editing.** Click a text box and type on the canvas.
+- **Shapes.** Rectangles, circles and lines, with a fill (or none, for frames and checkboxes), a border, its thickness in mm and, for lines, a dashed or dotted style.
+- **Page layouts.** 17 ready-made pages in four groups (covers, text, print-and-write pages such as a checklist or a daily schedule, and lined or dot-grid paper), built from ordinary text, shapes and paper patterns. Click one to add it to the open page, or drag it onto the canvas or any thumbnail. It lands on top of what the page already has, and the toast or the inspector takes it back.
 - **Batch upload with auto-optimization.** When you import several images, they're spread across the free pages and scaled down automatically if their longest side is over 2400 px.
 - **Pages in reading order.** The sidebar shows live thumbnails grouped the way they're read (Front cover, 1|2, 3|4, 5|6, Back cover), and the canvas can show the facing page.
 - **Sheet review.** Before you download, the Review step shows the whole A4 sheet with all 8 panels and the PDF options.
@@ -117,8 +119,11 @@ fanzines/
 │   │   ├── ZinePageRender.vue      # Live render of one page (thumbnails and facing page)
 │   │   ├── PageCanvas.vue          # Konva canvas: active page, facing page and floating toolbar
 │   │   ├── DropOverlay.vue         # Notice shown while files are dragged over the editor
-│   │   ├── ElementInspector.vue    # Element properties panel
-│   │   ├── TextColorPicker.vue     # Text colour: preset swatches and the custom colour picker
+│   │   ├── ElementInspector.vue    # Element properties panel, or the layout catalog when nothing is selected
+│   │   ├── ColorPicker.vue         # Text, fill and border colour: swatches, "None" and the custom colour picker
+│   │   ├── PageLayoutPicker.vue    # Layout catalog: click or drag a layout onto a page
+│   │   ├── LayoutPreview.vue       # SVG miniature of a layout
+│   │   ├── AddShapeMenu.vue        # "+ Shape" menu (top bar and mobile bar)
 │   │   ├── MobileBar.vue           # Action bar (mobile)
 │   │   ├── SheetPreview.vue        # Imposed A4 sheet (sidebar and review)
 │   │   ├── ReviewPanel.vue         # Review and PDF options
@@ -132,7 +137,8 @@ fanzines/
 │   │   ├── useZineElementActions.client.ts  # Actions on the selected element
 │   │   ├── useZineExport.client.ts          # PDF export and its state
 │   │   ├── useZineImageImport.client.ts     # Image import
-│   │   ├── usePageTileDrop.client.ts        # Dropping files on a thumbnail
+│   │   ├── usePageTileDrop.client.ts        # Dropping files or a layout on a thumbnail
+│   │   ├── usePageLayouts.client.ts         # Adding, taking back and dragging page layouts
 │   │   ├── useZineDragState.client.ts       # Drag state
 │   │   ├── useZineAnalytics.client.ts       # PostHog events
 │   │   ├── useTrackedZinePageSelection.client.ts
@@ -141,6 +147,8 @@ fanzines/
 │   ├── utils/
 │   │   ├── zineLayout.ts            # A4 geometry, imposition, reading order and conversion to mm and pt
 │   │   ├── renderZine.client.ts     # Renders elements to Konva
+│   │   ├── zineShapes.ts            # Shapes and paper patterns: Konva configs and geometry shared by every render
+│   │   ├── pageLayouts.ts           # The page layouts, in mm, and their categories
 │   │   ├── renderPage.client.ts     # Renders one page to a canvas
 │   │   ├── renderSheet.client.ts    # Renders the whole sheet to a canvas
 │   │   ├── exportPdf.client.ts      # PDF generation with jsPDF
@@ -192,7 +200,7 @@ The folding guide in the "Your zine is ready" dialog reads the same table: the d
 
 ### Rendering
 
-The editor canvas uses **Konva** through `vue-konva`. Thumbnails and the facing page are drawn by [`renderPage.client.ts`](app/utils/renderPage.client.ts), which uses the same nodes as the sheet and the PDF. To export, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) mounts an offscreen `Stage` with every panel imposed and returns a canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) embeds it in a landscape A4 PDF with **jsPDF** at 300 DPI, adding the cut/fold guides and the safe margins when they're turned on.
+The editor canvas uses **Konva** through `vue-konva`. Shapes and paper patterns get their Konva settings from [`zineShapes.ts`](app/utils/zineShapes.ts), so they look the same on the canvas, in the thumbnails and in the PDF; a pattern is a single node that draws all its lines or dots, however many there are. Thumbnails and the facing page are drawn by [`renderPage.client.ts`](app/utils/renderPage.client.ts), which uses the same nodes as the sheet and the PDF. To export, [`renderSheet.client.ts`](app/utils/renderSheet.client.ts) mounts an offscreen `Stage` with every panel imposed and returns a canvas; [`exportPdf.client.ts`](app/utils/exportPdf.client.ts) embeds it in a landscape A4 PDF with **jsPDF** at 300 DPI, adding the cut/fold guides and the safe margins when they're turned on.
 
 ### Languages
 

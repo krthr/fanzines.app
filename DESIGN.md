@@ -32,7 +32,9 @@ The editor adds a few neutrals that sit between those tokens (`--ed-canvas` `#10
 
 Fixed colours with one job each: the printable page is always `#ffffff`; the safe-margin guide is `rgb(0 163 255 / 40%)`; the cut line on the sheet is `#e5372b`; a passed check is `#2e7d4f`; the hint note is `#fbf7c9`.
 
-Text in a zine can take any colour. Five are offered as swatches, the ones in `TEXT_COLOR_OPTIONS`: `#0b0a09`, `#ffffff`, `#d25a36`, `#e9ff5c`, `#2f5bea`. Any other comes from the custom colour picker.
+Text in a zine can take any colour. Five are offered as swatches, the ones in `TEXT_COLOR_OPTIONS`: `#0b0a09`, `#ffffff`, `#d25a36`, `#e9ff5c`, `#2f5bea`. Any other comes from the custom colour picker. Shapes use the same swatches for their fill and border, plus "None".
+
+The page layouts draw their rules, frames and dots in soft greys (`#b8b3aa`, `#dedad2`, `#9c968b`, `#d6d2ca`) and their secondary text in `#5a554e`, so that handwriting reads over them when the zine is printed in black and white.
 
 ### Rules
 
@@ -126,19 +128,20 @@ A panel is 74.25 × 105 mm. On the canvas a single page ("Page") is 440 × 622 p
 
 ### Editor
 
-- **Top bar**: brand block (`EditorBrand`, shared with the prerendered fallback), "+ Text" and "+ Image", eight progress ticks in reading order, and the orange action. In review the add buttons give way to the stepper Design → Review → Print and fold.
+- **Top bar**: brand block (`EditorBrand`, shared with the prerendered fallback), "+ Text", "+ Image" and "+ Shape" (a paper menu with Rectangle, Circle and Line), eight progress ticks in reading order, and the orange action. In review the add buttons give way to the stepper Design → Review → Print and fold.
 - **Pages sidebar**: "Reading" lists the reading spreads (Front cover alone on the right, 1|2, 3|4, 5|6, Back cover alone on the left) with live miniatures; "Sheet" shows the imposed sheet. The current page has a 3px acid frame and its spread a raised background. The reset button is an icon in the header.
 - **Canvas**: the page on white with a 10px `--orange-deep` shadow. "Spread" adds the facing page at 68% opacity, read-only; clicking it selects it. The covers have no facing page. "Guides" draws the 5 mm safe margin.
-- **Selection**: 2px orange frame, white handles with an orange stroke (12px, 18px on touch), a round handle to rotate. A paper toolbar floats above (Fill, Fit, Forward, Backward, Delete; text has the last three) and hides while dragging, transforming or editing text. An orange tag below gives width × height in mm.
+- **Selection**: 2px orange frame, white handles with an orange stroke (12px, 18px on touch), a round handle to rotate. Text and lines have a handle at each end; frames and paper patterns have eight. A paper toolbar floats above (Fill, Fit, Forward, Backward, Delete; text and shapes have the last three) and hides while dragging, transforming or editing text. An orange tag below gives width × height in mm, or the length of a line. A thin line or the edge of an empty frame is picked up by a band about 16px wide (26px on touch); the inside of an empty frame lets clicks through.
 - **Empty page**: a paper card with "Drop your photos", "Choose photos" and a link to start with text.
-- **Inspector**: cream panel. An image has Fit to the page (Fill, Fit, Center), Opacity, Rotation and order. Text has the font list, size in points, style, alignment, the colour (five swatches and a custom one), order and delete. The custom swatch, a dashed square with a palette, opens the picker below the swatches: a colour square and hue strip for pointer and touch, and a hex code field for the keyboard. Once a custom colour is chosen, the swatch shows it with the selected frame. "Exact measurements" is a disclosure, closed by default, with X, Y, Width and Height in mm and the page alignment buttons (and, for text, Opacity and Rotation).
+- **Inspector**: cream panel. With nothing selected it holds the layout catalog: "Layouts", a line saying which page a click adds to, and miniatures of the layouts grouped as Covers, Text, Print and write, and Paper. A miniature is white paper with a hairline that turns ink with a 3px `--orange-deep` shadow under the pointer, and it can be dragged onto the canvas or a thumbnail. "Remove “…”", a bordered action, takes back the latest layout added to the open page. An image has Fit to the page (Fill, Fit, Center), Opacity, Rotation and order. Text has the font list, size in points, style, alignment, the colour (five swatches and a custom one), order and delete. The custom swatch, a dashed square with a palette, opens the picker below the swatches: a colour square and hue strip for pointer and touch, and a hex code field for the keyboard. Once a custom colour is chosen, the swatch shows it with the selected frame. A rectangle or a circle has Fill and Border (the label above the swatches, "None" first, crossed out; it can't drop both), the thickness in mm, the sliders up front, order and delete. A line has its colour, thickness and style (Solid, Dashed, Dotted); a paper pattern its type (Lined, Dot grid, Graph paper), colour, thickness and spacing in mm. "Exact measurements" is a disclosure, closed by default, with X, Y, Width and Height in mm and the page alignment buttons (and, for text, Opacity and Rotation).
 - **Controls**: segmented switch (cream segment on a hairline box), toggle (acid track, dark knob), slider (3px track, square acid knob), field (grey label left, value right, white box), bordered action (1px `--ink-dark`, inverts on hover).
 - **Shortcut hints**: typewriter keys under the canvas, only for shortcuts that exist in the current state.
 - **Review**: the sheet large, with its fold and cut guides when the PDF will carry them; on the right, the page count, and the two PDF switches. The export error appears in the same panel.
 - **PDF ready**: a dialog after a successful export, with the fold guide, the print-at-100% callout, "Download again" and "Back to the editor".
+- **Layout drop**: while a layout is dragged, the page under it on the canvas and its thumbnail get the acid frame, and an empty thumbnail reads "+ layout". Nothing else on screen changes.
 - **Drop overlay**: covers the canvas while files are dragged over the editor, states the one-image-per-page rule, and the miniatures that will receive a photo light up in acid. If none of the files is an image it says so and promises nothing.
-- **Toast**: cream paper, 2px dark border, 6px orange shadow, bottom right. Every toast looks the same whatever its severity.
-- **Mobile**: a context bar with the selection's actions (or "+ Text" and "+ Photo"), "Settings" opening the inspector in a drawer, and a strip of page miniatures.
+- **Toast**: cream paper, 2px dark border, 6px orange shadow, bottom right. Every toast looks the same whatever its severity. Adding a layout says so with an "Undo" action, a bordered button.
+- **Mobile**: a context bar with the selection's actions (or "+ Text", "+ Photo", "+ Shape" and "Layouts"), "Settings" opening the inspector in a drawer, and a strip of page miniatures. "Layouts" opens the same drawer on the catalog; picking a layout closes it.
 
 ## 6. Motion & Interaction
 
