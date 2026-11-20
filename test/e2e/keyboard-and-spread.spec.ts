@@ -93,14 +93,13 @@ test.describe('keyboard shortcut isolation and desktop spread mode', () => {
       await expect(facingPage).toBeVisible()
       await waitForKonvaFrame(page)
 
-      const activeBox = await page.getByTestId('active-page').boundingBox()
       const facingBox = await facingPage.boundingBox()
-      expect(activeBox).not.toBeNull()
       expect(facingBox).not.toBeNull()
 
       // Click inside p1's overhanging stagePad area over the left strip of p2.
       // stagePad is 40px and SPREAD_GAP is 2px, so +15px into facingPage sits squarely under p1's Konva canvas.
-      const overhangRightX = facingBox!.x + Math.min(15, STAGE_PAD_DESKTOP - 10)
+      const overhangInset = Math.min(15, STAGE_PAD_DESKTOP - 10)
+      const overhangRightX = facingBox!.x + overhangInset
       const overhangRightY = facingBox!.y + facingBox!.height / 2
 
       const hitTagRight = await page.evaluate(
@@ -119,7 +118,7 @@ test.describe('keyboard shortcut isolation and desktop spread mode', () => {
       const facingP1Box = await facingPage.boundingBox()
       expect(facingP1Box).not.toBeNull()
 
-      const overhangLeftX = facingP1Box!.x + facingP1Box!.width - 15
+      const overhangLeftX = facingP1Box!.x + facingP1Box!.width - overhangInset
       const overhangLeftY = facingP1Box!.y + facingP1Box!.height / 2
 
       const hitTagLeft = await page.evaluate(

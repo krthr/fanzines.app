@@ -2,6 +2,7 @@ import { expect, test } from './fixtures'
 import {
   PAGE_H,
   PAGE_W,
+  type ElementBox,
   dragBetween,
   dragPagePoints,
   isPixelCloseTo,
@@ -12,16 +13,30 @@ import {
   unitsToMm
 } from './helpers/canvas'
 import {
+  type MeasureValues,
   addShape,
   addTextAndCommit,
+  closeMobileDrawerIfOpen,
+  getInspectorRoot,
   openEnglishEditor,
   readMeasures,
   readRotationDegrees,
+  rotationSlider,
   setShapeFill,
   uploadSyntheticImage
 } from './helpers/editor'
 
 const ORANGE_HEX = '#d25a36'
+const BLUE_HEX = '#2f5bea'
+
+function measuresToUnitsBox(measures: MeasureValues): ElementBox {
+  return {
+    x: mmToUnits(measures.x),
+    y: mmToUnits(measures.y),
+    width: mmToUnits(measures.width),
+    height: mmToUnits(measures.height ?? 0)
+  }
+}
 
 test.describe('canvas drag, resize, and rotate', () => {
   test('drags an element on canvas and updates exact-measure inspector x/y (mm)', async ({ page, isMobile }) => {
@@ -66,14 +81,7 @@ test.describe('canvas drag, resize, and rotate', () => {
     const initialRotation = await readRotationDegrees(page, { isMobile })
     expect(initialRotation).toBe(0)
 
-    const box = await readMeasures(page, { isMobile })
-    const rectUnits = {
-      x: mmToUnits(box.x),
-      y: mmToUnits(box.y),
-      width: mmToUnits(box.width),
-      height: mmToUnits(box.height ?? 30)
-    }
-
+    const rectUnits = measuresToUnitsBox(await readMeasures(page, { isMobile }))
     const rotater = await transformerHandlePoint(page, rectUnits, 'rotater', { compact: isMobile })
     const center = await pagePoint(page, rectUnits.x + rectUnits.width / 2, rectUnits.y + rectUnits.height / 2)
     const radius = center.y - rotater.y
@@ -86,9 +94,43 @@ test.describe('canvas drag, resize, and rotate', () => {
       { steps: 16, touch: isMobile }
     )
 
-    await expect.poll(async () => readRotationDegrees(page, { isMobile })).toBeGreaterThan(45)
-    const updatedRotation = await readRotationDegrees(page, { isMobile })
-    expect(updatedRotation).toBeLessThan(125)
+    // Open the inspector once before polling so mobile UDrawer does not toggle on every tick.
+    const inspector = await getInspectorRoot(page, isMobile)
+    const slider = rotationSlider(inspector)
+    await expect(slider).toBeVisible()
+    await expect.poll(async () => Number.parseFloat(await slider.inputValue())).toBeGreaterThan(45)
+    expect(Number.parseFloat(await slider.inputValue())).toBeLessThan(125)
+    await closeMobileDrawerIfOpen(page, isMobile)
+  })
+
+  test('keeps circle round on corner drag and turns it into an ellipse on side drag', async ({ page, isMobile }) => {
+    await openEnglishEditor(page)
+
+    await addShape(page, 'Circle', isMobile)
+    const before = await readMeasures(page, { isMobile })
+    expect(before.width).toBeCloseTo(30, 0)
+    expect(before.height).toBeCloseTo(30, 0)
+
+    const beforeUnits = measuresToUnitsBox(before)
+
+    // Corner drag with non-square delta (+160 X, +30 Y): keepRatio keeps width === height.
+    const br = await transformerHandlePoint(page, beforeUnits, 'bottom-right', { compact: isMobile })
+    const brTarget = await pagePoint(page, beforeUnits.x + beforeUnits.width + 160, beforeUnits.y + beforeUnits.height + 30)
+    await dragBetween(page, br, brTarget, { touch: isMobile })
+
+    const afterCorner = await readMeasures(page, { isMobile })
+    expect(afterCorner.width).toBeGreaterThan(before.width + 5)
+    expect(Math.abs(afterCorner.width - afterCorner.height!)).toBeLessThanOrEqual(0.3)
+
+    // Side handle drag (+140 X): stretches width only, turning circle into an ellipse.
+    const cornerUnits = measuresToUnitsBox(afterCorner)
+    const mr = await transformerHandlePoint(page, cornerUnits, 'middle-right', { compact: isMobile })
+    const mrTarget = await pagePoint(page, cornerUnits.x + cornerUnits.width + 140, cornerUnits.y + cornerUnits.height / 2)
+    await dragBetween(page, mr, mrTarget, { touch: isMobile })
+
+    const afterSide = await readMeasures(page, { isMobile })
+    expect(afterSide.width).toBeGreaterThan(afterCorner.width + 6)
+    expect(afterSide.height!).toBeCloseTo(afterCorner.height!, 1)
   })
 
   test.describe('resize handle constraints (desktop)', () => {
@@ -98,18 +140,13 @@ test.describe('canvas drag, resize, and rotate', () => {
       await openEnglishEditor(page)
 
       // 600x300 -> 2:1 aspect ratio, fits inside the 10% margin without downscaling.
-      await uploadSyntheticImage(page, { width: 600, height: 300, color: '#2f5bea' })
+      await uploadSyntheticImage(page, { width: 600, height: 300, color: BLUE_HEX })
 
       const before = await readMeasures(page)
       const initialRatio = before.width / (before.height ?? 1)
       expect(initialRatio).toBeCloseTo(2, 1)
 
-      const boxUnits = {
-        x: mmToUnits(before.x),
-        y: mmToUnits(before.y),
-        width: mmToUnits(before.width),
-        height: mmToUnits(before.height ?? 0)
-      }
+      const boxUnits = measuresToUnitsBox(before)
 
       // Drag bottom-right corner with an intentionally skewed delta (+150 X, +15 Y):
       // keepRatio: true should preserve the 2:1 proportion.
@@ -124,12 +161,7 @@ test.describe('canvas drag, resize, and rotate', () => {
 
       // Dragging the middle-right edge (not an enabled anchor on images) drags the image
       // instead of resizing it horizontally.
-      const afterUnits = {
-        x: mmToUnits(afterCorner.x),
-        y: mmToUnits(afterCorner.y),
-        width: mmToUnits(afterCorner.width),
-        height: mmToUnits(afterCorner.height ?? 0)
-      }
+      const afterUnits = measuresToUnitsBox(afterCorner)
       const mrEdge = await transformerHandlePoint(page, afterUnits, 'middle-right')
       await dragBetween(page, { x: mrEdge.x - 4, y: mrEdge.y }, { x: mrEdge.x + 30, y: mrEdge.y })
 
@@ -139,81 +171,40 @@ test.describe('canvas drag, resize, and rotate', () => {
       expect(afterSide.x).toBeGreaterThan(afterCorner.x + 2)
     })
 
-    test('keeps circle round on corner drag and turns it into an ellipse on side drag', async ({ page }) => {
-      await openEnglishEditor(page)
-
-      await addShape(page, 'Circle', false)
-      const before = await readMeasures(page)
-      expect(before.width).toBeCloseTo(30, 0)
-      expect(before.height).toBeCloseTo(30, 0)
-
-      const beforeUnits = {
-        x: mmToUnits(before.x),
-        y: mmToUnits(before.y),
-        width: mmToUnits(before.width),
-        height: mmToUnits(before.height ?? 30)
-      }
-
-      // Corner drag with non-square delta (+160 X, +30 Y): keepRatio keeps width === height.
-      const br = await transformerHandlePoint(page, beforeUnits, 'bottom-right')
-      const brTarget = await pagePoint(page, beforeUnits.x + beforeUnits.width + 160, beforeUnits.y + beforeUnits.height + 30)
-      await dragBetween(page, br, brTarget)
-
-      const afterCorner = await readMeasures(page)
-      expect(afterCorner.width).toBeGreaterThan(before.width + 5)
-      expect(Math.abs(afterCorner.width - afterCorner.height!)).toBeLessThanOrEqual(0.3)
-
-      // Side handle drag (+140 X): stretches width only, turning circle into an ellipse.
-      const cornerUnits = {
-        x: mmToUnits(afterCorner.x),
-        y: mmToUnits(afterCorner.y),
-        width: mmToUnits(afterCorner.width),
-        height: mmToUnits(afterCorner.height ?? 30)
-      }
-      const mr = await transformerHandlePoint(page, cornerUnits, 'middle-right')
-      const mrTarget = await pagePoint(page, cornerUnits.x + cornerUnits.width + 140, cornerUnits.y + cornerUnits.height / 2)
-      await dragBetween(page, mr, mrTarget)
-
-      const afterSide = await readMeasures(page)
-      expect(afterSide.width).toBeGreaterThan(afterCorner.width + 6)
-      expect(afterSide.height!).toBeCloseTo(afterCorner.height!, 1)
-    })
-
-    test('resizes text and lines width-only via side handles', async ({ page }) => {
+    test('resizes text and lines width-only via side handles and omits corner handles', async ({ page }) => {
       await openEnglishEditor(page)
 
       // Short single-line text so narrowing does not wrap onto a second line.
       await addTextAndCommit(page, 'Zine')
       const textBefore = await readMeasures(page)
-
-      const textUnits = {
-        x: mmToUnits(textBefore.x),
-        y: mmToUnits(textBefore.y),
-        width: mmToUnits(textBefore.width),
-        height: mmToUnits(textBefore.height ?? 0)
-      }
+      const textUnits = measuresToUnitsBox(textBefore)
 
       // Drag middle-right handle inward by -220 units: width shrinks, height stays constant.
       const textMr = await transformerHandlePoint(page, textUnits, 'middle-right')
       const textMrTarget = await pagePoint(page, textUnits.x + textUnits.width - 220, textUnits.y + textUnits.height / 2)
       await dragBetween(page, textMr, textMrTarget)
 
-      const textAfter = await readMeasures(page)
-      expect(textAfter.width).toBeLessThan(textBefore.width - 10)
-      expect(textAfter.height!).toBeCloseTo(textBefore.height!, 1)
+      const textAfterSide = await readMeasures(page)
+      expect(textAfterSide.width).toBeLessThan(textBefore.width - 10)
+      expect(textAfterSide.height!).toBeCloseTo(textBefore.height!, 1)
+
+      // Dragging the bottom-right corner (not an enabled anchor on text) drags the element
+      // instead of resizing its height or width.
+      const afterTextUnits = measuresToUnitsBox(textAfterSide)
+      const textBr = await transformerHandlePoint(page, afterTextUnits, 'bottom-right')
+      await dragBetween(page, { x: textBr.x - 4, y: textBr.y - 4 }, { x: textBr.x + 30, y: textBr.y + 45 })
+
+      const textAfterCorner = await readMeasures(page)
+      expect(textAfterCorner.width).toBeCloseTo(textAfterSide.width, 1)
+      expect(textAfterCorner.height!).toBeCloseTo(textAfterSide.height!, 1)
+      expect(textAfterCorner.y).toBeGreaterThan(textAfterSide.y + 4)
 
       // Add a Line: inspector exposes Length (no Height), and side handle changes length only.
       await addShape(page, 'Line', false)
       const lineBefore = await readMeasures(page, { isLine: true })
       expect(lineBefore.width).toBeCloseTo(50, 0)
 
-      const lineUnits = {
-        x: mmToUnits(lineBefore.x),
-        y: mmToUnits(lineBefore.y),
-        width: mmToUnits(lineBefore.width),
-        height: 0
-      }
-
+      const lineUnits = measuresToUnitsBox(lineBefore)
       const lineMr = await transformerHandlePoint(page, lineUnits, 'middle-right')
       const lineMrTarget = await pagePoint(page, lineUnits.x + lineUnits.width + 140, lineUnits.y)
       await dragBetween(page, lineMr, lineMrTarget)

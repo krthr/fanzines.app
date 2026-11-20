@@ -13,7 +13,6 @@ export const SAFE_MARGIN_MM = 5
 export const SAFE_MARGIN = SAFE_MARGIN_MM / MM_PER_UNIT
 
 export const STAGE_PAD_DESKTOP = 40
-export const STAGE_PAD_COMPACT = 44
 export const ROTATE_ANCHOR_OFFSET_DESKTOP = 24
 export const ROTATE_ANCHOR_OFFSET_COMPACT = 30
 

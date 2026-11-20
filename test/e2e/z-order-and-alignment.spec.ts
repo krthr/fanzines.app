@@ -8,7 +8,6 @@ import {
   isPixelCloseTo,
   pagePoint,
   readCanvasPixel,
-  round1,
   waitForKonvaFrame
 } from './helpers/canvas'
 import {
@@ -16,7 +15,6 @@ import {
   deselectOnCanvas,
   getInspectorRoot,
   openEnglishEditor,
-  openExactMeasures,
   readMeasures,
   readRotationDegrees,
   setMeasureValue,
@@ -75,7 +73,7 @@ test.describe('z-order, fit/fill, and page alignment', () => {
   test.describe('fit/fill and rotated painted-bounds alignment (desktop)', () => {
     test.skip(({ isMobile }) => isMobile, 'Desktop inspector alignment suite')
 
-    test('applies Fill, Fit, and Center to photos and paper patterns', async ({ page }) => {
+    test('applies Fill, Fit, and Position on the page to photos and paper patterns', async ({ page }) => {
       await openEnglishEditor(page)
       const inspector = await getInspectorRoot(page, false)
 
@@ -90,10 +88,10 @@ test.describe('z-order, fit/fill, and page alignment', () => {
       expect(await readRotationDegrees(page)).toBe(0)
 
       const filledPhoto = await readMeasures(page)
-      expect(filledPhoto.height).toBeCloseTo(PANEL_H_MM, 0)
-      expect(filledPhoto.width).toBeCloseTo(PANEL_H_MM * 2, 0)
-      expect(filledPhoto.y).toBeCloseTo(0, 1)
-      expect(filledPhoto.x).toBeCloseTo(round1((PANEL_W_MM - PANEL_H_MM * 2) / 2), 0)
+      expectMmCloseTo(filledPhoto.height!, PANEL_H_MM)
+      expectMmCloseTo(filledPhoto.width, PANEL_H_MM * 2)
+      expectMmCloseTo(filledPhoto.y, 0)
+      expectMmCloseTo(filledPhoto.x, (PANEL_W_MM - PANEL_H_MM * 2) / 2)
 
       // Fit ("contain"): matches full page width (74.25 mm), height = 37.125 mm, vertically centered.
       await setRotationDegrees(inspector, -25)
@@ -101,19 +99,21 @@ test.describe('z-order, fit/fill, and page alignment', () => {
       expect(await readRotationDegrees(page)).toBe(0)
 
       const fittedPhoto = await readMeasures(page)
-      expect(fittedPhoto.width).toBeCloseTo(round1(PANEL_W_MM), 1)
-      expect(fittedPhoto.height).toBeCloseTo(round1(PANEL_W_MM / 2), 1)
-      expect(fittedPhoto.x).toBeCloseTo(0, 1)
-      expect(fittedPhoto.y).toBeCloseTo(round1((PANEL_H_MM - PANEL_W_MM / 2) / 2), 1)
+      expectMmCloseTo(fittedPhoto.width, PANEL_W_MM)
+      expectMmCloseTo(fittedPhoto.height!, PANEL_W_MM / 2)
+      expectMmCloseTo(fittedPhoto.x, 0)
+      expectMmCloseTo(fittedPhoto.y, (PANEL_H_MM - PANEL_W_MM / 2) / 2)
 
-      // Move off-center, then click Center.
+      // Move off-center vertically, then re-center via the always-visible "Position on the page" group.
       await setMeasureValue(inspector, 'Y', 10)
-      expect((await readMeasures(page)).y).toBeCloseTo(10, 1)
+      expectMmCloseTo((await readMeasures(page)).y, 10)
 
-      await inspector.getByRole('button', { name: 'Center', exact: true }).click()
+      await expect(inspector.getByRole('heading', { level: 3, name: 'Position on the page' })).toBeVisible()
+      await expect(inspector.getByRole('button', { name: 'Center horizontally' })).toBeDisabled()
+      await inspector.getByRole('button', { name: 'Center vertically' }).click()
       const centeredPhoto = await readMeasures(page)
-      expect(centeredPhoto.x).toBeCloseTo(0, 1)
-      expect(centeredPhoto.y).toBeCloseTo(round1((PANEL_H_MM - PANEL_W_MM / 2) / 2), 1)
+      expectMmCloseTo(centeredPhoto.x, 0)
+      expectMmCloseTo(centeredPhoto.y, (PANEL_H_MM - PANEL_W_MM / 2) / 2)
 
       // Switch to Page 1 and apply the Lined paper layout to verify Paper Fill / Fit bounds.
       await page.getByTestId('page-tile-p1').click()
@@ -125,25 +125,25 @@ test.describe('z-order, fit/fill, and page alignment', () => {
       await page.mouse.click(paperCenter.x, paperCenter.y)
       await expect(inspector.getByRole('heading', { level: 2, name: 'Paper' })).toBeVisible()
 
-      // Fill: edge-to-edge (0, 0, 74.3 x 105 mm), which disables horizontal & vertical alignment buttons.
+      // Fill: edge-to-edge (0, 0, 74.25 x 105 mm), keeping "Position on the page" visible with disabled controls.
       await inspector.getByRole('button', { name: 'Fill' }).click()
       const filledPaper = await readMeasures(page)
-      expect(filledPaper.x).toBeCloseTo(0, 1)
-      expect(filledPaper.y).toBeCloseTo(0, 1)
-      expect(filledPaper.width).toBeCloseTo(round1(PANEL_W_MM), 1)
-      expect(filledPaper.height).toBeCloseTo(PANEL_H_MM, 1)
+      expectMmCloseTo(filledPaper.x, 0)
+      expectMmCloseTo(filledPaper.y, 0)
+      expectMmCloseTo(filledPaper.width, PANEL_W_MM)
+      expectMmCloseTo(filledPaper.height!, PANEL_H_MM)
 
-      await openExactMeasures(inspector)
+      await expect(inspector.getByRole('heading', { level: 3, name: 'Position on the page' })).toBeVisible()
       await expect(inspector.getByRole('button', { name: 'Snap to the left of the page' })).toBeDisabled()
       await expect(inspector.getByRole('button', { name: 'Snap to the top of the page' })).toBeDisabled()
 
-      // Fit: inside the 5 mm safe margin (5, 5, 64.3 x 95 mm).
+      // Fit: inside the 5 mm safe margin (5, 5, 64.25 x 95 mm).
       await inspector.getByRole('button', { name: 'Fit' }).click()
       const fittedPaper = await readMeasures(page)
-      expect(fittedPaper.x).toBeCloseTo(SAFE_MARGIN_MM, 1)
-      expect(fittedPaper.y).toBeCloseTo(SAFE_MARGIN_MM, 1)
-      expect(fittedPaper.width).toBeCloseTo(round1(PANEL_W_MM - SAFE_MARGIN_MM * 2), 1)
-      expect(fittedPaper.height).toBeCloseTo(PANEL_H_MM - SAFE_MARGIN_MM * 2, 1)
+      expectMmCloseTo(fittedPaper.x, SAFE_MARGIN_MM)
+      expectMmCloseTo(fittedPaper.y, SAFE_MARGIN_MM)
+      expectMmCloseTo(fittedPaper.width, PANEL_W_MM - SAFE_MARGIN_MM * 2)
+      expectMmCloseTo(fittedPaper.height!, PANEL_H_MM - SAFE_MARGIN_MM * 2)
       await expect(inspector.getByRole('button', { name: 'Snap to the left of the page' })).toBeEnabled()
     })
 
@@ -163,8 +163,6 @@ test.describe('z-order, fit/fill, and page alignment', () => {
       await thicknessInput.fill('4')
       await thicknessInput.press('Enter')
       await thicknessInput.blur()
-
-      await openExactMeasures(inspector)
 
       const snapLeft = inspector.getByRole('button', { name: 'Snap to the left of the page' })
       const snapCenterH = inspector.getByRole('button', { name: 'Center horizontally' })

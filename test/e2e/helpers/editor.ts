@@ -1,5 +1,13 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { createSolidPngBuffer, pagePoint, waitForKonvaFrame } from './canvas'
+import {
+  PAGE_H,
+  PAGE_W,
+  createSolidPngBuffer,
+  isPixelCloseTo,
+  pagePoint,
+  readCanvasPixel,
+  waitForKonvaFrame
+} from './canvas'
 
 export type ShapeMenuLabel = 'Rectangle' | 'Circle' | 'Line'
 
@@ -54,14 +62,22 @@ export async function addTextAndCommit(
 
 export async function uploadSyntheticImage(
   page: Page,
-  options: { width: number, height: number, color: string, name?: string }
+  options: { width: number, height: number, color: string, name?: string, isMobile?: boolean }
 ): Promise<void> {
+  const fileName = options.name ?? `fixture-${options.width}x${options.height}.png`
   const buffer = createSolidPngBuffer(options.width, options.height, options.color)
   await page.locator('input[type="file"]').setInputFiles({
-    name: options.name ?? `fixture-${options.width}x${options.height}.png`,
+    name: fileName,
     mimeType: 'image/png',
     buffer
   })
+
+  // Wait for both store insertion and PageCanvas's async Image.onload swap (VRect -> VImage)
+  // so subsequent inspector reads and Transformer drags target the settled VImage node.
+  if (!options.isMobile) {
+    await expect(page.locator('aside.inspector').getByText(fileName)).toBeVisible()
+  }
+  await expect.poll(async () => isPixelCloseTo(await readCanvasPixel(page, PAGE_W / 2, PAGE_H / 2), options.color)).toBe(true)
   await waitForKonvaFrame(page)
 }
 
@@ -198,8 +214,5 @@ export async function setRotationDegrees(
 
   const slider = rotationSlider(inspector)
   await expect(slider).toBeVisible()
-  await slider.evaluate((el: HTMLInputElement, deg: number) => {
-    el.value = String(deg)
-    el.dispatchEvent(new Event('input', { bubbles: true }))
-  }, degrees)
+  await slider.fill(String(degrees))
 }

@@ -9,6 +9,7 @@ import {
 } from './helpers/canvas'
 import {
   addTextAndCommit,
+  deselectOnCanvas,
   openEnglishEditor,
   readMeasures
 } from './helpers/editor'
@@ -90,13 +91,12 @@ test.describe('inline text editing', () => {
     await addTextAndCommit(page, 'One line', { isMobile })
     const initialMeasures = await readMeasures(page, { isMobile })
 
-    const textCenter = await pagePoint(
-      page,
-      mmToUnits(initialMeasures.x + initialMeasures.width / 2),
-      mmToUnits(initialMeasures.y + (initialMeasures.height ?? 13) / 2)
-    )
-
     if (isMobile) {
+      const textCenter = await pagePoint(
+        page,
+        mmToUnits(initialMeasures.x + initialMeasures.width / 2),
+        mmToUnits(initialMeasures.y + (initialMeasures.height ?? 13) / 2)
+      )
       await doubleTapAt(page, textCenter)
     } else {
       await page.keyboard.press('Enter')
@@ -139,14 +139,13 @@ test.describe('inline text editing', () => {
     // Case A: clearing text and deselecting removes the empty text element.
     await addTextAndCommit(page, 'Temporary text', { isMobile })
 
-    const firstMeasures = await readMeasures(page, { isMobile })
-    const firstCenter = await pagePoint(
-      page,
-      mmToUnits(firstMeasures.x + firstMeasures.width / 2),
-      mmToUnits(firstMeasures.y + (firstMeasures.height ?? 13) / 2)
-    )
-
     if (isMobile) {
+      const firstMeasures = await readMeasures(page, { isMobile: true })
+      const firstCenter = await pagePoint(
+        page,
+        mmToUnits(firstMeasures.x + firstMeasures.width / 2),
+        mmToUnits(firstMeasures.y + (firstMeasures.height ?? 13) / 2)
+      )
       await doubleTapAt(page, firstCenter)
     } else {
       await page.keyboard.press('Enter')
@@ -157,26 +156,19 @@ test.describe('inline text editing', () => {
     await expect(textEditor).toBeHidden()
 
     // Deselect by tapping/clicking empty canvas below the text box.
-    const emptyArea = await pagePoint(page, PAGE_W * 0.5, PAGE_H * 0.85)
-    if (isMobile) {
-      await page.touchscreen.tap(emptyArea.x, emptyArea.y)
-    } else {
-      await page.mouse.click(emptyArea.x, emptyArea.y)
-    }
-
+    await deselectOnCanvas(page, isMobile, { x: PAGE_W * 0.5, y: PAGE_H * 0.85 })
     await expect(page.getByText('Drop your photos')).toBeVisible()
 
     // Case B: clearing text and switching pages removes the empty text element.
     await addTextAndCommit(page, 'Another temporary', { isMobile })
 
-    const secondMeasures = await readMeasures(page, { isMobile })
-    const secondCenter = await pagePoint(
-      page,
-      mmToUnits(secondMeasures.x + secondMeasures.width / 2),
-      mmToUnits(secondMeasures.y + (secondMeasures.height ?? 13) / 2)
-    )
-
     if (isMobile) {
+      const secondMeasures = await readMeasures(page, { isMobile: true })
+      const secondCenter = await pagePoint(
+        page,
+        mmToUnits(secondMeasures.x + secondMeasures.width / 2),
+        mmToUnits(secondMeasures.y + (secondMeasures.height ?? 13) / 2)
+      )
       await doubleTapAt(page, secondCenter)
     } else {
       await page.keyboard.press('Enter')
