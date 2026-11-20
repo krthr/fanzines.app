@@ -90,12 +90,15 @@ jobs:
       - name: Run browser tests
         run: npm run test:e2e
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Upload e2e run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-report
           path: |
             .e2e/report.html
+            .e2e/report.json
+            .e2e/timings.json
             .e2e/results/
             .e2e/logs/
           if-no-files-found: ignore
