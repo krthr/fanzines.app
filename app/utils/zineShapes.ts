@@ -112,15 +112,11 @@ export function getPatternGeometry(element: PatternShape): PatternGeometry {
     return geometry
   }
 
-  // Graph paper: closed squares, so the grid stops at its last full row and column.
-  const left = columns[0] ?? 0
-  const right = columns[columns.length - 1] ?? width
-  const top = rows[0] ?? 0
-  const bottom = rows[rows.length - 1] ?? height
-
+  // Graph paper runs to the edges of its block, like a piece cut from a sheet, so a
+  // block smaller than one square still shows a cross instead of nothing.
   geometry.lines = [
-    ...columns.map((x): [number, number, number, number] => [x, top, x, bottom]),
-    ...rows.map((y): [number, number, number, number] => [left, y, right, y])
+    ...columns.map((x): [number, number, number, number] => [x, 0, x, height]),
+    ...rows.map((y): [number, number, number, number] => [0, y, width, y])
   ]
 
   return geometry

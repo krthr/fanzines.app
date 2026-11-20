@@ -96,6 +96,9 @@ const EDGE = 8
 // nothing than photos and text before a resize stops.
 const MIN_SHAPE_BOX_PX = 8
 const MIN_SHAPE_SIZE = mmToUnits(1)
+// A line's box is as tall as its stroke, under a pixel for a thin one, and Konva won't
+// resize or rotate a box that flat. The frame gets this much room above and below.
+const LINE_BOX_PADDING_PX = 4
 // How wide, on screen, the band is that picks up a thin line or an empty frame's edge.
 const HIT_BAND_PX = 16
 const HIT_BAND_PX_TOUCH = 26
@@ -370,6 +373,9 @@ const transformerConfig = computed(() => {
   const element = selectedElement.value
   const anchorSize = props.compact ? 18 : 12
   const isLine = element?.type === 'line'
+  // Text and lines are only resized from their sides, so only their width has a floor:
+  // a short caption can be shorter than the floor and must still get wider.
+  const widthOnly = isLine || element?.type === 'text'
   const minBox = element?.type === 'image' || element?.type === 'text' ? 20 : MIN_SHAPE_BOX_PX
 
   return {
@@ -377,6 +383,7 @@ const transformerConfig = computed(() => {
     rotateAnchorOffset: props.compact ? 30 : 24,
     ...transformerShape(element),
     flipEnabled: false,
+    padding: isLine ? LINE_BOX_PADDING_PX : 0,
     anchorSize,
     anchorCornerRadius: 0,
     borderStroke: ORANGE,
@@ -388,9 +395,8 @@ const transformerConfig = computed(() => {
     anchorStyleFunc: (anchor: KonvaRect) => {
       if (anchor.hasName('rotater')) anchor.cornerRadius(anchorSize / 2)
     },
-    // A line is as tall as its stroke, so only its length has a floor.
     boundBoxFunc: (_oldBox: Box, newBox: Box) => {
-      if (newBox.width < minBox || (!isLine && newBox.height < minBox)) return _oldBox
+      if (newBox.width < minBox || (!widthOnly && newBox.height < minBox)) return _oldBox
       return newBox
     }
   }
@@ -827,8 +833,13 @@ function commitTextEdit() {
   const element = editingTextElement.value
 
   if (element) {
+    const text = editingTextValue.value
+
+    // A click on another element selects it before this edit ends, so the box is fitted
+    // here rather than left to the watcher on the selected text.
     updateElement(element.id, {
-      text: editingTextValue.value
+      text,
+      height: Math.max(element.height, fitTextHeight({ ...element, text }))
     })
   }
 

@@ -232,7 +232,10 @@ function handleKeydown(event: KeyboardEvent) {
 
   // The canvas is not on screen in review and is covered by the drawer on mobile, so
   // its shortcuts are off there: Esc closes the drawer without dropping the selection.
-  if (isTyping || mode.value !== 'design' || mobileToolsOpen.value) return
+  // An open menu ("+ Shape") has the keyboard: Esc closes it and Delete does nothing.
+  const inMenu = Boolean(target?.closest('[role="menu"]'))
+
+  if (isTyping || inMenu || mode.value !== 'design' || mobileToolsOpen.value) return
 
   if (event.key === 'Escape') {
     selectElement(null)

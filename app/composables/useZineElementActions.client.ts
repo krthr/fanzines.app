@@ -1,5 +1,6 @@
-import type { ImageElement, ZineElement } from '~/types/zine'
+import { isShapeElement, type ImageElement, type ZineElement } from '~/types/zine'
 import { PAGE_H, PAGE_W, SAFE_MARGIN, getRotatedBounds } from '~/utils/zineLayout'
+import { hasPaint } from '~/utils/zineShapes'
 import { useZineStore } from '~/composables/useZineStore'
 import { useZineAnalytics } from '~/composables/useZineAnalytics.client'
 
@@ -11,10 +12,31 @@ const ALIGNMENT_EPSILON = 1
 const HORIZONTAL_ALIGNMENTS: HorizontalAlignment[] = ['left', 'center', 'right']
 const VERTICAL_ALIGNMENTS: VerticalAlignment[] = ['top', 'middle', 'bottom']
 
-// Alignment places what is visible: the element's bounds as rotated. The result is
-// the x (or y) of its origin, which sits `offset` away from the visible edge.
+// What is painted, as rotated. A shape's border and a line's thickness reach half a
+// stroke beyond the element's box, so snapping a thick line to the top of the page
+// doesn't cut half of it off.
+function paintedBounds(element: ZineElement) {
+  const half = isShapeElement(element) && hasPaint(element.stroke) ? element.strokeWidth / 2 : 0
+  if (!half) return getRotatedBounds(element)
+
+  const isLine = element.type === 'line'
+  const left = isLine ? 0 : -half
+  const top = -half
+  const radians = element.rotation * Math.PI / 180
+
+  return getRotatedBounds({
+    x: element.x + left * Math.cos(radians) - top * Math.sin(radians),
+    y: element.y + left * Math.sin(radians) + top * Math.cos(radians),
+    width: element.width - left * 2,
+    height: isLine ? half * 2 : element.height + half * 2,
+    rotation: element.rotation
+  })
+}
+
+// Alignment places what is visible: the painted bounds. The result is the x (or y) of
+// the element's origin, which sits `offset` away from the visible edge.
 function elementX(element: ZineElement, alignment: HorizontalAlignment) {
-  const bounds = getRotatedBounds(element)
+  const bounds = paintedBounds(element)
   const width = bounds.right - bounds.left
   const offset = element.x - bounds.left
 
@@ -24,7 +46,7 @@ function elementX(element: ZineElement, alignment: HorizontalAlignment) {
 }
 
 function elementY(element: ZineElement, alignment: VerticalAlignment) {
-  const bounds = getRotatedBounds(element)
+  const bounds = paintedBounds(element)
   const height = bounds.bottom - bounds.top
   const offset = element.y - bounds.top
 
