@@ -12,7 +12,9 @@
     "test:coverage": "npm run test:unit:coverage && npm run test:e2e:coverage && node test/coverage/merge.ts",
     "test:e2e": "playwright test",
     "test:e2e:coverage": "COVERAGE=1 playwright test --project=desktop-chromium --project=mobile-chromium",
+    "test:e2e:run": "e2e run",
     "test:e2e:ui": "playwright test --ui",
+    "test:preview": "node test/preview.ts && npm run preview",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:watch": "vitest",
@@ -40,12 +42,19 @@
     "vue-router": "^5.5.1"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^4.0.0",
+    "@e2e-dev/core": "^0.24.0",
+    "@e2e-dev/html-reporter": "^0.0.2",
+    "@e2e-dev/web": "^0.16.1",
     "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
+    "ai": "^7.0.0",
+    "e2e": "^0.24.0",
     "monocart-coverage-reports": "^3.2.1",
     "typescript": "^6.0.3",
     "vitest": "^5.1.1",
     "vitest-monocart-coverage": "^5.0.0",
-    "vue-tsc": "^3.3.14"
+    "vue-tsc": "^3.3.14",
+    "zod": "^4.1.8"
   }
 }

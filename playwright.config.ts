@@ -1,36 +1,5 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
-
-const rootDir = dirname(fileURLToPath(import.meta.url))
-const port = Number(process.env.PLAYWRIGHT_PORT || 4173)
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${port}`
-const isCoverage = Boolean(process.env.COVERAGE)
-
-function hasClientSourcemaps(): boolean {
-  const nuxtAssetsDir = resolve(rootDir, '.output/public/_nuxt')
-  if (!existsSync(nuxtAssetsDir)) return false
-
-  try {
-    return readdirSync(nuxtAssetsDir).some((file) => file.endsWith('.js.map'))
-  } catch {
-    return false
-  }
-}
-
-function hasNodePreviewBuild(): boolean {
-  const nitroMetaPath = resolve(rootDir, '.output/nitro.json')
-  if (!existsSync(nitroMetaPath)) return false
-
-  try {
-    const meta = JSON.parse(readFileSync(nitroMetaPath, 'utf8')) as { preset?: string }
-    if (meta.preset !== 'node-server') return false
-    return !isCoverage || hasClientSourcemaps()
-  } catch {
-    return false
-  }
-}
+import { baseURL, isCoverage, previewServer } from './test/preview.ts'
 
 export default defineConfig({
   testDir: './test/e2e',
@@ -78,19 +47,11 @@ export default defineConfig({
         ]
       : [])
   ],
-  webServer: process.env.PLAYWRIGHT_BASE_URL
-    ? undefined
-    : {
-        command: hasNodePreviewBuild() ? 'npm run preview' : 'npm run build && npm run preview',
-        url: baseURL,
-        reuseExistingServer: !process.env.CI && !isCoverage,
-        timeout: 120_000,
-        env: {
-          HOST: '127.0.0.1',
-          PORT: String(port),
-          NITRO_HOST: '127.0.0.1',
-          NITRO_PORT: String(port),
-          ...(isCoverage ? { COVERAGE: '1' } : {})
-        }
-      }
+  webServer: previewServer && {
+    command: `npm run ${previewServer.script}`,
+    url: baseURL,
+    reuseExistingServer: previewServer.reuseExisting,
+    timeout: previewServer.startupTimeout,
+    env: previewServer.env
+  }
 })
