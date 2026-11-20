@@ -162,7 +162,7 @@ export default defineNuxtConfig({
       include: ['../test/unit/**/*']
     },
     nodeTsConfig: {
-      include: ['../vitest.config.ts']
+      include: ['../vitest.config.ts', '../playwright.config.ts', '../test/e2e/**/*']
     }
   }
 })
