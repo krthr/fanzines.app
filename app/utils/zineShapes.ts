@@ -173,17 +173,35 @@ export function circleNodeConfig(element: CircleElement) {
   return { ...boxConfig(element), ...paintConfig(element), sceneFunc: drawEllipse }
 }
 
-export function lineNodeConfig(element: LineElement) {
+function drawLine(context: Context, shape: Shape) {
+  const y = shape.height() / 2
+
+  context.beginPath()
+  context.moveTo(0, y)
+  context.lineTo(shape.width(), y)
+  context.strokeShape(shape)
+}
+
+// A line is drawn through the middle of a box as tall as `band` (at least its stroke),
+// centred on the line with offsetY, so it still starts at x/y and turns around that
+// point. The editor passes a band of a few pixels: Konva won't resize or rotate a box
+// under a pixel tall, which is all a 0.1 mm line would give it.
+export function lineNodeConfig(element: LineElement, band = 0) {
+  const height = Math.max(band, element.strokeWidth)
+
   return {
     x: element.x,
     y: element.y,
+    width: element.width,
+    height,
+    offsetY: height / 2,
     rotation: element.rotation,
     opacity: element.opacity,
-    points: [0, 0, element.width, 0],
     stroke: element.stroke,
     strokeWidth: element.strokeWidth,
     dash: getLineDash(element),
-    lineCap: element.dash === 'dotted' ? 'round' as const : 'butt' as const
+    lineCap: element.dash === 'dotted' ? 'round' as const : 'butt' as const,
+    sceneFunc: drawLine
   }
 }
 

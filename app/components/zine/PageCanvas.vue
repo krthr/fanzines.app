@@ -2,7 +2,6 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import 'konva/lib/shapes/Image'
-import 'konva/lib/shapes/Line'
 import 'konva/lib/shapes/Rect'
 import 'konva/lib/shapes/Text'
 import 'konva/lib/shapes/Transformer'
@@ -10,7 +9,6 @@ import {
   Group as VGroup,
   Image as VImage,
   Layer as VLayer,
-  Line as VLine,
   Rect as VRect,
   Shape as VShape,
   Stage as VStage,
@@ -19,7 +17,6 @@ import {
 } from 'vue-konva/core'
 import type { Node as KonvaNode } from 'konva/lib/Node'
 import type { Stage as KonvaStage } from 'konva/lib/Stage'
-import type { Line as KonvaLine } from 'konva/lib/shapes/Line'
 import type { Rect as KonvaRect } from 'konva/lib/shapes/Rect'
 import type { Box, Transformer as KonvaTransformer } from 'konva/lib/shapes/Transformer'
 import {
@@ -96,9 +93,9 @@ const EDGE = 8
 // nothing than photos and text before a resize stops.
 const MIN_SHAPE_BOX_PX = 8
 const MIN_SHAPE_SIZE = mmToUnits(1)
-// A line's box is as tall as its stroke, under a pixel for a thin one, and Konva won't
-// resize or rotate a box that flat. The frame gets this much room above and below.
-const LINE_BOX_PADDING_PX = 4
+// How tall, on screen, a line's box is: Konva won't resize or rotate a box under a
+// pixel tall, which is all a thin line's stroke would give it.
+const LINE_BAND_PX = 6
 // How wide, on screen, the band is that picks up a thin line or an empty frame's edge.
 const HIT_BAND_PX = 16
 const HIT_BAND_PX_TOUCH = 26
@@ -383,7 +380,6 @@ const transformerConfig = computed(() => {
     rotateAnchorOffset: props.compact ? 30 : 24,
     ...transformerShape(element),
     flipEnabled: false,
-    padding: isLine ? LINE_BOX_PADDING_PX : 0,
     anchorSize,
     anchorCornerRadius: 0,
     borderStroke: ORANGE,
@@ -482,7 +478,6 @@ function nodeComponent(element: ZineElement) {
     case 'rect':
       return VRect
     case 'line':
-      return VLine
     case 'circle':
     case 'pattern':
       return VShape
@@ -500,7 +495,11 @@ function nodeConfig(element: ZineElement) {
     case 'circle':
       return { ...circleNodeConfig(element), ...interactiveConfig(element), hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value) }
     case 'line':
-      return { ...lineNodeConfig(element), ...interactiveConfig(element), hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value) }
+      return {
+        ...lineNodeConfig(element, LINE_BAND_PX / scale.value),
+        ...interactiveConfig(element),
+        hitStrokeWidth: Math.max(element.strokeWidth, hitBand.value)
+      }
     case 'pattern':
       return { ...patternNodeConfig(element), ...interactiveConfig(element) }
   }
@@ -663,12 +662,13 @@ function handleElementPointerLeave(event: KonvaEvent) {
   }
 }
 
-function readLiveBox(node: KonvaNode): Box2d {
+// A line's node is a few pixels tall so it can be handled, but the line has no height.
+function readLiveBox(element: ZineElement, node: KonvaNode): Box2d {
   return {
     x: node.x(),
     y: node.y(),
     width: node.width() * node.scaleX(),
-    height: node.height() * node.scaleY(),
+    height: element.type === 'line' ? 0 : node.height() * node.scaleY(),
     rotation: node.rotation()
   }
 }
@@ -678,8 +678,8 @@ function handleDragStart(event: KonvaEvent) {
   setStageCursor('grabbing', event)
 }
 
-function handleDragMove(event: KonvaEvent) {
-  liveBox.value = readLiveBox(event.target)
+function handleDragMove(element: ZineElement, event: KonvaEvent) {
+  liveBox.value = readLiveBox(element, event.target)
 }
 
 function handleDragEnd(element: ZineElement, event: KonvaEvent) {
@@ -703,10 +703,10 @@ function applyLiveResize(element: ZineElement, node: KonvaNode) {
   const scaleX = node.scaleX()
   const scaleY = node.scaleY()
 
-  if (element.type === 'line') {
-    (node as KonvaLine).points([0, 0, Math.max(MIN_SHAPE_SIZE, node.width() * scaleX), 0])
-  } else {
-    node.width(Math.max(MIN_SHAPE_SIZE, node.width() * scaleX))
+  node.width(Math.max(MIN_SHAPE_SIZE, node.width() * scaleX))
+
+  // A line keeps its band; only its length changes.
+  if (element.type !== 'line') {
     node.height(Math.max(MIN_SHAPE_SIZE, node.height() * scaleY))
   }
 
@@ -719,7 +719,7 @@ function handleTransform(element: ZineElement, event: KonvaEvent) {
     applyLiveResize(element, event.target)
   }
 
-  liveBox.value = readLiveBox(event.target)
+  liveBox.value = readLiveBox(element, event.target)
 }
 
 function handleTransformEnd(element: ZineElement, event: KonvaEvent) {
@@ -1091,7 +1091,7 @@ defineExpose({
                   @mouseenter="(event: KonvaEvent) => handleElementPointerEnter(element, event)"
                   @mouseleave="(event: KonvaEvent) => handleElementPointerLeave(event)"
                   @dragstart="handleDragStart"
-                  @dragmove="handleDragMove"
+                  @dragmove="(event: KonvaEvent) => handleDragMove(element, event)"
                   @dragend="(event: KonvaEvent) => handleDragEnd(element, event)"
                   @transformstart="handleTransformStart"
                   @transform="(event: KonvaEvent) => handleTransform(element, event)"

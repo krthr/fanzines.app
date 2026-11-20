@@ -1,7 +1,6 @@
 import type { Group } from 'konva/lib/Group'
 import { Shape } from 'konva/lib/Shape'
 import { Image as KonvaImage } from 'konva/lib/shapes/Image'
-import { Line } from 'konva/lib/shapes/Line'
 import { Rect } from 'konva/lib/shapes/Rect'
 import { Text as KonvaText } from 'konva/lib/shapes/Text'
 import type { ImageElement, TextElement, ZineElement } from '~/types/zine'
@@ -78,7 +77,7 @@ export async function createElementNode(element: ZineElement) {
     case 'circle':
       return new Shape({ ...circleNodeConfig(element), listening: false })
     case 'line':
-      return new Line({ ...lineNodeConfig(element), listening: false })
+      return new Shape({ ...lineNodeConfig(element), listening: false })
     case 'pattern':
       return new Shape({ ...patternNodeConfig(element), listening: false })
   }
