@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
+  sourcemap: {
+    client: Boolean(process.env.COVERAGE)
+  },
   modules: ['@nuxt/ui', '@nuxtjs/i18n', '@nuxtjs/seo', '@nuxt/image', '@nuxt/fonts', '@nuxt/scripts'],
   runtimeConfig: {
     public: {
@@ -162,7 +165,7 @@ export default defineNuxtConfig({
       include: ['../test/unit/**/*']
     },
     nodeTsConfig: {
-      include: ['../vitest.config.ts', '../playwright.config.ts', '../test/e2e/**/*']
+      include: ['../vitest.config.ts', '../playwright.config.ts', '../test/e2e/**/*', '../test/coverage/**/*']
     }
   }
 })

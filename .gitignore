@@ -30,6 +30,10 @@ test-results/
 blob-report/
 playwright/.cache/
 
+# Coverage
+/coverage/
+/.coverage/
+
 # Personal AI agent skills (install them locally, don't commit them)
 /.agents
 /skills-lock.json
