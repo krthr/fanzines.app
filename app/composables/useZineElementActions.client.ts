@@ -129,16 +129,6 @@ export function useZineElementActions() {
     if (element && bounds) updateElement(element.id, { ...bounds, rotation: 0 })
   }
 
-  function centerOnPage() {
-    const element = selectedElement.value
-    if (!element) return
-
-    updateElement(element.id, {
-      x: elementX(element, 'center'),
-      y: elementY(element, 'middle')
-    })
-  }
-
   function alignHorizontal(alignment: HorizontalAlignment) {
     const element = selectedElement.value
     if (!element || !hasHorizontalMovement(element)) return
@@ -201,7 +191,6 @@ export function useZineElementActions() {
   return {
     coverPage,
     containPage,
-    centerOnPage,
     alignHorizontal,
     alignVertical,
     canAlignHorizontal,
