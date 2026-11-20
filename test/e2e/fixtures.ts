@@ -26,8 +26,9 @@ export const test = base.extend({
 
     await use(context)
   },
-  page: async ({ page }, use) => {
+  page: async ({ page, browserName }, use) => {
     const errors: string[] = []
+    const collectCoverage = Boolean(process.env.COVERAGE) && browserName === 'chromium'
 
     const onConsole = (message: ConsoleMessage) => {
       const type = message.type()
@@ -47,10 +48,27 @@ export const test = base.extend({
     page.on('console', onConsole)
     page.on('pageerror', onPageError)
 
-    await use(page)
+    if (collectCoverage) {
+      await page.coverage.startJSCoverage({ resetOnNavigation: false })
+    }
 
-    page.off('console', onConsole)
-    page.off('pageerror', onPageError)
+    try {
+      await use(page)
+    } finally {
+      page.off('console', onConsole)
+      page.off('pageerror', onPageError)
+
+      if (collectCoverage && !page.isClosed()) {
+        const jsCoverage = await page.coverage.stopJSCoverage()
+        if (jsCoverage.length > 0) {
+          const [{ MCR }, { e2eCoverageOptions }] = await Promise.all([
+            import('monocart-coverage-reports'),
+            import('../coverage/config.ts')
+          ])
+          await MCR(e2eCoverageOptions).add(jsCoverage)
+        }
+      }
+    }
 
     expect(errors, 'Unexpected console or page errors').toEqual([])
   }

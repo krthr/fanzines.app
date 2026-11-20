@@ -60,11 +60,43 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Build app
-        run: npm run build
+      - name: Run unit tests with coverage
+        run: npm run test:unit:coverage
 
-      - name: Run Playwright tests
+      - name: Build app with client sourcemaps
+        run: npm run build
+        env:
+          COVERAGE: '1'
+
+      - name: Run Playwright tests with coverage
         run: npm run test:e2e
+        env:
+          COVERAGE: '1'
+
+      - name: Merge Vitest and Playwright coverage
+        run: node test/coverage/merge.ts
+
+      - name: Publish coverage summary
+        if: hashFiles('coverage/coverage-summary.md') != ''
+        run: |
+          {
+            cat coverage/coverage-summary.md
+            echo ""
+            echo "<details>"
+            echo "<summary>Per-file breakdown</summary>"
+            echo ""
+            tail -n +2 coverage/coverage-details.md
+            echo ""
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: hashFiles('coverage/index.html') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
 
       - uses: actions/upload-artifact@v4
         if: failure()
