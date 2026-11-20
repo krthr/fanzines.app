@@ -259,8 +259,11 @@
         "white": "White",
         "orange": "Orange",
         "acid": "Acid yellow",
-        "blue": "Blue"
+        "blue": "Blue",
+        "custom": "Custom color",
+        "customSelected": "Custom color {hex}, selected"
       },
+      "hex": "Hex code",
       "opacity": "Opacity",
       "rotation": "Rotation",
       "measures": "Exact measurements",

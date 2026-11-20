@@ -2,7 +2,7 @@
 import { computed, ref, useId } from 'vue'
 import type { CSSProperties } from 'vue'
 import type { ZineElement } from '~/types/zine'
-import { FONT_OPTIONS, TEXT_COLOR_OPTIONS } from '~/types/zine'
+import { FONT_OPTIONS } from '~/types/zine'
 import {
   PAGE_H,
   PAGE_W,
@@ -13,6 +13,7 @@ import {
   unitsToPt
 } from '~/utils/zineLayout'
 import { useZineStore } from '~/composables/useZineStore'
+import TextColorPicker from '~/components/zine/TextColorPicker.vue'
 import {
   useZineElementActions,
   type HorizontalAlignment,
@@ -33,14 +34,6 @@ const textAlignItems = [
   { label: 'alignCenter', value: 'center', icon: 'i-lucide-text-align-center' },
   { label: 'alignRight', value: 'right', icon: 'i-lucide-text-align-end' }
 ] as const
-
-const colorNames: Record<typeof TEXT_COLOR_OPTIONS[number], string> = {
-  '#0b0a09': 'black',
-  '#ffffff': 'white',
-  '#d25a36': 'orange',
-  '#e9ff5c': 'acid',
-  '#2f5bea': 'blue'
-}
 
 const horizontalAlignItems = [
   { label: 'pageLeft', value: 'left', icon: 'i-lucide-align-horizontal-justify-start' },
@@ -160,14 +153,6 @@ function setOpacity(event: Event) {
 function setRotation(event: Event) {
   const value = readNumber(event)
   if (value !== null) patch({ rotation: value })
-}
-
-function isColorSelected(color: string, fill: string) {
-  return fill.toLowerCase() === color
-}
-
-function colorLabel(color: typeof TEXT_COLOR_OPTIONS[number]) {
-  return t(`editor.inspector.colors.${colorNames[color]}`)
 }
 
 // X and Y are the same in every language.
@@ -304,28 +289,10 @@ function measureLabel(key: MeasureKey) {
         </div>
       </div>
 
-      <div class="row is-colors">
-        <span class="row-label">{{ t('editor.inspector.color') }}</span>
-        <div class="swatches" role="radiogroup" :aria-label="t('editor.inspector.colorLabel')">
-          <label
-            v-for="color in TEXT_COLOR_OPTIONS"
-            :key="color"
-            class="swatch"
-            :class="{ 'is-active': isColorSelected(color, selectedElement.fill) }"
-            :title="colorLabel(color)"
-          >
-            <input
-              type="radio"
-              class="sr-only"
-              :name="`${groupId}-color`"
-              :aria-label="colorLabel(color)"
-              :checked="isColorSelected(color, selectedElement.fill)"
-              @change="patch({ fill: color })"
-            >
-            <span :style="{ background: color }" />
-          </label>
-        </div>
-      </div>
+      <TextColorPicker
+        :model-value="selectedElement.fill"
+        @update:model-value="patch({ fill: $event })"
+      />
     </template>
 
     <template v-if="selectedElement">
@@ -649,11 +616,10 @@ function measureLabel(key: MeasureKey) {
   gap: 6px;
 }
 
-/* The font, alignment and colour options are labels around hidden radio inputs:
-   the label shows the focus ring its input cannot. */
+/* The font and alignment options are labels around hidden radio inputs: the label
+   shows the focus ring its input cannot. */
 .font:has(:focus-visible),
-.switch-item:has(:focus-visible),
-.swatch:has(:focus-visible) {
+.switch-item:has(:focus-visible) {
   outline: 2px solid var(--ed-focus);
   outline-offset: 2px;
 }
@@ -714,14 +680,6 @@ function measureLabel(key: MeasureKey) {
   font-weight: 700;
 }
 
-.row.is-colors {
-  gap: 8px;
-}
-
-.row.is-colors .row-label {
-  min-width: 0;
-}
-
 .switch {
   display: grid;
   flex: 1;
@@ -760,35 +718,6 @@ function measureLabel(key: MeasureKey) {
 .switch-item .iconify {
   width: 18px;
   height: 18px;
-}
-
-.swatches {
-  display: flex;
-  gap: 8px;
-}
-
-.swatch {
-  position: relative;
-  display: block;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 2px solid transparent;
-  background: transparent;
-  cursor: pointer;
-}
-
-.swatch span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 1px solid var(--ed-hairline);
-}
-
-/* A sliver of paper between the frame and the colour, so black reads as selected too. */
-.swatch.is-active {
-  padding: 1px;
-  border-color: var(--ink-dark);
 }
 
 /* Medidas exactas */

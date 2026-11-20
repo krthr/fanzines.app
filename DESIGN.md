@@ -32,7 +32,7 @@ The editor adds a few neutrals that sit between those tokens (`--ed-canvas` `#10
 
 Fixed colours with one job each: the printable page is always `#ffffff`; the safe-margin guide is `rgb(0 163 255 / 40%)`; the cut line on the sheet is `#e5372b`; a passed check is `#2e7d4f`; the hint note is `#fbf7c9`.
 
-Text in a zine can take five colours, the swatches in `TEXT_COLOR_OPTIONS`: `#0b0a09`, `#ffffff`, `#d25a36`, `#e9ff5c`, `#2f5bea`.
+Text in a zine can take any colour. Five are offered as swatches, the ones in `TEXT_COLOR_OPTIONS`: `#0b0a09`, `#ffffff`, `#d25a36`, `#e9ff5c`, `#2f5bea`. Any other comes from the custom colour picker.
 
 ### Rules
 
@@ -131,7 +131,7 @@ A panel is 74.25 × 105 mm. On the canvas a single page ("Page") is 440 × 622 p
 - **Canvas**: the page on white with a 10px `--orange-deep` shadow. "Spread" adds the facing page at 68% opacity, read-only; clicking it selects it. The covers have no facing page. "Guides" draws the 5 mm safe margin.
 - **Selection**: 2px orange frame, white handles with an orange stroke (12px, 18px on touch), a round handle to rotate. A paper toolbar floats above (Fill, Fit, Forward, Backward, Delete; text has the last three) and hides while dragging, transforming or editing text. An orange tag below gives width × height in mm.
 - **Empty page**: a paper card with "Drop your photos", "Choose photos" and a link to start with text.
-- **Inspector**: cream panel. An image has Fit to the page (Fill, Fit, Center), Opacity, Rotation and order. Text has the font list, size in points, style, alignment, five colour swatches, order and delete. "Exact measurements" is a disclosure, closed by default, with X, Y, Width and Height in mm and the page alignment buttons (and, for text, Opacity and Rotation).
+- **Inspector**: cream panel. An image has Fit to the page (Fill, Fit, Center), Opacity, Rotation and order. Text has the font list, size in points, style, alignment, the colour (five swatches and a custom one), order and delete. The custom swatch, a dashed square with a palette, opens the picker below the swatches: a colour square and hue strip for pointer and touch, and a hex code field for the keyboard. Once a custom colour is chosen, the swatch shows it with the selected frame. "Exact measurements" is a disclosure, closed by default, with X, Y, Width and Height in mm and the page alignment buttons (and, for text, Opacity and Rotation).
 - **Controls**: segmented switch (cream segment on a hairline box), toggle (acid track, dark knob), slider (3px track, square acid knob), field (grey label left, value right, white box), bordered action (1px `--ink-dark`, inverts on hover).
 - **Shortcut hints**: typewriter keys under the canvas, only for shortcuts that exist in the current state.
 - **Review**: the sheet large, with its fold and cut guides when the PDF will carry them; on the right, the page count, and the two PDF switches. The export error appears in the same panel.

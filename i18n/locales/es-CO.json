@@ -259,8 +259,11 @@
         "white": "Blanco",
         "orange": "Naranja",
         "acid": "Amarillo ácido",
-        "blue": "Azul"
+        "blue": "Azul",
+        "custom": "Color personalizado",
+        "customSelected": "Color personalizado {hex}, seleccionado"
       },
+      "hex": "Código hex",
       "opacity": "Opacidad",
       "rotation": "Giro",
       "measures": "Medidas exactas",

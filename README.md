@@ -118,6 +118,7 @@ fanzines/
 │   │   ├── PageCanvas.vue          # Konva canvas: active page, facing page and floating toolbar
 │   │   ├── DropOverlay.vue         # Notice shown while files are dragged over the editor
 │   │   ├── ElementInspector.vue    # Element properties panel
+│   │   ├── TextColorPicker.vue     # Text colour: preset swatches and the custom colour picker
 │   │   ├── MobileBar.vue           # Action bar (mobile)
 │   │   ├── SheetPreview.vue        # Imposed A4 sheet (sidebar and review)
 │   │   ├── ReviewPanel.vue         # Review and PDF options
