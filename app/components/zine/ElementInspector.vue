@@ -77,7 +77,6 @@ const { selectedElement, updateElement } = useZineStore()
 const {
   coverPage,
   containPage,
-  centerOnPage,
   alignHorizontal,
   alignVertical,
   canAlignHorizontal,
@@ -475,10 +474,6 @@ function strokeLabel(element: ZineElement) {
             <UIcon name="i-lucide-scan" aria-hidden="true" />
             {{ t('editor.actions.fit') }}
           </button>
-          <button type="button" class="fit-action" @click="centerOnPage">
-            <UIcon name="i-lucide-align-horizontal-justify-center" aria-hidden="true" />
-            {{ t('editor.actions.center') }}
-          </button>
         </div>
       </div>
 
@@ -513,6 +508,53 @@ function strokeLabel(element: ZineElement) {
           >
           <span class="slider-value">{{ rotationDegrees }}°</span>
         </label>
+      </div>
+
+      <!-- Hidden for an element as big as the page: every button would leave it where it is. -->
+      <div v-if="canAlignHorizontal() || canAlignVertical()" class="group">
+        <h3 class="group-label">
+          {{ t('editor.inspector.position') }}
+        </h3>
+
+        <div class="row">
+          <span class="row-label">{{ t('editor.inspector.horizontal') }}</span>
+          <div class="switch" role="group" :aria-label="t('editor.inspector.horizontalLabel')">
+            <button
+              v-for="item in horizontalAlignItems"
+              :key="item.value"
+              type="button"
+              class="switch-item"
+              :class="{ 'is-active': isHorizontallyAligned(item.value) }"
+              :aria-pressed="isHorizontallyAligned(item.value)"
+              :aria-label="t(`editor.inspector.${item.label}`)"
+              :title="t(`editor.inspector.${item.label}`)"
+              :disabled="!canAlignHorizontal()"
+              @click="alignHorizontal(item.value)"
+            >
+              <UIcon :name="item.icon" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="row-label">{{ t('editor.inspector.vertical') }}</span>
+          <div class="switch" role="group" :aria-label="t('editor.inspector.verticalLabel')">
+            <button
+              v-for="item in verticalAlignItems"
+              :key="item.value"
+              type="button"
+              class="switch-item"
+              :class="{ 'is-active': isVerticallyAligned(item.value) }"
+              :aria-pressed="isVerticallyAligned(item.value)"
+              :aria-label="t(`editor.inspector.${item.label}`)"
+              :title="t(`editor.inspector.${item.label}`)"
+              :disabled="!canAlignVertical()"
+              @click="alignVertical(item.value)"
+            >
+              <UIcon :name="item.icon" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="order">
@@ -598,46 +640,6 @@ function strokeLabel(element: ZineElement) {
               <span class="slider-value">{{ rotationDegrees }}°</span>
             </label>
           </div>
-
-          <div class="row">
-            <span class="row-label">{{ t('editor.inspector.horizontal') }}</span>
-            <div class="switch" role="group" :aria-label="t('editor.inspector.horizontalLabel')">
-              <button
-                v-for="item in horizontalAlignItems"
-                :key="item.value"
-                type="button"
-                class="switch-item"
-                :class="{ 'is-active': isHorizontallyAligned(item.value) }"
-                :aria-pressed="isHorizontallyAligned(item.value)"
-                :aria-label="t(`editor.inspector.${item.label}`)"
-                :title="t(`editor.inspector.${item.label}`)"
-                :disabled="!canAlignHorizontal()"
-                @click="alignHorizontal(item.value)"
-              >
-                <UIcon :name="item.icon" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-
-          <div class="row">
-            <span class="row-label">{{ t('editor.inspector.vertical') }}</span>
-            <div class="switch" role="group" :aria-label="t('editor.inspector.verticalLabel')">
-              <button
-                v-for="item in verticalAlignItems"
-                :key="item.value"
-                type="button"
-                class="switch-item"
-                :class="{ 'is-active': isVerticallyAligned(item.value) }"
-                :aria-pressed="isVerticallyAligned(item.value)"
-                :aria-label="t(`editor.inspector.${item.label}`)"
-                :title="t(`editor.inspector.${item.label}`)"
-                :disabled="!canAlignVertical()"
-                @click="alignVertical(item.value)"
-              >
-                <UIcon :name="item.icon" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </template>
@@ -716,7 +718,7 @@ function strokeLabel(element: ZineElement) {
 
 .fit {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
